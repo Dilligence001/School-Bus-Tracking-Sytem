@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrackRide - GPS Tracking App</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
-            --secondary-color: #1e40af;
+            --primary-dark: #1e40af;
+            --secondary-color: #8b5cf6;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
@@ -17,6 +19,8 @@
             --dark-bg: #1e293b;
             --text-light: #334155;
             --text-dark: #f1f5f9;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         * {
@@ -51,7 +55,7 @@
             align-items: center;
             padding: 1rem 1.5rem;
             background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--header-shadow);
             z-index: 1000;
         }
 
@@ -62,21 +66,22 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-weight: bold;
+            gap: 0.75rem;
+            font-weight: 700;
             font-size: 1.5rem;
             color: var(--primary-color);
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
-            background-color: var(--primary-color);
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
 
         .theme-toggle {
@@ -85,10 +90,25 @@
             cursor: pointer;
             font-size: 1.2rem;
             color: var(--text-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         body.dark-mode .theme-toggle {
             color: var(--text-dark);
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
         .main-content {
@@ -108,14 +128,14 @@
         }
 
         .sidebar {
-            width: 350px;
+            width: 380px;
             background-color: white;
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
             overflow-y: auto;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease;
         }
 
@@ -134,14 +154,19 @@
             background-color: white;
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--card-shadow);
             cursor: pointer;
             z-index: 1000;
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            transform: scale(1.05);
         }
 
         body.dark-mode .sidebar-toggle {
@@ -150,10 +175,16 @@
         }
 
         .card {
-            background-color: var(--light-bg);
-            border-radius: 12px;
-            padding: 1.25rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            background-color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
         }
 
         body.dark-mode .card {
@@ -163,39 +194,42 @@
         .card-title {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .card-icon {
-            width: 24px;
-            height: 24px;
-            background-color: var(--primary-color);
-            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 0.8rem;
+            font-size: 1rem;
         }
 
         .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 500;
+            margin-bottom: 1.25rem;
         }
 
         .status-arriving {
-            background-color: rgba(16, 185, 129, 0.2);
+            background-color: rgba(16, 185, 129, 0.15);
             color: var(--success-color);
         }
 
         .status-pickup {
-            background-color: rgba(245, 158, 11, 0.2);
+            background-color: rgba(245, 158, 11, 0.15);
             color: var(--warning-color);
         }
 
@@ -203,24 +237,27 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .driver-info {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .driver-avatar {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            background-color: #e2e8f0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            color: #64748b;
-        }
-
-        body.dark-mode .driver-avatar {
-            background-color: #475569;
-            color: #94a3b8;
+            font-size: 1.75rem;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .driver-details {
@@ -229,33 +266,35 @@
 
         .driver-name {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
         }
 
         .driver-rating {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.5rem;
             color: var(--warning-color);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .trip-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 1.25rem;
+            margin-top: 1.25rem;
         }
 
         .detail-item {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.5rem;
         }
 
         .detail-label {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #64748b;
+            font-weight: 500;
         }
 
         body.dark-mode .detail-label {
@@ -270,14 +309,14 @@
         .action-buttons {
             display: flex;
             gap: 0.75rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .btn {
-            padding: 0.75rem 1rem;
+            padding: 0.85rem 1rem;
             border: none;
-            border-radius: 8px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -285,15 +324,17 @@
             gap: 0.5rem;
             transition: all 0.2s;
             flex: 1;
+            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
 
         .btn-secondary {
-            background-color: #e2e8f0;
+            background-color: #f1f5f9;
             color: var(--text-light);
         }
 
@@ -305,6 +346,7 @@
         .btn:hover {
             opacity: 0.9;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
         .btn:active {
@@ -314,32 +356,33 @@
         .route-info {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .route-point {
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            align-items: flex-start;
+            gap: 1rem;
         }
 
         .route-icon {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 0.8rem;
+            font-size: 1rem;
+            flex-shrink: 0;
         }
 
         .route-start {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color), #34d399);
         }
 
         .route-end {
-            background-color: var(--danger-color);
+            background: linear-gradient(135deg, var(--danger-color), #f87171);
         }
 
         .route-details {
@@ -347,11 +390,12 @@
         }
 
         .route-address {
-            font-weight: 500;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
         }
 
         .route-note {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #64748b;
         }
 
@@ -370,55 +414,42 @@
         }
 
         .map-control {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
             background-color: white;
             border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--card-shadow);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--text-light);
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            transition: all 0.2s;
+        }
+
+        .map-control:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         body.dark-mode .map-control {
             background-color: #334155;
-            color: var(--text-dark);
+            color: var(--primary-color);
         }
 
         .location-marker {
-            width: 20px;
-            height: 20px;
-            border-radius: 50% 50% 50% 0;
-            background-color: var(--primary-color);
-            transform: rotate(-45deg);
-            position: relative;
-        }
-
-        .location-marker::after {
-            content: '';
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: white;
-            position: absolute;
-            top: 4px;
-            left: 4px;
-        }
-
-        .driver-marker {
             width: 24px;
             height: 24px;
             border-radius: 50% 50% 50% 0;
-            background-color: var(--danger-color);
-            transform: rotate(45deg);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transform: rotate(-45deg);
             position: relative;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
         }
 
-        .driver-marker::after {
+        .location-marker::after {
             content: '';
             width: 14px;
             height: 14px;
@@ -429,23 +460,45 @@
             left: 5px;
         }
 
-        .rider-marker {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: var(--success-color);
+        .driver-marker {
+            width: 28px;
+            height: 28px;
+            border-radius: 50% 50% 50% 0;
+            background: linear-gradient(135deg, var(--danger-color), #f87171);
+            transform: rotate(45deg);
             position: relative;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+
+        .driver-marker::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            position: absolute;
+            top: 6px;
+            left: 6px;
+        }
+
+        .rider-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
         }
 
         .rider-marker::after {
             content: '';
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background-color: white;
             position: absolute;
-            top: 4px;
-            left: 4px;
+            top: 5px;
+            left: 5px;
         }
 
         /* Responsive styles */
@@ -481,36 +534,52 @@
     <div class="app-container">
         <header class="header">
             <div class="logo">
-                <div class="logo-icon">T</div>
+                <div class="logo-icon"><i class="fas fa-map-marker-alt"></i></div>
                 <span>TrackRide</span>
             </div>
-            <button class="theme-toggle" id="themeToggle">🌙</button>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
         </header>
 
         <div class="main-content">
             <div class="map-container">
                 <div id="map"></div>
                 <div class="map-controls">
-                    <button class="map-control" id="locateMe" title="Locate Me">📍</button>
-                    <button class="map-control" id="findRide" title="Find My Ride">🚗</button>
+                    <button class="map-control" id="locateMe" title="Locate Me">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+                    <button class="map-control" id="findRide" title="Find My Ride">
+                        <i class="fas fa-car"></i>
+                    </button>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
 
             <div class="sidebar" id="sidebar">
                 <div class="card">
                     <h2 class="card-title">
-                        <div class="card-icon">🚗</div>
+                        <div class="card-icon"><i class="fas fa-car"></i></div>
                         Ride Information
                     </h2>
-                    <div class="status-badge status-arriving">Driver Arriving - 5 min</div>
+                    <div class="status-badge status-arriving">
+                        <i class="fas fa-clock"></i>
+                        <span>Driver Arriving - 5 min</span>
+                    </div>
                     
                     <div class="driver-info">
                         <div class="driver-avatar">JD</div>
                         <div class="driver-details">
                             <div class="driver-name">John Driver</div>
                             <div class="driver-rating">
-                                ★★★★☆ <span>4.2</span>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span>4.2</span>
                             </div>
                         </div>
                     </div>
@@ -536,23 +605,23 @@
                     
                     <div class="action-buttons">
                         <button class="btn btn-secondary" id="callDriver">
-                            <span>📞</span> Call Driver
+                            <i class="fas fa-phone"></i> Call Driver
                         </button>
                         <button class="btn btn-primary" id="cancelRide">
-                            <span>✕</span> Cancel Ride
+                            <i class="fas fa-times"></i> Cancel Ride
                         </button>
                     </div>
                 </div>
                 
                 <div class="card">
                     <h2 class="card-title">
-                        <div class="card-icon">📍</div>
+                        <div class="card-icon"><i class="fas fa-route"></i></div>
                         Route Details
                     </h2>
                     
                     <div class="route-info">
                         <div class="route-point">
-                            <div class="route-icon route-start">A</div>
+                            <div class="route-icon route-start"><i class="fas fa-location-arrow"></i></div>
                             <div class="route-details">
                                 <div class="route-address">123 Main Street</div>
                                 <div class="route-note">Your current location</div>
@@ -560,7 +629,7 @@
                         </div>
                         
                         <div class="route-point">
-                            <div class="route-icon route-end">B</div>
+                            <div class="route-icon route-end"><i class="fas fa-flag-checkered"></i></div>
                             <div class="route-details">
                                 <div class="route-address">456 Central Avenue</div>
                                 <div class="route-note">Your destination</div>
@@ -571,7 +640,7 @@
                 
                 <div class="card">
                     <h2 class="card-title">
-                        <div class="card-icon">💰</div>
+                        <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
                         Fare Estimate
                     </h2>
                     <div class="detail-item">
@@ -580,7 +649,9 @@
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Payment Method</div>
-                        <div class="detail-value">Credit Card ****1234</div>
+                        <div class="detail-value">
+                            <i class="fas fa-credit-card"></i> Credit Card ****1234
+                        </div>
                     </div>
                 </div>
             </div>
@@ -603,6 +674,7 @@
             driverInterval: null,
             eta: 5, // minutes
             distance: 2.3, // km
+            currentTileLayer: null
         };
 
         // DOM elements
@@ -633,7 +705,7 @@
             appState.map = L.map('map').setView(defaultCoords, 13);
             
             // Add light theme tile layer
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            appState.currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(appState.map);
             
@@ -666,24 +738,14 @@
             appState.isDarkMode = !appState.isDarkMode;
             document.body.classList.toggle('dark-mode', appState.isDarkMode);
             
-            // Update map theme
+            // Update theme toggle icon
             if (appState.isDarkMode) {
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    subdomains: 'abcd',
-                    maxZoom: 20
-                }).addTo(appState.map);
-                themeToggle.textContent = '☀️';
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
             } else {
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(appState.map);
-                themeToggle.textContent = '🌙';
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
             }
             
-            // Re-add markers and route
-            addMarkers();
-            drawRoute();
+            // Note: We're not changing the map theme to keep it consistent
         }
 
         // Toggle sidebar visibility (mobile)
@@ -698,6 +760,9 @@
                 return;
             }
             
+            // Show loading state
+            locateMeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
@@ -708,6 +773,9 @@
                     
                     // Update user marker
                     updateUserMarker();
+                    
+                    // Reset button
+                    locateMeBtn.innerHTML = '<i class="fas fa-location-arrow"></i>';
                 },
                 (error) => {
                     console.error('Error getting location:', error);
@@ -717,6 +785,9 @@
                     appState.userLocation = [37.7749, -122.4194];
                     appState.map.setView(appState.userLocation, 13);
                     updateUserMarker();
+                    
+                    // Reset button
+                    locateMeBtn.innerHTML = '<i class="fas fa-location-arrow"></i>';
                 }
             );
         }
@@ -725,7 +796,7 @@
         function findMyRide() {
             if (!appState.isTracking) {
                 appState.isTracking = true;
-                findRideBtn.textContent = '🔄 Tracking...';
+                findRideBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 
                 // In a real app, this would connect to a live tracking service
                 alert('Tracking your ride... Driver location will update in real-time.');
@@ -736,9 +807,14 @@
                 }
                 
                 appState.driverInterval = setInterval(moveDriver, 3000);
+                
+                // Reset button after a moment
+                setTimeout(() => {
+                    findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
+                }, 1000);
             } else {
                 appState.isTracking = false;
-                findRideBtn.textContent = '🚗 Find My Ride';
+                findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
                 
                 if (appState.driverInterval) {
                     clearInterval(appState.driverInterval);
@@ -758,7 +834,7 @@
                 
                 // Reset tracking
                 appState.isTracking = false;
-                findRideBtn.textContent = '🚗 Find My Ride';
+                findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
                 
                 if (appState.driverInterval) {
                     clearInterval(appState.driverInterval);
@@ -779,8 +855,8 @@
                     icon: L.divIcon({
                         className: 'user-marker',
                         html: '<div class="location-marker"></div>',
-                        iconSize: [20, 20],
-                        iconAnchor: [10, 20]
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 24]
                     })
                 }).addTo(appState.map)
                 .bindPopup('Your Location');
@@ -791,8 +867,8 @@
                 icon: L.divIcon({
                     className: 'driver-marker',
                     html: '<div class="driver-marker"></div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 24]
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 28]
                 })
             }).addTo(appState.map)
             .bindPopup('Driver - John Driver');
@@ -802,8 +878,8 @@
                 icon: L.divIcon({
                     className: 'rider-marker',
                     html: '<div class="rider-marker"></div>',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 20]
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 24]
                 })
             }).addTo(appState.map)
             .bindPopup('Destination');
@@ -835,7 +911,7 @@
             
             // Draw the route
             appState.routeLine = L.polyline(routeCoordinates, {
-                color: appState.isDarkMode ? '#3b82f6' : '#1e40af',
+                color: '#3b82f6',
                 weight: 5,
                 opacity: 0.7,
                 lineJoin: 'round'
@@ -873,7 +949,7 @@
                 clearInterval(appState.driverInterval);
                 alert('Driver has arrived!');
                 appState.isTracking = false;
-                findRideBtn.textContent = '🚗 Find My Ride';
+                findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
             }
         }
 
