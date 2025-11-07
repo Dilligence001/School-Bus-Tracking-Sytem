@@ -566,6 +566,59 @@
         .suggestion-item:last-child {
             border-bottom: none;
         }
+        
+        /* Top controls */
+        .top-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .top-control-btn {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .top-control-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .top-control-btn.primary {
+            background: linear-gradient(135deg, #7877c6 0%, #5b59a6 100%);
+            border: 1px solid rgba(120, 119, 198, 0.3);
+            box-shadow: 0 4px 15px rgba(120, 119, 198, 0.3);
+        }
+        
+        .top-control-btn.primary:hover {
+            background: linear-gradient(135deg, #8a89d4 0%, #6b69b4 100%);
+            box-shadow: 0 6px 20px rgba(120, 119, 198, 0.4);
+        }
+        
+        .top-control-btn.tracking-active {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .top-control-btn.tracking-active:hover {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body class="theme-blue min-h-screen text-white">
@@ -606,6 +659,18 @@
                 </div>
             </div>
         </header>
+        
+        <!-- Top Controls -->
+        <div class="top-controls">
+            <button id="trackBtn" class="top-control-btn primary">
+                <i data-lucide="play" class="w-4 h-4"></i>
+                Start Tracking
+            </button>
+            <button id="clearRouteBtn" class="top-control-btn">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                Clear Route
+            </button>
+        </div>
         
         <!-- Transit Info Bar -->
         <div class="glass-card rounded-2xl p-4 mb-6">
@@ -716,17 +781,12 @@
                     Tracking Controls
                 </h2>
                 <div class="space-y-4">
-                    <button id="trackBtn" class="w-full btn-primary text-white font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-center text-lg glow">
-                        <i data-lucide="play" class="w-5 h-5 mr-3"></i>
-                        Start Tracking
-                    </button>
-                    
                     <div class="grid grid-cols-2 gap-3">
                         <button id="centerBtn" class="glass-button text-white font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center">
                             <i data-lucide="crosshair" class="w-4 h-4 mr-2"></i>
                             Center
                         </button>
-                        <button id="clearRouteBtn" class="glass-button text-white font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center">
+                        <button id="clearRouteBtn2" class="glass-button text-white font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
                             Clear
                         </button>
@@ -889,8 +949,8 @@
 
         // Initialize Leaflet Map with OpenStreetMap tiles
         function initMap() {
-            // Default center (London)
-            const defaultCenter = [51.505, -0.09];
+            // Default center (Dar es Salaam, Tanzania)
+            const defaultCenter = [-6.7924, 39.2083];
             
             // Create map
             state.map = L.map('map').setView(defaultCenter, 13);
@@ -967,7 +1027,7 @@
             if (state.marker) {
                 state.marker.setIcon(customIcon);
             } else {
-                state.marker = L.marker([51.505, -0.09], { icon: customIcon }).addTo(state.map);
+                state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
                 state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
             }
             
@@ -980,6 +1040,7 @@
             document.getElementById('trackBtn').addEventListener('click', toggleTracking);
             document.getElementById('centerBtn').addEventListener('click', centerMap);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
+            document.getElementById('clearRouteBtn2').addEventListener('click', clearRoute);
             document.getElementById('themeSelector').addEventListener('change', changeTheme);
             document.getElementById('transitType').addEventListener('change', updateTransitType);
             document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
@@ -1407,7 +1468,7 @@
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
             
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="square" class="w-5 h-5 mr-3"></i>Stop Tracking';
+            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i>Stop Tracking';
             trackBtn.classList.add('tracking-active');
             
             // Update status indicator
@@ -1435,7 +1496,7 @@
             
             state.isTracking = false;
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="play" class="w-5 h-5 mr-3"></i>Start Tracking';
+            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i>Start Tracking';
             trackBtn.classList.remove('tracking-active');
             
             // Update status indicator
