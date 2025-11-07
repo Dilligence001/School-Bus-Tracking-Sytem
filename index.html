@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transit Tracker - Real-time GPS Tracking</title>
+    <title>Transit Tracker Pro - Enterprise GPS Tracking Solution</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Leaflet Routing Machine CSS -->
@@ -619,9 +619,275 @@
             background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
+        
+        /* Voice assistant */
+        .voice-assistant {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .voice-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7877c6 0%, #5b59a6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(120, 119, 198, 0.4);
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+        }
+        
+        .voice-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(120, 119, 198, 0.6);
+        }
+        
+        .voice-btn.listening {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+        
+        /* Tutorial overlay */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tutorial-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .tutorial-content {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tutorial-step {
+            display: none;
+        }
+        
+        .tutorial-step.active {
+            display: block;
+        }
+        
+        .tutorial-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #7877c6 0%, #5b59a6 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Business metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Notification system */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 16px 20px;
+            border-left: 4px solid #7877c6;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 2001;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            max-width: 350px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left-color: #10b981;
+        }
+        
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+        
+        .notification.warning {
+            border-left-color: #f59e0b;
+        }
     </style>
 </head>
 <body class="theme-blue min-h-screen text-white">
+    <!-- Voice Assistant -->
+    <div class="voice-assistant">
+        <button id="voiceBtn" class="voice-btn">
+            <i data-lucide="mic" class="w-6 h-6"></i>
+        </button>
+    </div>
+    
+    <!-- Tutorial Overlay -->
+    <div id="tutorialOverlay" class="tutorial-overlay">
+        <div class="tutorial-content">
+            <div id="tutorialStep1" class="tutorial-step active">
+                <h2 class="text-2xl font-bold mb-4">Welcome to Transit Tracker Pro</h2>
+                <p class="text-gray-300 mb-6">Your enterprise-grade GPS tracking solution with voice guidance and advanced analytics.</p>
+                <div class="flex justify-center mb-6">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                        <i data-lucide="satellite" class="w-10 h-10 text-white"></i>
+                    </div>
+                </div>
+                <p class="text-gray-300">Let's take a quick tour to get you started.</p>
+            </div>
+            
+            <div id="tutorialStep2" class="tutorial-step">
+                <h2 class="text-2xl font-bold mb-4">Start Tracking</h2>
+                <p class="text-gray-300 mb-6">Click the "Start Tracking" button to begin monitoring your transit in real-time.</p>
+                <div class="flex justify-center mb-6">
+                    <button class="top-control-btn primary">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        Start Tracking
+                    </button>
+                </div>
+                <p class="text-gray-300">Your location will be tracked with high accuracy.</p>
+            </div>
+            
+            <div id="tutorialStep3" class="tutorial-step">
+                <h2 class="text-2xl font-bold mb-4">Set Destination</h2>
+                <p class="text-gray-300 mb-6">Use the Destination dropdown to set where you're heading. The system will calculate the best route.</p>
+                <div class="flex justify-center mb-6">
+                    <div class="map-control cursor-pointer">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-gray-300"></i>
+                        <span>Destination</span>
+                        <i data-lucide="chevron-down" class="w-2 h-2"></i>
+                    </div>
+                </div>
+                <p class="text-gray-300">You can also use voice commands like "Navigate to [destination]".</p>
+            </div>
+            
+            <div id="tutorialStep4" class="tutorial-step">
+                <h2 class="text-2xl font-bold mb-4">Voice Assistant</h2>
+                <p class="text-gray-300 mb-6">Click the microphone button to use voice commands for hands-free operation.</p>
+                <div class="flex justify-center mb-6">
+                    <div class="voice-btn">
+                        <i data-lucide="mic" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-gray-300">Try saying "Start tracking", "Stop tracking", or "Where am I?"</p>
+            </div>
+            
+            <div id="tutorialStep5" class="tutorial-step">
+                <h2 class="text-2xl font-bold mb-4">Business Analytics</h2>
+                <p class="text-gray-300 mb-6">Track key metrics like distance traveled, average speed, and transit time.</p>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">0 km</div>
+                        <div class="metric-label">Distance</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">0 km/h</div>
+                        <div class="metric-label">Avg Speed</div>
+                    </div>
+                </div>
+                <p class="text-gray-300 mt-6">These insights help optimize your operations.</p>
+            </div>
+            
+            <div class="progress-bar">
+                <div id="tutorialProgress" class="progress-fill" style="width: 20%"></div>
+            </div>
+            
+            <div class="tutorial-navigation">
+                <button id="tutorialPrev" class="glass-button text-white py-2 px-4 rounded-xl">Previous</button>
+                <button id="tutorialNext" class="glass-button text-white py-2 px-4 rounded-xl btn-primary">Next</button>
+                <button id="tutorialSkip" class="glass-button text-white py-2 px-4 rounded-xl hidden">Skip Tutorial</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="flex items-start">
+            <i data-lucide="info" class="w-5 h-5 mr-3 mt-0.5"></i>
+            <div>
+                <div id="notificationTitle" class="font-semibold">Notification</div>
+                <div id="notificationMessage" class="text-sm text-gray-300 mt-1">This is a notification message.</div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <!-- Header -->
         <header class="mb-6">
@@ -632,9 +898,9 @@
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mr-3 shadow-lg">
                                 <i data-lucide="satellite" class="w-5 h-5 text-white"></i>
                             </div>
-                            Transit Tracker
+                            Transit Tracker Pro
                         </h1>
-                        <p class="text-gray-300 text-sm font-medium">Real-time GPS tracking</p>
+                        <p class="text-gray-300 text-sm font-medium">Enterprise GPS Tracking & Analytics</p>
                     </div>
                     <div class="flex items-center space-x-4">
                         <!-- Tracking Status -->
@@ -642,6 +908,12 @@
                             <span class="status-indicator status-inactive" id="statusIndicator"></span>
                             <span id="statusText" class="text-sm font-medium">Not Tracking</span>
                         </div>
+                        
+                        <!-- Tutorial Button -->
+                        <button id="tutorialBtn" class="glass-button text-white py-2 px-4 rounded-xl flex items-center">
+                            <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i>
+                            Tutorial
+                        </button>
                         
                         <!-- Theme Selector -->
                         <div class="relative mobile-hidden">
@@ -660,6 +932,26 @@
             </div>
         </header>
         
+        <!-- Business Metrics -->
+        <div class="metrics-grid mb-6">
+            <div class="metric-card">
+                <div class="metric-value" id="distanceTraveled">0 km</div>
+                <div class="metric-label">Distance Traveled</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="averageSpeed">0 km/h</div>
+                <div class="metric-label">Average Speed</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="transitTime">00:00:00</div>
+                <div class="metric-label">Transit Time</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="fuelEfficiency">--</div>
+                <div class="metric-label">Fuel Efficiency</div>
+            </div>
+        </div>
+        
         <!-- Top Controls -->
         <div class="top-controls">
             <button id="trackBtn" class="top-control-btn primary">
@@ -669,6 +961,14 @@
             <button id="clearRouteBtn" class="top-control-btn">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                 Clear Route
+            </button>
+            <button id="saveRouteBtn" class="top-control-btn">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Save Route
+            </button>
+            <button id="exportBtn" class="top-control-btn">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Export Data
             </button>
         </div>
         
@@ -725,7 +1025,11 @@
                                 <button id="setDestinationBtn" class="w-full glass-button text-white py-2 rounded-lg text-sm font-medium">Set Destination</button>
                             </div>
                             <div class="text-xs text-gray-400 mb-2">Popular destinations:</div>
-                           
+                            <div class="flex flex-wrap gap-2">
+                                <button class="destination-option glass-button text-white py-1 px-2 rounded text-xs" data-destination="Airport">Airport</button>
+                                <button class="destination-option glass-button text-white py-1 px-2 rounded text-xs" data-destination="City Center">City Center</button>
+                                <button class="destination-option glass-button text-white py-1 px-2 rounded text-xs" data-destination="Warehouse">Warehouse</button>
+                            </div>
                         </div>
                     </div>
                     
@@ -744,7 +1048,11 @@
                                     <i data-lucide="send" class="w-3 h-3"></i>
                                 </button>
                             </div>
-                           
+                            <div class="text-xs text-gray-400 mb-2">Quick contacts:</div>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="contact-option glass-button text-white py-1 px-2 rounded text-xs" data-number="+255123456789">Manager</button>
+                                <button class="contact-option glass-button text-white py-1 px-2 rounded text-xs" data-number="+255987654321">Dispatch</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -789,6 +1097,10 @@
                                 <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 accent-purple-500">
                                 <label for="shareLive" class="text-sm font-medium">Share Live Location</label>
                             </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 accent-purple-500" checked>
+                                <label for="voiceGuidance" class="text-sm font-medium">Voice Guidance</label>
+                            </div>
                         </div>
                     </div>
                     
@@ -800,7 +1112,7 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs text-gray-400 font-medium uppercase tracking-wide">Transit Name</label>
-                                <input type="text" id="transitNameInput" class="w-full glass-input text-white rounded-xl p-3 text-sm mt-1" value="Delivery Truck">
+                                <input type="text" id="transitNameInput" class="w-full glass-input text-white rounded-xl p-3 text-sm mt-1" value="Delivery Truck #1245">
                             </div>
                             <div>
                                 <label class="text-xs text-gray-400 font-medium uppercase tracking-wide">Transit Type</label>
@@ -912,7 +1224,16 @@
             mapLayers: {},
             destinationMarker: null,
             suggestions: [],
-            suggestionTimeout: null
+            suggestionTimeout: null,
+            speechSynthesis: window.speechSynthesis,
+            speechRecognition: null,
+            isListening: false,
+            tutorialStep: 1,
+            totalTutorialSteps: 5,
+            savedRoutes: [],
+            averageSpeed: 0,
+            transitStartTime: null,
+            transitTimer: null
         };
 
         // Initialize the app when DOM is loaded
@@ -921,6 +1242,8 @@
             setupEventListeners();
             checkGeolocationSupport();
             updateTransitInfo();
+            initVoiceRecognition();
+            showTutorial();
         });
 
         // Initialize Leaflet Map with OpenStreetMap tiles
@@ -964,6 +1287,166 @@
                 opacity: 0.7,
                 lineJoin: 'round'
             }).addTo(state.map);
+        }
+
+        // Initialize voice recognition
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                state.speechRecognition = new SpeechRecognition();
+                state.speechRecognition.continuous = false;
+                state.speechRecognition.interimResults = false;
+                state.speechRecognition.lang = 'en-US';
+                
+                state.speechRecognition.onstart = function() {
+                    state.isListening = true;
+                    document.getElementById('voiceBtn').classList.add('listening');
+                    showNotification('Voice Assistant', 'Listening...', 'info');
+                };
+                
+                state.speechRecognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    processVoiceCommand(transcript);
+                };
+                
+                state.speechRecognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    state.isListening = false;
+                    document.getElementById('voiceBtn').classList.remove('listening');
+                    showNotification('Voice Assistant', 'Error: ' + event.error, 'error');
+                };
+                
+                state.speechRecognition.onend = function() {
+                    state.isListening = false;
+                    document.getElementById('voiceBtn').classList.remove('listening');
+                };
+            } else {
+                console.warn('Speech recognition not supported');
+                document.getElementById('voiceBtn').style.display = 'none';
+            }
+        }
+
+        // Process voice commands
+        function processVoiceCommand(command) {
+            showNotification('Voice Command', `Heard: "${command}"`, 'info');
+            
+            if (command.includes('start tracking') || command.includes('begin tracking')) {
+                if (!state.isTracking) {
+                    startTracking();
+                    speak("Tracking started. Your transit is now being monitored.");
+                } else {
+                    speak("Tracking is already active.");
+                }
+            } else if (command.includes('stop tracking') || command.includes('end tracking')) {
+                if (state.isTracking) {
+                    stopTracking();
+                    speak("Tracking stopped.");
+                } else {
+                    speak("Tracking is not active.");
+                }
+            } else if (command.includes('center map') || command.includes('center')) {
+                centerMap();
+                speak("Map centered on your location.");
+            } else if (command.includes('clear route') || command.includes('clear path')) {
+                clearRoute();
+                speak("Route cleared.");
+            } else if (command.includes('where am i') || command.includes('my location')) {
+                if (state.lastPosition) {
+                    speak(`You are at latitude ${state.lastPosition[0].toFixed(4)}, longitude ${state.lastPosition[1].toFixed(4)}`);
+                } else {
+                    speak("Your location is not available. Please start tracking first.");
+                }
+            } else if (command.includes('navigate to') || command.includes('set destination to')) {
+                const destination = command.replace('navigate to', '').replace('set destination to', '').trim();
+                if (destination) {
+                    document.getElementById('destinationInput').value = destination;
+                    setDestination();
+                    speak(`Setting destination to ${destination}`);
+                }
+            } else if (command.includes('help') || command.includes('what can i say')) {
+                speak("You can say: Start tracking, Stop tracking, Center map, Clear route, Where am I, or Navigate to followed by a destination.");
+            } else {
+                speak("Sorry, I didn't understand that command. Try saying 'Help' for a list of commands.");
+            }
+        }
+
+        // Text-to-speech function
+        function speak(text) {
+            if (state.speechSynthesis && document.getElementById('voiceGuidance').checked) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                state.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Show notification
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notificationTitle');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+            
+            // Set icon based on type
+            let icon = 'info';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'alert-circle';
+            if (type === 'warning') icon = 'alert-triangle';
+            
+            notification.innerHTML = `
+                <div class="flex items-start">
+                    <i data-lucide="${icon}" class="w-5 h-5 mr-3 mt-0.5"></i>
+                    <div>
+                        <div class="font-semibold">${title}</div>
+                        <div class="text-sm text-gray-300 mt-1">${message}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+            
+            // Set notification type
+            notification.className = 'notification';
+            notification.classList.add(type);
+            notification.classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Show tutorial
+        function showTutorial() {
+            const tutorialOverlay = document.getElementById('tutorialOverlay');
+            tutorialOverlay.classList.add('active');
+            updateTutorialProgress();
+        }
+
+        // Update tutorial progress
+        function updateTutorialProgress() {
+            const progress = (state.tutorialStep / state.totalTutorialSteps) * 100;
+            document.getElementById('tutorialProgress').style.width = `${progress}%`;
+            
+            // Update navigation buttons
+            document.getElementById('tutorialPrev').style.display = state.tutorialStep > 1 ? 'block' : 'none';
+            
+            if (state.tutorialStep === state.totalTutorialSteps) {
+                document.getElementById('tutorialNext').textContent = 'Finish';
+                document.getElementById('tutorialSkip').classList.add('hidden');
+            } else {
+                document.getElementById('tutorialNext').textContent = 'Next';
+                document.getElementById('tutorialSkip').classList.remove('hidden');
+            }
+            
+            // Show current step
+            document.querySelectorAll('.tutorial-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(`tutorialStep${state.tutorialStep}`).classList.add('active');
         }
 
         // Update marker icon based on transit type
@@ -1017,12 +1500,19 @@
             document.getElementById('centerBtn').addEventListener('click', centerMap);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
             document.getElementById('clearRouteBtn2').addEventListener('click', clearRoute);
+            document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
+            document.getElementById('exportBtn').addEventListener('click', exportData);
             document.getElementById('themeSelector').addEventListener('change', changeTheme);
             document.getElementById('transitType').addEventListener('change', updateTransitType);
             document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
             document.getElementById('mapType').addEventListener('change', changeMapType);
             document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
             document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
+            document.getElementById('voiceBtn').addEventListener('click', toggleVoiceRecognition);
+            document.getElementById('tutorialBtn').addEventListener('click', showTutorial);
+            document.getElementById('tutorialNext').addEventListener('click', nextTutorialStep);
+            document.getElementById('tutorialPrev').addEventListener('click', prevTutorialStep);
+            document.getElementById('tutorialSkip').addEventListener('click', closeTutorial);
             
             // Add event listeners for destination options
             document.querySelectorAll('.destination-option').forEach(button => {
@@ -1060,6 +1550,95 @@
                     hideSuggestions();
                 }
             });
+        }
+
+        // Toggle voice recognition
+        function toggleVoiceRecognition() {
+            if (state.speechRecognition) {
+                if (state.isListening) {
+                    state.speechRecognition.stop();
+                } else {
+                    state.speechRecognition.start();
+                }
+            } else {
+                showNotification('Voice Assistant', 'Speech recognition not supported in your browser', 'error');
+            }
+        }
+
+        // Tutorial navigation
+        function nextTutorialStep() {
+            if (state.tutorialStep < state.totalTutorialSteps) {
+                state.tutorialStep++;
+                updateTutorialProgress();
+            } else {
+                closeTutorial();
+            }
+        }
+
+        function prevTutorialStep() {
+            if (state.tutorialStep > 1) {
+                state.tutorialStep--;
+                updateTutorialProgress();
+            }
+        }
+
+        function closeTutorial() {
+            document.getElementById('tutorialOverlay').classList.remove('active');
+            state.tutorialStep = 1;
+            updateTutorialProgress();
+        }
+
+        // Save route
+        function saveRoute() {
+            if (state.pathCoordinates.length === 0) {
+                showNotification('Save Route', 'No route data to save', 'error');
+                return;
+            }
+            
+            const routeName = prompt('Enter a name for this route:');
+            if (!routeName) return;
+            
+            const routeData = {
+                name: routeName,
+                coordinates: state.pathCoordinates,
+                timestamps: state.timestamps,
+                distance: state.totalDistance,
+                duration: state.transitStartTime ? new Date() - state.transitStartTime : 0,
+                date: new Date().toISOString()
+            };
+            
+            state.savedRoutes.push(routeData);
+            showNotification('Save Route', `Route "${routeName}" saved successfully`, 'success');
+        }
+
+        // Export data
+        function exportData() {
+            if (state.pathCoordinates.length === 0) {
+                showNotification('Export Data', 'No data to export', 'error');
+                return;
+            }
+            
+            const data = {
+                transitName: state.transitName,
+                transitType: state.transitType,
+                coordinates: state.pathCoordinates,
+                timestamps: state.timestamps,
+                totalDistance: state.totalDistance,
+                averageSpeed: state.averageSpeed,
+                topSpeed: state.topSpeed,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.download = `transit-data-${new Date().toISOString().slice(0, 10)}.json`;
+            link.href = url;
+            link.click();
+            
+            showNotification('Export Data', 'Data exported successfully', 'success');
         }
 
         // Fetch location suggestions from OpenStreetMap Nominatim
@@ -1109,7 +1688,7 @@
         // Set destination from suggestion
         function setDestinationFromSuggestion(suggestion) {
             if (!state.lastPosition) {
-                showStatus('Please start tracking to get your current location first.', 'error');
+                showNotification('Set Destination', 'Please start tracking to get your current location first.', 'error');
                 return;
             }
             
@@ -1162,7 +1741,12 @@
                 latLng: destLatLng
             };
             
-            showStatus(`Route to ${suggestion.display_name} calculated.`, 'success');
+            showNotification('Set Destination', `Route to ${suggestion.display_name} calculated.`, 'success');
+            
+            // Voice guidance
+            if (document.getElementById('voiceGuidance').checked) {
+                speak(`Route to ${suggestion.display_name} calculated. Follow the highlighted path.`);
+            }
         }
 
         // Change map type
@@ -1184,7 +1768,7 @@
             const destinationInput = document.getElementById('destinationInput').value.trim();
             
             if (!destinationInput) {
-                showStatus('Please enter a destination.', 'error');
+                showNotification('Set Destination', 'Please enter a destination.', 'error');
                 return;
             }
             
@@ -1194,7 +1778,7 @@
             } else {
                 // Fallback to geocoding
                 if (!state.lastPosition) {
-                    showStatus('Please start tracking to get your current location first.', 'error');
+                    showNotification('Set Destination', 'Please start tracking to get your current location first.', 'error');
                     return;
                 }
                 
@@ -1262,14 +1846,19 @@
                                 latLng: destLatLng
                             };
                             
-                            showStatus(`Route to ${destinationInput} calculated.`, 'success');
+                            showNotification('Set Destination', `Route to ${destinationInput} calculated.`, 'success');
+                            
+                            // Voice guidance
+                            if (document.getElementById('voiceGuidance').checked) {
+                                speak(`Route to ${destinationInput} calculated. Follow the highlighted path.`);
+                            }
                         } else {
-                            showStatus('Destination not found. Please try a different location.', 'error');
+                            showNotification('Set Destination', 'Destination not found. Please try a different location.', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Geocoding error:', error);
-                        showStatus('Error finding destination. Please try again.', 'error');
+                        showNotification('Set Destination', 'Error finding destination. Please try again.', 'error');
                     });
             }
         }
@@ -1279,12 +1868,12 @@
             const phoneNumber = document.getElementById('whatsappNumber').value.trim();
             
             if (!phoneNumber) {
-                showStatus('Please enter a phone number.', 'error');
+                showNotification('Share Location', 'Please enter a phone number.', 'error');
                 return;
             }
             
             if (!state.lastPosition) {
-                showStatus('No location data available. Start tracking first.', 'error');
+                showNotification('Share Location', 'No location data available. Start tracking first.', 'error');
                 return;
             }
             
@@ -1300,7 +1889,7 @@
             // Open WhatsApp in a new tab
             window.open(whatsappUrl, '_blank');
             
-            showStatus('WhatsApp sharing initiated.', 'success');
+            showNotification('Share Location', 'WhatsApp sharing initiated.', 'success');
         }
 
         // Change theme
@@ -1402,7 +1991,7 @@
         // Check if geolocation is supported
         function checkGeolocationSupport() {
             if (!navigator.geolocation) {
-                showStatus('Geolocation is not supported by this browser.', 'error');
+                showNotification('Geolocation', 'Geolocation is not supported by this browser.', 'error');
                 document.getElementById('trackBtn').disabled = true;
             }
         }
@@ -1419,7 +2008,7 @@
         // Start location tracking
         function startTracking() {
             if (!navigator.geolocation) {
-                showStatus('Geolocation is not supported by this browser.', 'error');
+                showNotification('Tracking', 'Geolocation is not supported by this browser.', 'error');
                 return;
             }
 
@@ -1439,6 +2028,7 @@
 
             state.isTracking = true;
             state.startTime = new Date();
+            state.transitStartTime = new Date();
             
             // Start tracking timer
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
@@ -1455,7 +2045,12 @@
             // Re-initialize Lucide icons
             lucide.createIcons();
             
-            showStatus('Tracking started. Your transit is now being monitored.', 'success');
+            showNotification('Tracking', 'Tracking started. Your transit is now being monitored.', 'success');
+            
+            // Voice guidance
+            if (document.getElementById('voiceGuidance').checked) {
+                speak("Tracking started. Your transit is now being monitored.");
+            }
         }
 
         // Stop location tracking
@@ -1468,6 +2063,11 @@
             if (state.trackingInterval) {
                 clearInterval(state.trackingInterval);
                 state.trackingInterval = null;
+            }
+            
+            if (state.transitTimer) {
+                clearInterval(state.transitTimer);
+                state.transitTimer = null;
             }
             
             state.isTracking = false;
@@ -1483,7 +2083,12 @@
             // Re-initialize Lucide icons
             lucide.createIcons();
             
-            showStatus('Tracking stopped.', 'info');
+            showNotification('Tracking', 'Tracking stopped.', 'info');
+            
+            // Voice guidance
+            if (document.getElementById('voiceGuidance').checked) {
+                speak("Tracking stopped.");
+            }
         }
 
         // Update position on the map
@@ -1547,6 +2152,9 @@
                 );
                 state.totalDistance += distance;
                 
+                // Update metrics
+                updateMetrics();
+                
                 // Calculate ETA (simplified calculation)
                 updateETA();
             }
@@ -1568,6 +2176,27 @@
             
             // Store last position
             state.lastPosition = newPosition;
+        }
+
+        // Update business metrics
+        function updateMetrics() {
+            // Update distance traveled
+            document.getElementById('distanceTraveled').textContent = `${(state.totalDistance / 1000).toFixed(2)} km`;
+            
+            // Update average speed
+            if (state.timestamps.length > 1) {
+                const timeDiff = (state.timestamps[state.timestamps.length - 1] - state.timestamps[0]) / 1000; // in seconds
+                if (timeDiff > 0) {
+                    state.averageSpeed = (state.totalDistance / timeDiff) * 3.6; // km/h
+                    document.getElementById('averageSpeed').textContent = `${state.averageSpeed.toFixed(2)} km/h`;
+                }
+            }
+            
+            // Update fuel efficiency (simplified calculation)
+            if (state.transitType === 'truck' || state.transitType === 'van' || state.transitType === 'car') {
+                const fuelEfficiency = state.totalDistance > 0 ? (state.totalDistance / 1000) / (state.totalDistance / 100000) * 0.1 : 0;
+                document.getElementById('fuelEfficiency').textContent = `${fuelEfficiency.toFixed(2)} L/km`;
+            }
         }
 
         // Update ETA calculation
@@ -1630,6 +2259,9 @@
                 const hours = Math.floor(diff / 3600000);
                 const minutes = Math.floor((diff % 3600000) / 60000);
                 const seconds = Math.floor((diff % 60000) / 1000);
+                
+                document.getElementById('transitTime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }
 
@@ -1637,9 +2269,9 @@
         function centerMap() {
             if (state.lastPosition) {
                 state.map.setView(state.lastPosition, state.map.getZoom());
-                showStatus('Map centered on current location.', 'info');
+                showNotification('Map Control', 'Map centered on current location.', 'info');
             } else {
-                showStatus('No location data available. Start tracking first.', 'error');
+                showNotification('Map Control', 'No location data available. Start tracking first.', 'error');
             }
         }
 
@@ -1662,7 +2294,7 @@
                     break;
             }
             
-            showStatus(message, 'error');
+            showNotification('Geolocation Error', message, 'error');
             stopTracking();
         }
 
@@ -1675,7 +2307,8 @@
             state.currentSpeed = 0;
             state.topSpeed = 0;
             refreshRouteHistory();
-            showStatus('Route cleared.', 'info');
+            updateMetrics();
+            showNotification('Route', 'Route cleared.', 'info');
         }
 
         // Refresh route history display
