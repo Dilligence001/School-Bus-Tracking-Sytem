@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPS Tracker</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=Function.prototype"></script>
     <style>
-        /* Custom styles for better appearance */
         #map {
             height: 70vh;
             width: 100%;
+            z-index: 1;
         }
         
         .tracking-active {
@@ -33,6 +33,32 @@
             background-color: #374151;
             border-color: #4b5563;
         }
+        
+        /* Custom marker pulse animation */
+        .pulse-marker {
+            display: block;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 0 rgba(59, 130, 246, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+        
+        /* Route line styling */
+        .route-line {
+            stroke-dasharray: 5, 5;
+        }
     </style>
 </head>
 <body class="dark-theme min-h-screen">
@@ -40,12 +66,15 @@
         <!-- Header -->
         <header class="mb-6">
             <h1 class="text-3xl font-bold text-center text-white">GPS Tracker</h1>
-            <p class="text-center text-gray-400 mt-2">Track your location in real-time</p>
+            <p class="text-center text-gray-400 mt-2">Track your location in real-time with free maps</p>
         </header>
         
         <!-- Map Container -->
-        <div class="mb-6 rounded-lg overflow-hidden shadow-lg">
+        <div class="mb-6 rounded-lg overflow-hidden shadow-lg relative">
             <div id="map"></div>
+            <div class="absolute top-4 right-4 z-10 bg-gray-800 bg-opacity-70 text-white px-3 py-2 rounded-lg">
+                <span id="zoomLevel">Zoom: --</span>
+            </div>
         </div>
         
         <!-- Controls and Info -->
@@ -57,9 +86,14 @@
                     <button id="trackBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
                         Start Tracking
                     </button>
-                    <button id="clearRouteBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                        Clear Route
-                    </button>
+                    <div class="flex space-x-2">
+                        <button id="centerBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-1">
+                            Center Map
+                        </button>
+                        <button id="clearRouteBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-1">
+                            Clear Route
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -80,6 +114,10 @@
                         <span id="accuracy" class="text-white">--</span>
                     </div>
                     <div class="flex justify-between">
+                        <span class="text-gray-400">Speed:</span>
+                        <span id="speed" class="text-white">--</span>
+                    </div>
+                    <div class="flex justify-between">
                         <span class="text-gray-400">Last Update:</span>
                         <span id="lastUpdate" class="text-white">--</span>
                     </div>
@@ -89,8 +127,16 @@
         
         <!-- Status Messages -->
         <div id="statusMessage" class="mt-6 p-4 rounded-lg hidden"></div>
+        
+        <!-- Map Attribution -->
+        <div class="mt-6 text-center text-gray-500 text-sm">
+            Map data © <a href="https://www.openstreetmap.org/" class="text-blue-400" target="_blank">OpenStreetMap</a> contributors
+        </div>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script>
         // App state
         const state = {
@@ -98,9 +144,11 @@
             watchId: null,
             map: null,
             marker: null,
+            accuracyCircle: null,
             pathCoordinates: [],
             polyline: null,
-            lastPosition: null
+            lastPosition: null,
+            totalDistance: 0
         };
 
         // Initialize the app when DOM is loaded
@@ -110,128 +158,66 @@
             checkGeolocationSupport();
         });
 
-        // Initialize Google Map
+        // Initialize Leaflet Map with OpenStreetMap tiles
         function initMap() {
-            // Default center (San Francisco)
-            const defaultCenter = { lat: 37.7749, lng: -122.4194 };
+            // Default center (London)
+            const defaultCenter = [51.505, -0.09];
             
-            state.map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
-                center: defaultCenter,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                styles: [
-                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                    {
-                        featureType: "administrative.locality",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }]
-                    },
-                    {
-                        featureType: "poi",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }]
-                    },
-                    {
-                        featureType: "poi.park",
-                        elementType: "geometry",
-                        stylers: [{ color: "#263c3f" }]
-                    },
-                    {
-                        featureType: "poi.park",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#6b9a76" }]
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry",
-                        stylers: [{ color: "#38414e" }]
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#212a37" }]
-                    },
-                    {
-                        featureType: "road",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#9ca5b3" }]
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry",
-                        stylers: [{ color: "#746855" }]
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "geometry.stroke",
-                        stylers: [{ color: "#1f2835" }]
-                    },
-                    {
-                        featureType: "road.highway",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#f3d19c" }]
-                    },
-                    {
-                        featureType: "transit",
-                        elementType: "geometry",
-                        stylers: [{ color: "#2f3948" }]
-                    },
-                    {
-                        featureType: "transit.station",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#d59563" }]
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "geometry",
-                        stylers: [{ color: "#17263c" }]
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#515c6d" }]
-                    },
-                    {
-                        featureType: "water",
-                        elementType: "labels.text.stroke",
-                        stylers: [{ color: "#17263c" }]
-                    }
-                ]
+            // Create map
+            state.map = L.map('map').setView(defaultCenter, 13);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(state.map);
+            
+            // Add a dark theme tile layer option (optional)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                maxZoom: 19
+            }).addTo(state.map);
+            
+            // Create initial marker with custom icon
+            const customIcon = L.divIcon({
+                className: 'pulse-marker',
+                html: `<div style="background-color: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
             });
             
-            // Create initial marker
-            state.marker = new google.maps.Marker({
-                position: defaultCenter,
-                map: state.map,
-                title: 'Your Location',
-                icon: {
-                    url: 'data:image/svg+xml;base64,' + btoa(`
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(40, 40),
-                    anchor: new google.maps.Point(12, 24)
-                }
-            });
+            state.marker = L.marker(defaultCenter, { icon: customIcon }).addTo(state.map);
+            state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
+            
+            // Initialize accuracy circle
+            state.accuracyCircle = L.circle(defaultCenter, {
+                color: 'blue',
+                fillColor: '#3b82f6',
+                fillOpacity: 0.1,
+                radius: 0
+            }).addTo(state.map);
             
             // Initialize polyline for route tracking
-            state.polyline = new google.maps.Polyline({
-                path: state.pathCoordinates,
-                geodesic: true,
-                strokeColor: '#3b82f6',
-                strokeOpacity: 1.0,
-                strokeWeight: 4,
-                map: state.map
+            state.polyline = L.polyline([], {
+                color: '#3b82f6',
+                weight: 4,
+                opacity: 0.7,
+                lineJoin: 'round',
+                dashArray: '5, 5'
+            }).addTo(state.map);
+            
+            // Update zoom level display
+            state.map.on('zoomend', function() {
+                document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
             });
+            
+            document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
         }
 
         // Set up event listeners
         function setupEventListeners() {
             document.getElementById('trackBtn').addEventListener('click', toggleTracking);
+            document.getElementById('centerBtn').addEventListener('click', centerMap);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
         }
 
@@ -295,59 +281,80 @@
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             const accuracy = position.coords.accuracy;
+            const speed = position.coords.speed;
             
             // Update location display
             document.getElementById('latitude').textContent = lat.toFixed(6);
             document.getElementById('longitude').textContent = lng.toFixed(6);
             document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)} meters`;
+            document.getElementById('speed').textContent = speed ? `${(speed * 3.6).toFixed(2)} km/h` : '--';
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
             
             // Create new position object
-            const newPosition = { lat, lng };
+            const newPosition = [lat, lng];
             
-            // Update marker position with smooth animation
-            if (state.lastPosition) {
-                // Calculate direction for smooth animation
-                const heading = calculateHeading(state.lastPosition, newPosition);
-                state.marker.setPosition(newPosition);
-                
-                // Add a subtle rotation effect based on movement direction
-                if (heading !== null) {
-                    // This would require a custom marker with rotation capability
-                    // For simplicity, we're just updating position
-                }
-            } else {
-                state.marker.setPosition(newPosition);
+            // Update marker position
+            state.marker.setLatLng(newPosition);
+            
+            // Update accuracy circle
+            state.accuracyCircle.setLatLng(newPosition);
+            state.accuracyCircle.setRadius(accuracy);
+            
+            // Update marker popup
+            state.marker.bindPopup(`
+                <b>Your Location</b><br>
+                Lat: ${lat.toFixed(6)}<br>
+                Lng: ${lng.toFixed(6)}<br>
+                Accuracy: ${accuracy.toFixed(2)}m<br>
+                ${speed ? `Speed: ${(speed * 3.6).toFixed(2)} km/h` : ''}
+            `);
+            
+            // Center map on new position if tracking is active
+            if (state.isTracking) {
+                state.map.setView(newPosition, state.map.getZoom());
             }
             
-            // Center map on new position
-            state.map.setCenter(newPosition);
-            
             // Add to path and update polyline
-            state.pathCoordinates.push(newPosition);
-            state.polyline.setPath(state.pathCoordinates);
+            if (state.lastPosition) {
+                // Calculate distance between points
+                const distance = calculateDistance(
+                    state.lastPosition[0], state.lastPosition[1],
+                    lat, lng
+                );
+                state.totalDistance += distance;
+            }
             
-            // Store last position for heading calculation
+            state.pathCoordinates.push(newPosition);
+            state.polyline.setLatLngs(state.pathCoordinates);
+            
+            // Store last position
             state.lastPosition = newPosition;
         }
 
-        // Calculate heading between two points (for animation)
-        function calculateHeading(from, to) {
-            if (!from || !to) return null;
-            
-            const fromLat = from.lat * Math.PI / 180;
-            const fromLng = from.lng * Math.PI / 180;
-            const toLat = to.lat * Math.PI / 180;
-            const toLng = to.lng * Math.PI / 180;
-            
-            const dLng = toLng - fromLng;
-            
-            const y = Math.sin(dLng) * Math.cos(toLat);
-            const x = Math.cos(fromLat) * Math.sin(toLat) -
-                      Math.sin(fromLat) * Math.cos(toLat) * Math.cos(dLng);
-            
-            let heading = Math.atan2(y, x) * 180 / Math.PI;
-            return (heading + 360) % 360;
+        // Calculate distance between two coordinates in meters
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c;
+        }
+
+        // Center map on current location
+        function centerMap() {
+            if (state.lastPosition) {
+                state.map.setView(state.lastPosition, state.map.getZoom());
+                showStatus('Map centered on your location.', 'info');
+            } else {
+                showStatus('No location data available. Start tracking first.', 'error');
+            }
         }
 
         // Handle geolocation errors
@@ -376,7 +383,8 @@
         // Clear the route/path
         function clearRoute() {
             state.pathCoordinates = [];
-            state.polyline.setPath(state.pathCoordinates);
+            state.polyline.setLatLngs(state.pathCoordinates);
+            state.totalDistance = 0;
             showStatus('Route cleared.', 'info');
         }
 
