@@ -3,35 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Tracker</title>
+    <title>Advanced GPS Tracker</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #map {
-            height: 70vh;
+            height: 65vh;
             width: 100%;
             z-index: 1;
         }
         
         .tracking-active {
             background-color: #ef4444 !important;
-        }
-        
-        .smooth-move {
-            transition: transform 0.5s ease-out;
-        }
-        
-        /* Dark theme adjustments */
-        .dark-theme {
-            background-color: #1f2937;
-            color: #f9fafb;
-        }
-        
-        .card-dark {
-            background-color: #374151;
-            border-color: #4b5563;
         }
         
         /* Custom marker pulse animation */
@@ -55,73 +40,246 @@
             }
         }
         
-        /* Route line styling */
-        .route-line {
-            stroke-dasharray: 5, 5;
+        /* Theme colors */
+        .theme-blue {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --accent-color: #60a5fa;
+        }
+        
+        .theme-green {
+            --primary-color: #10b981;
+            --secondary-color: #047857;
+            --accent-color: #34d399;
+        }
+        
+        .theme-purple {
+            --primary-color: #8b5cf6;
+            --secondary-color: #7c3aed;
+            --accent-color: #a78bfa;
+        }
+        
+        .theme-orange {
+            --primary-color: #f59e0b;
+            --secondary-color: #d97706;
+            --accent-color: #fbbf24;
+        }
+        
+        /* Map theme integration */
+        .map-theme-blue {
+            filter: hue-rotate(0deg) saturate(1.2);
+        }
+        
+        .map-theme-green {
+            filter: hue-rotate(100deg) saturate(1.1);
+        }
+        
+        .map-theme-purple {
+            filter: hue-rotate(250deg) saturate(1.3);
+        }
+        
+        .map-theme-orange {
+            filter: hue-rotate(40deg) saturate(1.2);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #374151;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        /* Stats cards */
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background-color: #4b5563;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #6b7280;
         }
     </style>
 </head>
-<body class="dark-theme min-h-screen">
+<body class="theme-blue min-h-screen bg-gray-900 text-white transition-colors duration-300">
     <div class="container mx-auto px-4 py-6">
         <!-- Header -->
-        <header class="mb-6">
-            <h1 class="text-3xl font-bold text-center text-white">GPS Tracker</h1>
-            <p class="text-center text-gray-400 mt-2">Track your location in real-time with free maps</p>
+        <header class="mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white">GPS Tracker</h1>
+                <p class="text-gray-400 mt-2">Advanced real-time location tracking</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Theme Selector -->
+                <div class="relative">
+                    <select id="themeSelector" class="bg-gray-800 text-white py-2 px-4 rounded-lg appearance-none cursor-pointer">
+                        <option value="blue">Blue Theme</option>
+                        <option value="green">Green Theme</option>
+                        <option value="purple">Purple Theme</option>
+                        <option value="orange">Orange Theme</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Map Style Selector -->
+                <div class="relative">
+                    <select id="mapStyleSelector" class="bg-gray-800 text-white py-2 px-4 rounded-lg appearance-none cursor-pointer">
+                        <option value="standard">Standard Map</option>
+                        <option value="dark">Dark Map</option>
+                        <option value="satellite">Satellite</option>
+                        <option value="terrain">Terrain</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </header>
         
-        <!-- Map Container -->
-        <div class="mb-6 rounded-lg overflow-hidden shadow-lg relative">
-            <div id="map"></div>
-            <div class="absolute top-4 right-4 z-10 bg-gray-800 bg-opacity-70 text-white px-3 py-2 rounded-lg">
-                <span id="zoomLevel">Zoom: --</span>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card p-4 rounded-lg shadow text-white">
+                <div class="text-sm opacity-80">Distance Traveled</div>
+                <div class="text-2xl font-bold" id="distanceTraveled">0.00 km</div>
+            </div>
+            <div class="stat-card p-4 rounded-lg shadow text-white">
+                <div class="text-sm opacity-80">Top Speed</div>
+                <div class="text-2xl font-bold" id="topSpeed">0.00 km/h</div>
+            </div>
+            <div class="stat-card p-4 rounded-lg shadow text-white">
+                <div class="text-sm opacity-80">Tracking Time</div>
+                <div class="text-2xl font-bold" id="trackingTime">00:00:00</div>
+            </div>
+            <div class="stat-card p-4 rounded-lg shadow text-white">
+                <div class="text-sm opacity-80">Points Recorded</div>
+                <div class="text-2xl font-bold" id="pointsRecorded">0</div>
             </div>
         </div>
         
-        <!-- Controls and Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Control Panel -->
-            <div class="card-dark p-4 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4 text-white">Controls</h2>
-                <div class="flex flex-col space-y-4">
-                    <button id="trackBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                        Start Tracking
-                    </button>
-                    <div class="flex space-x-2">
-                        <button id="centerBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-1">
-                            Center Map
-                        </button>
-                        <button id="clearRouteBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex-1">
-                            Clear Route
-                        </button>
-                    </div>
+        <!-- Map and Controls -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Map Container -->
+            <div class="lg:col-span-2 rounded-lg overflow-hidden shadow-lg relative">
+                <div id="map" class="map-theme-blue transition-all duration-500"></div>
+                <div class="absolute top-4 right-4 z-10 bg-gray-800 bg-opacity-70 text-white px-3 py-2 rounded-lg">
+                    <span id="zoomLevel">Zoom: --</span>
+                </div>
+                <div class="absolute bottom-4 left-4 z-10 bg-gray-800 bg-opacity-70 text-white px-3 py-2 rounded-lg">
+                    <span id="coordinates">Lat: --, Lng: --</span>
                 </div>
             </div>
             
-            <!-- Location Info -->
-            <div class="card-dark p-4 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4 text-white">Location Information</h2>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Latitude:</span>
-                        <span id="latitude" class="text-white">--</span>
+            <!-- Controls Panel -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 text-white">Controls</h2>
+                <div class="space-y-4">
+                    <button id="trackBtn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                        Start Tracking
+                    </button>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="centerBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Center Map
+                        </button>
+                        <button id="clearRouteBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Clear Route
+                        </button>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Longitude:</span>
-                        <span id="longitude" class="text-white">--</span>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="exportBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Export Data
+                        </button>
+                        <button id="shareBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Share Location
+                        </button>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Accuracy:</span>
-                        <span id="accuracy" class="text-white">--</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Speed:</span>
-                        <span id="speed" class="text-white">--</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Last Update:</span>
-                        <span id="lastUpdate" class="text-white">--</span>
+                    
+                    <div class="pt-4 border-t border-gray-700">
+                        <h3 class="font-semibold mb-2">Tracking Settings</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="highAccuracy" class="mr-2" checked>
+                                <label for="highAccuracy">High Accuracy</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="recordAltitude" class="mr-2">
+                                <label for="recordAltitude">Record Altitude</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="autoCenter" class="mr-2" checked>
+                                <label for="autoCenter">Auto Center Map</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Location Details -->
+                <div class="mt-6 pt-4 border-t border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4 text-white">Location Details</h2>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Latitude:</span>
+                            <span id="latitude" class="text-white">--</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Longitude:</span>
+                            <span id="longitude" class="text-white">--</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Accuracy:</span>
+                            <span id="accuracy" class="text-white">--</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Altitude:</span>
+                            <span id="altitude" class="text-white">--</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Speed:</span>
+                            <span id="speed" class="text-white">--</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Heading:</span>
+                            <span id="heading" class="text-white">--</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Last Update:</span>
+                            <span id="lastUpdate" class="text-white">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Route History -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-white">Route History</h2>
+            <div id="routeHistory" class="max-h-40 overflow-y-auto">
+                <p class="text-gray-400 text-center py-4">No route history yet. Start tracking to record your journey.</p>
             </div>
         </div>
         
@@ -148,7 +306,13 @@
             pathCoordinates: [],
             polyline: null,
             lastPosition: null,
-            totalDistance: 0
+            totalDistance: 0,
+            topSpeed: 0,
+            startTime: null,
+            trackingInterval: null,
+            currentTheme: 'blue',
+            currentMapStyle: 'standard',
+            mapLayers: {}
         };
 
         // Initialize the app when DOM is loaded
@@ -156,6 +320,7 @@
             initMap();
             setupEventListeners();
             checkGeolocationSupport();
+            updateTheme();
         });
 
         // Initialize Leaflet Map with OpenStreetMap tiles
@@ -166,22 +331,33 @@
             // Create map
             state.map = L.map('map').setView(defaultCenter, 13);
             
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19
-            }).addTo(state.map);
+            // Define map layers
+            state.mapLayers = {
+                standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }),
+                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    maxZoom: 19
+                }),
+                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                    maxZoom: 19
+                }),
+                terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+                    maxZoom: 17
+                })
+            };
             
-            // Add a dark theme tile layer option (optional)
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                maxZoom: 19
-            }).addTo(state.map);
+            // Add default layer
+            state.mapLayers.standard.addTo(state.map);
             
             // Create initial marker with custom icon
             const customIcon = L.divIcon({
                 className: 'pulse-marker',
-                html: `<div style="background-color: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>`,
+                html: `<div style="background-color: var(--primary-color); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>`,
                 iconSize: [26, 26],
                 iconAnchor: [13, 13]
             });
@@ -191,24 +367,29 @@
             
             // Initialize accuracy circle
             state.accuracyCircle = L.circle(defaultCenter, {
-                color: 'blue',
-                fillColor: '#3b82f6',
+                color: 'var(--primary-color)',
+                fillColor: 'var(--primary-color)',
                 fillOpacity: 0.1,
                 radius: 0
             }).addTo(state.map);
             
             // Initialize polyline for route tracking
             state.polyline = L.polyline([], {
-                color: '#3b82f6',
+                color: 'var(--primary-color)',
                 weight: 4,
                 opacity: 0.7,
-                lineJoin: 'round',
-                dashArray: '5, 5'
+                lineJoin: 'round'
             }).addTo(state.map);
             
             // Update zoom level display
             state.map.on('zoomend', function() {
                 document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
+            });
+            
+            // Update coordinates on map move
+            state.map.on('mousemove', function(e) {
+                document.getElementById('coordinates').textContent = 
+                    `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
             });
             
             document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
@@ -219,6 +400,69 @@
             document.getElementById('trackBtn').addEventListener('click', toggleTracking);
             document.getElementById('centerBtn').addEventListener('click', centerMap);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('shareBtn').addEventListener('click', shareLocation);
+            document.getElementById('themeSelector').addEventListener('change', changeTheme);
+            document.getElementById('mapStyleSelector').addEventListener('change', changeMapStyle);
+        }
+
+        // Change theme
+        function changeTheme() {
+            const theme = document.getElementById('themeSelector').value;
+            document.body.className = `theme-${theme} min-h-screen bg-gray-900 text-white transition-colors duration-300`;
+            state.currentTheme = theme;
+            
+            // Update map theme class
+            const map = document.getElementById('map');
+            map.className = 'map-theme-' + theme + ' transition-all duration-500';
+            map.style.height = '65vh';
+            map.style.width = '100%';
+            map.style.zIndex = '1';
+            
+            updateTheme();
+        }
+
+        // Update theme-specific elements
+        function updateTheme() {
+            // Update polyline color
+            if (state.polyline) {
+                state.polyline.setStyle({
+                    color: getComputedStyle(document.body).getPropertyValue('--primary-color')
+                });
+            }
+            
+            // Update accuracy circle color
+            if (state.accuracyCircle) {
+                state.accuracyCircle.setStyle({
+                    color: getComputedStyle(document.body).getPropertyValue('--primary-color'),
+                    fillColor: getComputedStyle(document.body).getPropertyValue('--primary-color')
+                });
+            }
+            
+            // Update marker
+            if (state.marker) {
+                const customIcon = L.divIcon({
+                    className: 'pulse-marker',
+                    html: `<div style="background-color: var(--primary-color); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>`,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13]
+                });
+                state.marker.setIcon(customIcon);
+            }
+        }
+
+        // Change map style
+        function changeMapStyle() {
+            const style = document.getElementById('mapStyleSelector').value;
+            state.currentMapStyle = style;
+            
+            // Remove all existing layers
+            for (const key in state.mapLayers) {
+                state.map.removeLayer(state.mapLayers[key]);
+            }
+            
+            // Add selected layer
+            state.mapLayers[style].addTo(state.map);
         }
 
         // Check if geolocation is supported
@@ -245,8 +489,10 @@
                 return;
             }
 
+            const highAccuracy = document.getElementById('highAccuracy').checked;
+            
             const options = {
-                enableHighAccuracy: true,
+                enableHighAccuracy: highAccuracy,
                 timeout: 10000,
                 maximumAge: 0
             };
@@ -258,6 +504,11 @@
             );
 
             state.isTracking = true;
+            state.startTime = new Date();
+            
+            // Start tracking timer
+            state.trackingInterval = setInterval(updateTrackingTime, 1000);
+            
             document.getElementById('trackBtn').textContent = 'Stop Tracking';
             document.getElementById('trackBtn').classList.add('tracking-active');
             showStatus('Tracking started. Your location is now being monitored.', 'success');
@@ -268,6 +519,11 @@
             if (state.watchId) {
                 navigator.geolocation.clearWatch(state.watchId);
                 state.watchId = null;
+            }
+            
+            if (state.trackingInterval) {
+                clearInterval(state.trackingInterval);
+                state.trackingInterval = null;
             }
             
             state.isTracking = false;
@@ -282,13 +538,23 @@
             const lng = position.coords.longitude;
             const accuracy = position.coords.accuracy;
             const speed = position.coords.speed;
+            const heading = position.coords.heading;
+            const altitude = position.coords.altitude;
             
             // Update location display
             document.getElementById('latitude').textContent = lat.toFixed(6);
             document.getElementById('longitude').textContent = lng.toFixed(6);
             document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)} meters`;
             document.getElementById('speed').textContent = speed ? `${(speed * 3.6).toFixed(2)} km/h` : '--';
+            document.getElementById('heading').textContent = heading ? `${heading.toFixed(0)}°` : '--';
+            document.getElementById('altitude').textContent = altitude ? `${altitude.toFixed(2)} meters` : '--';
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            
+            // Update top speed
+            if (speed && speed * 3.6 > state.topSpeed) {
+                state.topSpeed = speed * 3.6;
+                document.getElementById('topSpeed').textContent = state.topSpeed.toFixed(2) + ' km/h';
+            }
             
             // Create new position object
             const newPosition = [lat, lng];
@@ -309,8 +575,8 @@
                 ${speed ? `Speed: ${(speed * 3.6).toFixed(2)} km/h` : ''}
             `);
             
-            // Center map on new position if tracking is active
-            if (state.isTracking) {
+            // Center map on new position if auto-center is enabled
+            if (state.isTracking && document.getElementById('autoCenter').checked) {
                 state.map.setView(newPosition, state.map.getZoom());
             }
             
@@ -322,13 +588,96 @@
                     lat, lng
                 );
                 state.totalDistance += distance;
+                document.getElementById('distanceTraveled').textContent = (state.totalDistance / 1000).toFixed(2) + ' km';
             }
             
             state.pathCoordinates.push(newPosition);
             state.polyline.setLatLngs(state.pathCoordinates);
             
+            // Update points recorded
+            document.getElementById('pointsRecorded').textContent = state.pathCoordinates.length;
+            
+            // Add to route history
+            addToRouteHistory(newPosition, new Date());
+            
             // Store last position
             state.lastPosition = newPosition;
+        }
+
+        // Add point to route history
+        function addToRouteHistory(position, timestamp) {
+            const routeHistory = document.getElementById('routeHistory');
+            
+            // Clear placeholder if it exists
+            if (routeHistory.children.length === 1 && routeHistory.children[0].classList.contains('text-center')) {
+                routeHistory.innerHTML = '';
+            }
+            
+            const historyItem = document.createElement('div');
+            historyItem.className = 'flex justify-between items-center py-2 border-b border-gray-700';
+            historyItem.innerHTML = `
+                <div>
+                    <span class="text-sm">${timestamp.toLocaleTimeString()}</span>
+                    <span class="text-xs text-gray-400 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
+                </div>
+                <button class="text-xs text-red-400 hover:text-red-300" onclick="removeRoutePoint(${state.pathCoordinates.length - 1})">Remove</button>
+            `;
+            
+            routeHistory.appendChild(historyItem);
+            
+            // Scroll to bottom
+            routeHistory.scrollTop = routeHistory.scrollHeight;
+        }
+
+        // Remove a point from the route
+        function removeRoutePoint(index) {
+            if (index >= 0 && index < state.pathCoordinates.length) {
+                state.pathCoordinates.splice(index, 1);
+                state.polyline.setLatLngs(state.pathCoordinates);
+                document.getElementById('pointsRecorded').textContent = state.pathCoordinates.length;
+                
+                // Recalculate total distance
+                state.totalDistance = 0;
+                for (let i = 1; i < state.pathCoordinates.length; i++) {
+                    state.totalDistance += calculateDistance(
+                        state.pathCoordinates[i-1][0], state.pathCoordinates[i-1][1],
+                        state.pathCoordinates[i][0], state.pathCoordinates[i][1]
+                    );
+                }
+                document.getElementById('distanceTraveled').textContent = (state.totalDistance / 1000).toFixed(2) + ' km';
+                
+                // Refresh route history
+                refreshRouteHistory();
+            }
+        }
+
+        // Refresh route history display
+        function refreshRouteHistory() {
+            const routeHistory = document.getElementById('routeHistory');
+            routeHistory.innerHTML = '';
+            
+            if (state.pathCoordinates.length === 0) {
+                routeHistory.innerHTML = '<p class="text-gray-400 text-center py-4">No route history yet. Start tracking to record your journey.</p>';
+                return;
+            }
+            
+            state.pathCoordinates.forEach((position, index) => {
+                // Create a fake timestamp for display (in a real app, you'd store actual timestamps)
+                const fakeTime = new Date();
+                fakeTime.setMinutes(fakeTime.getMinutes() - (state.pathCoordinates.length - index));
+                
+                const historyItem = document.createElement('div');
+                historyItem.className = 'flex justify-between items-center py-2 border-b border-gray-700';
+                historyItem.innerHTML = `
+                    <div>
+                        <span class="text-sm">${fakeTime.toLocaleTimeString()}</span>
+                        <span class="text-xs text-gray-400 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
+                    </div>
+                    <button class="text-xs text-red-400 hover:text-red-300" onclick="removeRoutePoint(${index})">Remove</button>
+                `;
+                
+                routeHistory.appendChild(historyItem);
+            });
         }
 
         // Calculate distance between two coordinates in meters
@@ -345,6 +694,21 @@
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
             return R * c;
+        }
+
+        // Update tracking time
+        function updateTrackingTime() {
+            if (state.startTime) {
+                const now = new Date();
+                const diff = now - state.startTime;
+                
+                const hours = Math.floor(diff / 3600000);
+                const minutes = Math.floor((diff % 3600000) / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                
+                document.getElementById('trackingTime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
 
         // Center map on current location
@@ -385,7 +749,79 @@
             state.pathCoordinates = [];
             state.polyline.setLatLngs(state.pathCoordinates);
             state.totalDistance = 0;
+            state.topSpeed = 0;
+            document.getElementById('distanceTraveled').textContent = '0.00 km';
+            document.getElementById('topSpeed').textContent = '0.00 km/h';
+            document.getElementById('pointsRecorded').textContent = '0';
+            refreshRouteHistory();
             showStatus('Route cleared.', 'info');
+        }
+
+        // Export tracking data
+        function exportData() {
+            if (state.pathCoordinates.length === 0) {
+                showStatus('No data to export. Start tracking first.', 'error');
+                return;
+            }
+            
+            const data = {
+                metadata: {
+                    exportedAt: new Date().toISOString(),
+                    totalPoints: state.pathCoordinates.length,
+                    totalDistance: state.totalDistance,
+                    topSpeed: state.topSpeed,
+                    theme: state.currentTheme
+                },
+                coordinates: state.pathCoordinates
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `gps-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showStatus('Data exported successfully.', 'success');
+        }
+
+        // Share current location
+        function shareLocation() {
+            if (!state.lastPosition) {
+                showStatus('No location data available. Start tracking first.', 'error');
+                return;
+            }
+            
+            const lat = state.lastPosition[0];
+            const lng = state.lastPosition[1];
+            
+            const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
+            const text = `My current location: ${lat.toFixed(6)}, ${lng.toFixed(6)} - ${url}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Current Location',
+                    text: text,
+                    url: url
+                }).then(() => {
+                    showStatus('Location shared successfully.', 'success');
+                }).catch((error) => {
+                    console.log('Error sharing:', error);
+                    showStatus('Sharing cancelled or failed.', 'error');
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(text).then(() => {
+                    showStatus('Location copied to clipboard.', 'success');
+                }).catch(() => {
+                    // Final fallback: show the text
+                    prompt('Copy this location:', text);
+                });
+            }
         }
 
         // Show status messages
