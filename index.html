@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,23 +15,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        
+
         body {
             background-color: #f8fafc;
             color: #334155;
             min-height: 100vh;
         }
-        
+
         /* Professional header styling */
         .header-gradient {
             background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             color: white;
         }
-        
+
         /* Card styling */
         .card {
             background: white;
@@ -39,11 +43,11 @@
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
         }
-        
+
         .card:hover {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
-        
+
         /* Button styling */
         .btn-primary {
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -53,13 +57,13 @@
             font-weight: 500;
             transition: all 0.2s ease;
         }
-        
+
         .btn-primary:hover {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
         }
-        
+
         .btn-secondary {
             background: white;
             color: #475569;
@@ -68,12 +72,12 @@
             font-weight: 500;
             transition: all 0.2s ease;
         }
-        
+
         .btn-secondary:hover {
             background: #f8fafc;
             border-color: #94a3b8;
         }
-        
+
         .btn-danger {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
@@ -82,13 +86,13 @@
             font-weight: 500;
             transition: all 0.2s ease;
         }
-        
+
         .btn-danger:hover {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
         }
-        
+
         /* Status indicators */
         .status-indicator {
             width: 8px;
@@ -97,15 +101,15 @@
             display: inline-block;
             margin-right: 8px;
         }
-        
+
         .status-active {
             background-color: #10b981;
         }
-        
+
         .status-inactive {
             background-color: #ef4444;
         }
-        
+
         /* Map styling */
         #map {
             height: 65vh;
@@ -114,7 +118,7 @@
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Form controls */
         .form-input {
             background: white;
@@ -123,13 +127,13 @@
             padding: 8px 12px;
             transition: all 0.2s ease;
         }
-        
+
         .form-input:focus {
             outline: none;
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
-        
+
         .form-select {
             background: white;
             border: 1px solid #cbd5e1;
@@ -141,7 +145,7 @@
             background-position: right 8px center;
             background-size: 16px;
         }
-        
+
         /* Metric cards */
         .metric-card {
             background: white;
@@ -150,13 +154,13 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
         }
-        
+
         .metric-value {
             font-size: 24px;
             font-weight: 700;
             color: #1e293b;
         }
-        
+
         .metric-label {
             font-size: 12px;
             color: #64748b;
@@ -164,13 +168,13 @@
             letter-spacing: 0.5px;
             font-weight: 500;
         }
-        
+
         /* Table styling */
         .table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .table th {
             text-align: left;
             padding: 12px 16px;
@@ -181,35 +185,35 @@
             letter-spacing: 0.5px;
             border-bottom: 1px solid #e2e8f0;
         }
-        
+
         .table td {
             padding: 12px 16px;
             border-bottom: 1px solid #f1f5f9;
         }
-        
+
         .table tr:hover {
             background-color: #f8fafc;
         }
-        
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 3px;
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 3px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        
+
         /* Map controls */
         .map-controls {
             position: absolute;
@@ -224,7 +228,7 @@
             width: auto;
             max-width: 90%;
         }
-        
+
         .map-control {
             background: white;
             color: #334155;
@@ -238,13 +242,14 @@
             font-size: 12px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
-        
+
         .map-control:hover {
             background: #f8fafc;
             border-color: #94a3b8;
         }
-        
-        .map-control select, .map-control input {
+
+        .map-control select,
+        .map-control input {
             background: transparent;
             color: #334155;
             border: none;
@@ -252,12 +257,12 @@
             max-width: 120px;
             font-size: 12px;
         }
-        
+
         .map-control select option {
             background: white;
             color: #334155;
         }
-        
+
         .map-control button {
             background: #3b82f6;
             color: white;
@@ -268,17 +273,17 @@
             transition: all 0.2s ease;
             font-size: 11px;
         }
-        
+
         .map-control button:hover {
             background: #2563eb;
         }
-        
+
         /* Dropdown styles */
         .dropdown {
             position: relative;
             display: inline-block;
         }
-        
+
         .dropdown-content {
             display: none;
             position: absolute;
@@ -293,61 +298,45 @@
             margin-bottom: 8px;
             border: 1px solid #e2e8f0;
         }
-        
+
         .dropdown:hover .dropdown-content {
             display: block;
             animation: fadeInUp 0.2s ease;
         }
-        
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
-        /* Voice assistant */
-        .voice-btn {
+
+        /* Voice guidance indicator */
+        .voice-indicator {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: #3b82f6;
+            background: #10b981;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
             transition: all 0.2s ease;
             border: none;
             color: white;
         }
-        
-        .voice-btn:hover {
+
+        .voice-indicator:hover {
             transform: scale(1.05);
-            box-shadow: 0 6px 10px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 6px 10px rgba(16, 185, 129, 0.4);
         }
-        
-        .voice-btn.listening {
-            animation: pulse 1.5s infinite;
-            background: #ef4444;
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
-        }
-        
+
         /* Notification system */
         .notification {
             position: fixed;
@@ -363,23 +352,23 @@
             transition: transform 0.3s ease;
             max-width: 350px;
         }
-        
+
         .notification.show {
             transform: translateX(0);
         }
-        
+
         .notification.success {
             border-left-color: #10b981;
         }
-        
+
         .notification.error {
             border-left-color: #ef4444;
         }
-        
+
         .notification.warning {
             border-left-color: #f59e0b;
         }
-        
+
         /* Loading animation */
         .loading {
             display: inline-block;
@@ -390,43 +379,45 @@
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
             #map {
                 height: 60vh;
             }
-            
+
             .mobile-hidden {
                 display: none;
             }
-            
+
             .mobile-full {
                 width: 100%;
             }
-            
+
             .map-controls {
                 flex-direction: row;
                 align-items: center;
                 gap: 6px;
                 max-width: 95%;
             }
-            
+
             .card {
                 margin: 0 -8px;
                 border-radius: 0;
             }
-            
+
             .map-control {
                 padding: 5px 8px;
                 font-size: 11px;
             }
         }
-        
+
         /* Leaflet Routing Machine customization */
         .leaflet-routing-container {
             background: white;
@@ -436,60 +427,59 @@
             border: 1px solid #e2e8f0;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-        
+
         .leaflet-routing-alt {
             max-height: 180px;
         }
-        
-        .leaflet-routing-alt h2, 
+
+        .leaflet-routing-alt h2,
         .leaflet-routing-alt h3 {
             color: #334155;
         }
-        
+
         .leaflet-routing-alt table {
             color: #334155;
         }
-        
+
         .leaflet-routing-alt table tr:hover {
             background-color: #f8fafc;
         }
-        
+
         .leaflet-routing-collapse-btn {
             color: #334155;
         }
-        
+
         .leaflet-routing-geocoders input {
             background: white;
             color: #334155;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
         }
-        
+
         .leaflet-routing-geocoders input:focus {
             background: white;
             color: #334155;
             border-color: #3b82f6;
         }
-        
+
         .leaflet-routing-geocoders button {
             background: #3b82f6;
             color: white;
             border-radius: 4px;
         }
-        
+
         .leaflet-routing-geocoders button:hover {
             background: #2563eb;
         }
     </style>
 </head>
+
 <body class="min-h-screen bg-gray-50">
-    <!-- Voice Assistant -->
-    <div class="voice-assistant fixed bottom-6 right-6 z-50">
-        <button id="voiceBtn" class="voice-btn">
-            <i data-lucide="mic" class="w-5 h-5"></i>
-        </button>
+    <!-- Voice Guidance Indicator -->
+    <div class="voice-indicator fixed bottom-6 right-6 z-50">
+        <i data-lucide="volume-2" class="w-5 h-5"></i>
     </div>
-    
+
     <!-- Notification -->
     <div id="notification" class="notification">
         <div class="flex items-start">
@@ -508,7 +498,7 @@
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
                         <div class="w-12 h-12 rounded-lg bg-white bg-opacity-10 flex items-center justify-center mr-4">
-                            <i data-lucide="satellite" class="w-6 h-6 text-white"></i>
+                            <i data-lucide="truck" class="w-6 h-6 text-white"></i>
                         </div>
                         <div>
                             <h1 class="text-2xl font-bold text-white">Transit Tracker Pro</h1>
@@ -521,16 +511,11 @@
                             <span class="status-indicator status-inactive" id="statusIndicator"></span>
                             <span id="statusText" class="text-sm font-medium text-white">Not Tracking</span>
                         </div>
-                        
-                        <!-- User Menu -->
-                        <div class="relative">
-                           
-                        </div>
                     </div>
                 </div>
             </div>
         </header>
-        
+
         <!-- Business Metrics -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="metric-card">
@@ -550,7 +535,7 @@
                 <div class="metric-label">Fuel Efficiency</div>
             </div>
         </div>
-        
+
         <!-- Main Content Area -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Map Container -->
@@ -563,15 +548,11 @@
                                 <i data-lucide="play" class="w-4 h-4 mr-2"></i>
                                 Start Tracking
                             </button>
-                            <button id="centerBtn" class="btn-secondary py-2 px-4 text-sm flex items-center">
-                                <i data-lucide="crosshair" class="w-4 h-4 mr-2"></i>
-                                Center
-                            </button>
                         </div>
                     </div>
                     <div class="relative">
                         <div id="map"></div>
-                        
+
                         <!-- Map Controls -->
                         <div class="map-controls">
                             <!-- Map Type Selector -->
@@ -582,7 +563,7 @@
                                     <option value="satellite">Satellite</option>
                                 </select>
                             </div>
-                            
+
                             <!-- Destination Search -->
                             <div class="dropdown">
                                 <div class="map-control cursor-pointer">
@@ -593,20 +574,26 @@
                                 <div class="dropdown-content">
                                     <div class="text-sm mb-3 font-medium text-gray-800">Set Destination</div>
                                     <div class="relative mb-3">
-                                        <input type="text" id="destinationInput" placeholder="Search destination" class="w-full form-input p-2 text-sm">
+                                        <input type="text" id="destinationInput" placeholder="Search destination"
+                                            class="w-full form-input p-2 text-sm">
                                     </div>
                                     <div class="flex mb-3">
-                                        <button id="setDestinationBtn" class="w-full btn-primary py-2 rounded text-sm font-medium">Set Destination</button>
+                                        <button id="setDestinationBtn"
+                                            class="w-full btn-primary py-2 rounded text-sm font-medium">Set
+                                            Destination</button>
                                     </div>
                                     <div class="text-xs text-gray-500 mb-2">Popular destinations:</div>
                                     <div class="flex flex-wrap gap-2">
-                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs" data-destination="Airport">Airport</button>
-                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs" data-destination="City Center">City Center</button>
-                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs" data-destination="Warehouse">Warehouse</button>
+                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                            data-destination="Airport">Airport</button>
+                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                            data-destination="City Center">City Center</button>
+                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                            data-destination="Warehouse">Warehouse</button>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Share Location -->
                             <div class="dropdown">
                                 <div class="map-control cursor-pointer">
@@ -617,15 +604,18 @@
                                 <div class="dropdown-content">
                                     <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
                                     <div class="flex mb-3">
-                                        <input type="text" id="whatsappNumber" placeholder="Phone number" class="flex-grow form-input rounded-l p-2 text-sm">
+                                        <input type="text" id="whatsappNumber" placeholder="Phone number"
+                                            class="flex-grow form-input rounded-l p-2 text-sm">
                                         <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
                                             <i data-lucide="send" class="w-3 h-3"></i>
                                         </button>
                                     </div>
                                     <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
                                     <div class="flex flex-wrap gap-2">
-                                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs" data-number="+255123456789">Manager</button>
-                                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs" data-number="+255987654321">Dispatch</button>
+                                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                            data-number="+255123456789">Manager</button>
+                                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                            data-number="+255987654321">Dispatch</button>
                                     </div>
                                 </div>
                             </div>
@@ -633,7 +623,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Controls Panel -->
             <div class="space-y-6">
                 <!-- Transit Info -->
@@ -641,11 +631,14 @@
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Transit Information</h2>
                     <div class="space-y-4">
                         <div>
-                            <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit Name</label>
-                            <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1" value="Delivery Truck #1245">
+                            <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit
+                                Name</label>
+                            <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1"
+                                value="Delivery Truck #1245">
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit Type</label>
+                            <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit
+                                Type</label>
                             <select id="transitType" class="w-full form-select p-2 text-sm mt-1">
                                 <option value="truck">Delivery Truck</option>
                                 <option value="van">Delivery Van</option>
@@ -667,31 +660,35 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Tracking Controls -->
                 <div class="card p-4">
                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Tracking Controls</h2>
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-3">
-                            <button id="clearRouteBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            <button id="clearRouteBtn"
+                                class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
                                 <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
                                 Clear Route
                             </button>
-                            <button id="saveRouteBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            <button id="saveRouteBtn"
+                                class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
                                 <i data-lucide="save" class="w-4 h-4 mr-2"></i>
                                 Save Route
                             </button>
                         </div>
-                        
+
                         <div class="pt-2 border-t border-gray-200">
                             <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
                             <div class="space-y-3">
                                 <div class="flex items-center">
-                                    <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded" checked>
+                                    <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                                        checked>
                                     <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded" checked>
+                                    <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                                        checked>
                                     <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
                                 </div>
                                 <div class="flex items-center">
@@ -699,7 +696,8 @@
                                     <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded" checked>
+                                    <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                                        checked>
                                     <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
                                 </div>
                             </div>
@@ -708,7 +706,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Location Details and Route History -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Location Details -->
@@ -741,7 +739,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Route History -->
             <div class="card p-4">
                 <div class="flex justify-between items-center mb-4">
@@ -760,10 +758,12 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Map Attribution -->
         <div class="mt-6 text-center text-gray-500 text-xs">
-            Map data © <a href="https://www.openstreetmap.org/" class="text-blue-600 hover:text-blue-800 transition-colors" target="_blank">OpenStreetMap</a> contributors
+            Map data © <a href="https://www.openstreetmap.org/"
+                class="text-blue-600 hover:text-blue-800 transition-colors" target="_blank">OpenStreetMap</a>
+            contributors
         </div>
     </div>
 
@@ -771,11 +771,11 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Leaflet Routing Machine JS -->
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-    
+
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
-        
+
         // App state
         const state = {
             isTracking: false,
@@ -803,31 +803,31 @@
             suggestions: [],
             suggestionTimeout: null,
             speechSynthesis: window.speechSynthesis,
-            speechRecognition: null,
-            isListening: false,
             savedRoutes: [],
             averageSpeed: 0,
             transitStartTime: null,
-            transitTimer: null
+            transitTimer: null,
+            lastVoiceGuidance: null,
+            voiceGuidanceInterval: null
         };
 
         // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initMap();
             setupEventListeners();
             checkGeolocationSupport();
             updateTransitInfo();
-            initVoiceRecognition();
+            initVoiceGuidance();
         });
 
         // Initialize Leaflet Map with OpenStreetMap tiles
         function initMap() {
             // Default center (Dar es Salaam, Tanzania)
             const defaultCenter = [-6.7924, 39.2083];
-            
+
             // Create map
             state.map = L.map('map').setView(defaultCenter, 13);
-            
+
             // Define map layers
             state.mapLayers = {
                 standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -839,13 +839,13 @@
                     maxZoom: 19
                 })
             };
-            
+
             // Add default layer
             state.mapLayers.standard.addTo(state.map);
-            
+
             // Create initial marker with custom icon based on transit type
             updateMarkerIcon();
-            
+
             // Initialize accuracy circle
             state.accuracyCircle = L.circle(defaultCenter, {
                 color: '#3b82f6',
@@ -853,7 +853,7 @@
                 fillOpacity: 0.1,
                 radius: 0
             }).addTo(state.map);
-            
+
             // Initialize polyline for route tracking
             state.polyline = L.polyline([], {
                 color: '#3b82f6',
@@ -863,94 +863,71 @@
             }).addTo(state.map);
         }
 
-        // Initialize voice recognition
-        function initVoiceRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                state.speechRecognition = new SpeechRecognition();
-                state.speechRecognition.continuous = false;
-                state.speechRecognition.interimResults = false;
-                state.speechRecognition.lang = 'en-US';
-                
-                state.speechRecognition.onstart = function() {
-                    state.isListening = true;
-                    document.getElementById('voiceBtn').classList.add('listening');
-                    showNotification('Voice Assistant', 'Listening...', 'info');
-                };
-                
-                state.speechRecognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript.toLowerCase();
-                    processVoiceCommand(transcript);
-                };
-                
-                state.speechRecognition.onerror = function(event) {
-                    console.error('Speech recognition error', event.error);
-                    state.isListening = false;
-                    document.getElementById('voiceBtn').classList.remove('listening');
-                    showNotification('Voice Assistant', 'Error: ' + event.error, 'error');
-                };
-                
-                state.speechRecognition.onend = function() {
-                    state.isListening = false;
-                    document.getElementById('voiceBtn').classList.remove('listening');
-                };
-            } else {
-                console.warn('Speech recognition not supported');
-                document.getElementById('voiceBtn').style.display = 'none';
+        // Initialize voice guidance
+        function initVoiceGuidance() {
+            if (!state.speechSynthesis) {
+                console.warn('Speech synthesis not supported');
+                document.getElementById('voiceGuidance').disabled = true;
+                document.querySelector('.voice-indicator').style.display = 'none';
             }
         }
 
-        // Process voice commands
-        function processVoiceCommand(command) {
-            showNotification('Voice Command', `Heard: "${command}"`, 'info');
-            
-            if (command.includes('start tracking') || command.includes('begin tracking')) {
-                if (!state.isTracking) {
-                    startTracking();
-                    speak("Tracking started. Your transit is now being monitored.");
-                } else {
-                    speak("Tracking is already active.");
-                }
-            } else if (command.includes('stop tracking') || command.includes('end tracking')) {
-                if (state.isTracking) {
-                    stopTracking();
-                    speak("Tracking stopped.");
-                } else {
-                    speak("Tracking is not active.");
-                }
-            } else if (command.includes('center map') || command.includes('center')) {
-                centerMap();
-                speak("Map centered on your location.");
-            } else if (command.includes('clear route') || command.includes('clear path')) {
-                clearRoute();
-                speak("Route cleared.");
-            } else if (command.includes('where am i') || command.includes('my location')) {
-                if (state.lastPosition) {
-                    speak(`You are at latitude ${state.lastPosition[0].toFixed(4)}, longitude ${state.lastPosition[1].toFixed(4)}`);
-                } else {
-                    speak("Your location is not available. Please start tracking first.");
-                }
-            } else if (command.includes('navigate to') || command.includes('set destination to')) {
-                const destination = command.replace('navigate to', '').replace('set destination to', '').trim();
-                if (destination) {
-                    document.getElementById('destinationInput').value = destination;
-                    setDestination();
-                    speak(`Setting destination to ${destination}`);
-                }
-            } else if (command.includes('help') || command.includes('what can i say')) {
-                speak("You can say: Start tracking, Stop tracking, Center map, Clear route, Where am I, or Navigate to followed by a destination.");
-            } else {
-                speak("Sorry, I didn't understand that command. Try saying 'Help' for a list of commands.");
-            }
-        }
-
-        // Text-to-speech function
-        function speak(text) {
+        // Text-to-speech function for voice guidance
+        function speak(text, priority = 'normal') {
             if (state.speechSynthesis && document.getElementById('voiceGuidance').checked) {
+                // Don't interrupt high priority messages
+                if (priority === 'normal' && state.speechSynthesis.speaking) {
+                    return;
+                }
+
+                // Cancel any ongoing speech
+                state.speechSynthesis.cancel();
+
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1.0;
+                utterance.rate = 0.9;
                 utterance.pitch = 1.0;
                 state.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Provide real-time voice guidance for navigation
+        function provideVoiceGuidance() {
+            if (!state.routingControl || !state.lastPosition) return;
+
+            // Get route instructions
+            const route = state.routingControl.getRoute();
+            if (!route || !route.instructions) return;
+
+            // Find the next instruction
+            let nextInstruction = null;
+            let distanceToNext = 0;
+
+            for (let i = 0; i < route.instructions.length; i++) {
+                const instruction = route.instructions[i];
+                if (instruction.distance > 0) {
+                    nextInstruction = instruction;
+                    distanceToNext = instruction.distance;
+                    break;
+                }
+            }
+
+            if (!nextInstruction) return;
+
+            // Convert distance to appropriate unit
+            let distanceText;
+            if (distanceToNext < 100) {
+                distanceText = `${Math.round(distanceToNext)} meters`;
+            } else {
+                distanceText = `${(distanceToNext / 1000).toFixed(1)} kilometers`;
+            }
+
+            // Create guidance message
+            const guidanceMessage = `In ${distanceText}, ${nextInstruction.text}`;
+
+            // Only speak if it's a new instruction or distance has changed significantly
+            if (state.lastVoiceGuidance !== guidanceMessage) {
+                state.lastVoiceGuidance = guidanceMessage;
+                speak(guidanceMessage, 'normal');
             }
         }
 
@@ -959,16 +936,16 @@
             const notification = document.getElementById('notification');
             const notificationTitle = document.getElementById('notificationTitle');
             const notificationMessage = document.getElementById('notificationMessage');
-            
+
             notificationTitle.textContent = title;
             notificationMessage.textContent = message;
-            
+
             // Set icon based on type
             let icon = 'info';
             if (type === 'success') icon = 'check-circle';
             if (type === 'error') icon = 'alert-circle';
             if (type === 'warning') icon = 'alert-triangle';
-            
+
             notification.innerHTML = `
                 <div class="flex items-start">
                     <i data-lucide="${icon}" class="w-5 h-5 mr-3 mt-0.5"></i>
@@ -978,15 +955,15 @@
                     </div>
                 </div>
             `;
-            
+
             // Re-initialize Lucide icons
             lucide.createIcons();
-            
+
             // Set notification type
             notification.className = 'notification';
             notification.classList.add(type);
             notification.classList.add('show');
-            
+
             // Auto-hide after 5 seconds
             setTimeout(() => {
                 notification.classList.remove('show');
@@ -996,8 +973,8 @@
         // Update marker icon based on transit type
         function updateMarkerIcon() {
             let iconName = '';
-            
-            switch(state.transitType) {
+
+            switch (state.transitType) {
                 case 'truck':
                     iconName = 'truck';
                     break;
@@ -1019,21 +996,21 @@
                 default:
                     iconName = 'map-pin';
             }
-            
+
             const customIcon = L.divIcon({
                 className: 'custom-marker',
                 html: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="${iconName}" style="width: 18px; height: 18px; color: white;"></i></div>`,
                 iconSize: [46, 46],
                 iconAnchor: [23, 23]
             });
-            
+
             if (state.marker) {
                 state.marker.setIcon(customIcon);
             } else {
                 state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
                 state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
             }
-            
+
             // Re-initialize Lucide icons for the new marker
             setTimeout(() => lucide.createIcons(), 100);
         }
@@ -1041,7 +1018,6 @@
         // Set up event listeners
         function setupEventListeners() {
             document.getElementById('trackBtn').addEventListener('click', toggleTracking);
-            document.getElementById('centerBtn').addEventListener('click', centerMap);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
             document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
             document.getElementById('exportBtn').addEventListener('click', exportData);
@@ -1050,37 +1026,23 @@
             document.getElementById('mapType').addEventListener('change', changeMapType);
             document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
             document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
-            document.getElementById('voiceBtn').addEventListener('click', toggleVoiceRecognition);
-            
+
             // Add event listeners for destination options
             document.querySelectorAll('.destination-option').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const destination = this.getAttribute('data-destination');
                     document.getElementById('destinationInput').value = destination;
                     setDestination();
                 });
             });
-            
+
             // Add event listeners for contact options
             document.querySelectorAll('.contact-option').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const number = this.getAttribute('data-number');
                     document.getElementById('whatsappNumber').value = number;
                 });
             });
-        }
-
-        // Toggle voice recognition
-        function toggleVoiceRecognition() {
-            if (state.speechRecognition) {
-                if (state.isListening) {
-                    state.speechRecognition.stop();
-                } else {
-                    state.speechRecognition.start();
-                }
-            } else {
-                showNotification('Voice Assistant', 'Speech recognition not supported in your browser', 'error');
-            }
         }
 
         // Save route
@@ -1089,10 +1051,10 @@
                 showNotification('Save Route', 'No route data to save', 'error');
                 return;
             }
-            
+
             const routeName = prompt('Enter a name for this route:');
             if (!routeName) return;
-            
+
             const routeData = {
                 name: routeName,
                 coordinates: state.pathCoordinates,
@@ -1101,65 +1063,116 @@
                 duration: state.transitStartTime ? new Date() - state.transitStartTime : 0,
                 date: new Date().toISOString()
             };
-            
+
             state.savedRoutes.push(routeData);
             showNotification('Save Route', `Route "${routeName}" saved successfully`, 'success');
         }
 
-        // Export data
+        // Export data as PDF
         function exportData() {
             if (state.pathCoordinates.length === 0) {
                 showNotification('Export Data', 'No data to export', 'error');
                 return;
             }
-            
-            const data = {
-                transitName: state.transitName,
-                transitType: state.transitType,
-                coordinates: state.pathCoordinates,
-                timestamps: state.timestamps,
-                totalDistance: state.totalDistance,
-                averageSpeed: state.averageSpeed,
-                topSpeed: state.topSpeed,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.download = `transit-data-${new Date().toISOString().slice(0, 10)}.json`;
-            link.href = url;
-            link.click();
-            
-            showNotification('Export Data', 'Data exported successfully', 'success');
+
+            // Create PDF document
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add title
+            doc.setFontSize(20);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Transit Tracker Pro - Route Report', 20, 30);
+
+            // Add transit information
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Transit Name: ${state.transitName}`, 20, 50);
+            doc.text(`Transit Type: ${state.transitType}`, 20, 60);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
+
+            // Add metrics
+            doc.setTextColor(40, 40, 40);
+            doc.text('Route Metrics:', 20, 90);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 100);
+            doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 110);
+            doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 120);
+            doc.text(`Transit Time: ${document.getElementById('transitTime').textContent}`, 20, 130);
+
+            // Add route coordinates table
+            const tableColumn = ["Time", "Latitude", "Longitude", "Speed (km/h)"];
+            const tableRows = [];
+
+            for (let i = 0; i < state.timestamps.length; i++) {
+                const timestamp = state.timestamps[i];
+                const coord = state.pathCoordinates[i];
+
+                // Calculate speed for this point (simplified)
+                let speed = 0;
+                if (i > 0) {
+                    const prevCoord = state.pathCoordinates[i - 1];
+                    const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
+                    const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
+                    if (timeDiff > 0) {
+                        speed = (distance / timeDiff) * 3.6; // km/h
+                    }
+                }
+
+                const row = [
+                    timestamp.toLocaleTimeString(),
+                    coord[0].toFixed(6),
+                    coord[1].toFixed(6),
+                    speed.toFixed(2)
+                ];
+                tableRows.push(row);
+            }
+
+            // Add table to PDF
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 150,
+                theme: 'grid',
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [59, 130, 246] }
+            });
+
+            // Save the PDF
+            doc.save(`transit-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+
+            showNotification('Export Data', 'PDF report generated successfully', 'success');
         }
 
         // Set destination and calculate route
         function setDestination() {
             const destinationInput = document.getElementById('destinationInput').value.trim();
-            
+
             if (!destinationInput) {
                 showNotification('Set Destination', 'Please enter a destination.', 'error');
                 return;
             }
-            
+
             if (!state.lastPosition) {
                 showNotification('Set Destination', 'Please start tracking to get your current location first.', 'error');
                 return;
             }
-            
+
             // Remove existing routing control if any
             if (state.routingControl) {
                 state.map.removeControl(state.routingControl);
             }
-            
+
             // Remove existing destination marker if any
             if (state.destinationMarker) {
                 state.map.removeLayer(state.destinationMarker);
             }
-            
+
+            // Clear previous voice guidance interval
+            if (state.voiceGuidanceInterval) {
+                clearInterval(state.voiceGuidanceInterval);
+            }
+
             // Create routing control
             state.routingControl = L.Routing.control({
                 waypoints: [
@@ -1171,7 +1184,7 @@
                 lineOptions: {
                     styles: [{ color: '#3b82f6', weight: 5 }]
                 },
-                createMarker: function(i, waypoint, n) {
+                createMarker: function (i, waypoint, n) {
                     if (i === 0) {
                         // Don't create marker for start point (we already have one)
                         return null;
@@ -1185,40 +1198,43 @@
                             iconAnchor: [19, 19]
                         })
                     }).addTo(state.map);
-                    
+
                     state.destinationMarker.bindPopup(`<b>Destination</b><br>${destinationInput}`).openPopup();
-                    
+
                     return state.destinationMarker;
                 }
             }).addTo(state.map);
-            
+
             // Geocode the destination
             const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinationInput)}`;
-            
+
             fetch(geocodeUrl)
                 .then(response => response.json())
                 .then(data => {
                     if (data && data.length > 0) {
                         const destination = data[0];
                         const destLatLng = L.latLng(destination.lat, destination.lon);
-                        
+
                         // Update routing waypoints
                         state.routingControl.setWaypoints([
                             L.latLng(state.lastPosition[0], state.lastPosition[1]),
                             destLatLng
                         ]);
-                        
+
                         // Store destination
                         state.destination = {
                             name: destinationInput,
                             latLng: destLatLng
                         };
-                        
+
                         showNotification('Set Destination', `Route to ${destinationInput} calculated.`, 'success');
-                        
-                        // Voice guidance
+
+                        // Start voice guidance
                         if (document.getElementById('voiceGuidance').checked) {
-                            speak(`Route to ${destinationInput} calculated. Follow the highlighted path.`);
+                            speak(`Route to ${destinationInput} calculated. Follow the highlighted path.`, 'high');
+
+                            // Set up periodic voice guidance
+                            state.voiceGuidanceInterval = setInterval(provideVoiceGuidance, 10000);
                         }
                     } else {
                         showNotification('Set Destination', 'Destination not found. Please try a different location.', 'error');
@@ -1233,41 +1249,41 @@
         // Share location via WhatsApp
         function shareLocationViaWhatsApp() {
             const phoneNumber = document.getElementById('whatsappNumber').value.trim();
-            
+
             if (!phoneNumber) {
                 showNotification('Share Location', 'Please enter a phone number.', 'error');
                 return;
             }
-            
+
             if (!state.lastPosition) {
                 showNotification('Share Location', 'No location data available. Start tracking first.', 'error');
                 return;
             }
-            
+
             // Format phone number (remove any non-digit characters)
             const formattedNumber = phoneNumber.replace(/\D/g, '');
-            
+
             // Create message with location
             const message = `My current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
-            
+
             // Create WhatsApp URL
             const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
-            
+
             // Open WhatsApp in a new tab
             window.open(whatsappUrl, '_blank');
-            
+
             showNotification('Share Location', 'WhatsApp sharing initiated.', 'success');
         }
 
         // Change map type
         function changeMapType() {
             const mapType = document.getElementById('mapType').value;
-            
+
             // Remove current layer
             if (state.currentMapType && state.mapLayers[state.currentMapType]) {
                 state.map.removeLayer(state.mapLayers[state.currentMapType]);
             }
-            
+
             // Add new layer
             state.mapLayers[mapType].addTo(state.map);
             state.currentMapType = mapType;
@@ -1290,8 +1306,8 @@
         function updateTransitInfo() {
             let description = '';
             let iconName = '';
-            
-            switch(state.transitType) {
+
+            switch (state.transitType) {
                 case 'truck':
                     description = 'Delivery Truck Service';
                     iconName = 'truck';
@@ -1317,8 +1333,6 @@
                     iconName = 'package';
                     break;
             }
-            
-            document.getElementById('transitDescription').textContent = description;
         }
 
         // Check if geolocation is supported
@@ -1346,7 +1360,7 @@
             }
 
             const highAccuracy = document.getElementById('highAccuracy').checked;
-            
+
             const options = {
                 enableHighAccuracy: highAccuracy,
                 timeout: 10000,
@@ -1362,28 +1376,28 @@
             state.isTracking = true;
             state.startTime = new Date();
             state.transitStartTime = new Date();
-            
+
             // Start tracking timer
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
-            
+
             const trackBtn = document.getElementById('trackBtn');
             trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>Stop Tracking';
             trackBtn.classList.remove('btn-primary');
             trackBtn.classList.add('btn-danger');
-            
+
             // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-active';
             document.getElementById('statusText').textContent = 'Tracking Active';
             document.getElementById('transitStatus').textContent = 'In Transit';
-            
+
             // Re-initialize Lucide icons
             lucide.createIcons();
-            
+
             showNotification('Tracking', 'Tracking started. Your transit is now being monitored.', 'success');
-            
+
             // Voice guidance
             if (document.getElementById('voiceGuidance').checked) {
-                speak("Tracking started. Your transit is now being monitored.");
+                speak("Tracking started. Your transit is now being monitored.", 'high');
             }
         }
 
@@ -1393,36 +1407,41 @@
                 navigator.geolocation.clearWatch(state.watchId);
                 state.watchId = null;
             }
-            
+
             if (state.trackingInterval) {
                 clearInterval(state.trackingInterval);
                 state.trackingInterval = null;
             }
-            
+
             if (state.transitTimer) {
                 clearInterval(state.transitTimer);
                 state.transitTimer = null;
             }
-            
+
+            if (state.voiceGuidanceInterval) {
+                clearInterval(state.voiceGuidanceInterval);
+                state.voiceGuidanceInterval = null;
+            }
+
             state.isTracking = false;
             const trackBtn = document.getElementById('trackBtn');
             trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Tracking';
             trackBtn.classList.remove('btn-danger');
             trackBtn.classList.add('btn-primary');
-            
+
             // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-inactive';
             document.getElementById('statusText').textContent = 'Not Tracking';
             document.getElementById('transitStatus').textContent = 'Stopped';
-            
+
             // Re-initialize Lucide icons
             lucide.createIcons();
-            
+
             showNotification('Tracking', 'Tracking stopped.', 'info');
-            
+
             // Voice guidance
             if (document.getElementById('voiceGuidance').checked) {
-                speak("Tracking stopped.");
+                speak("Tracking stopped.", 'high');
             }
         }
 
@@ -1435,7 +1454,7 @@
             const heading = position.coords.heading;
             const altitude = position.coords.altitude;
             const timestamp = new Date(position.timestamp);
-            
+
             // Update location display
             document.getElementById('latitude').textContent = lat.toFixed(6);
             document.getElementById('longitude').textContent = lng.toFixed(6);
@@ -1444,27 +1463,27 @@
             document.getElementById('heading').textContent = heading ? `${heading.toFixed(0)}°` : '--';
             document.getElementById('lastUpdate').textContent = timestamp.toLocaleTimeString();
             document.getElementById('transitUpdate').textContent = timestamp.toLocaleTimeString();
-            
+
             // Update speed
             if (speed) {
                 state.currentSpeed = speed * 3.6; // Convert to km/h
-                
+
                 // Update top speed
                 if (state.currentSpeed > state.topSpeed) {
                     state.topSpeed = state.currentSpeed;
                 }
             }
-            
+
             // Create new position object
             const newPosition = [lat, lng];
-            
+
             // Update marker position
             state.marker.setLatLng(newPosition);
-            
+
             // Update accuracy circle
             state.accuracyCircle.setLatLng(newPosition);
             state.accuracyCircle.setRadius(accuracy);
-            
+
             // Update marker popup
             state.marker.bindPopup(`
                 <b>${state.transitName}</b><br>
@@ -1472,12 +1491,12 @@
                 Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
                 Last Update: ${timestamp.toLocaleTimeString()}
             `);
-            
+
             // Center map on new position if auto-center is enabled
             if (state.isTracking && document.getElementById('autoCenter').checked) {
                 state.map.setView(newPosition, state.map.getZoom());
             }
-            
+
             // Add to path and update polyline
             if (state.lastPosition) {
                 // Calculate distance between points
@@ -1486,29 +1505,34 @@
                     lat, lng
                 );
                 state.totalDistance += distance;
-                
+
                 // Update metrics
                 updateMetrics();
-                
+
                 // Calculate ETA (simplified calculation)
                 updateETA();
             }
-            
+
             state.pathCoordinates.push(newPosition);
             state.timestamps.push(timestamp);
             state.polyline.setLatLngs(state.pathCoordinates);
-            
+
             // Add to route history
             addToRouteHistory(newPosition, timestamp);
-            
+
             // Update routing if destination is set
             if (state.routingControl && state.lastPosition) {
                 state.routingControl.setWaypoints([
                     L.latLng(newPosition[0], newPosition[1]),
                     state.routingControl.getWaypoints()[1]
                 ]);
+
+                // Provide voice guidance if enabled
+                if (document.getElementById('voiceGuidance').checked) {
+                    provideVoiceGuidance();
+                }
             }
-            
+
             // Store last position
             state.lastPosition = newPosition;
         }
@@ -1517,7 +1541,7 @@
         function updateMetrics() {
             // Update distance traveled
             document.getElementById('distanceTraveled').textContent = `${(state.totalDistance / 1000).toFixed(2)} km`;
-            
+
             // Update average speed
             if (state.timestamps.length > 1) {
                 const timeDiff = (state.timestamps[state.timestamps.length - 1] - state.timestamps[0]) / 1000; // in seconds
@@ -1526,7 +1550,7 @@
                     document.getElementById('averageSpeed').textContent = `${state.averageSpeed.toFixed(2)} km/h`;
                 }
             }
-            
+
             // Update fuel efficiency (simplified calculation)
             if (state.transitType === 'truck' || state.transitType === 'van' || state.transitType === 'car') {
                 const fuelEfficiency = state.totalDistance > 0 ? (state.totalDistance / 1000) / (state.totalDistance / 100000) * 0.1 : 0;
@@ -1547,12 +1571,12 @@
         // Add point to route history
         function addToRouteHistory(position, timestamp) {
             const routeHistory = document.getElementById('routeHistory');
-            
+
             // Clear placeholder if it exists
             if (routeHistory.querySelector('.text-center')) {
                 routeHistory.innerHTML = '';
             }
-            
+
             const historyItem = document.createElement('div');
             historyItem.className = 'py-3 border-b border-gray-200';
             historyItem.innerHTML = `
@@ -1564,9 +1588,9 @@
                     <div class="text-xs text-gray-500 font-medium">${state.currentSpeed.toFixed(1)} km/h</div>
                 </div>
             `;
-            
+
             routeHistory.appendChild(historyItem);
-            
+
             // Scroll to bottom
             routeHistory.scrollTop = routeHistory.scrollHeight;
         }
@@ -1579,10 +1603,10 @@
             const Δφ = (lat2 - lat1) * Math.PI / 180;
             const Δλ = (lon2 - lon1) * Math.PI / 180;
 
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
             return R * c;
         }
@@ -1592,31 +1616,21 @@
             if (state.startTime) {
                 const now = new Date();
                 const diff = now - state.startTime;
-                
+
                 const hours = Math.floor(diff / 3600000);
                 const minutes = Math.floor((diff % 3600000) / 60000);
                 const seconds = Math.floor((diff % 60000) / 1000);
-                
-                document.getElementById('transitTime').textContent = 
-                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-        }
 
-        // Center map on current location
-        function centerMap() {
-            if (state.lastPosition) {
-                state.map.setView(state.lastPosition, state.map.getZoom());
-                showNotification('Map Control', 'Map centered on current location.', 'info');
-            } else {
-                showNotification('Map Control', 'No location data available. Start tracking first.', 'error');
+                document.getElementById('transitTime').textContent =
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }
 
         // Handle geolocation errors
         function handleGeolocationError(error) {
             let message = '';
-            
-            switch(error.code) {
+
+            switch (error.code) {
                 case error.PERMISSION_DENIED:
                     message = 'Location access denied. Please enable location permissions in your browser settings.';
                     break;
@@ -1630,7 +1644,7 @@
                     message = 'An unknown error occurred while retrieving your location.';
                     break;
             }
-            
+
             showNotification('Geolocation Error', message, 'error');
             stopTracking();
         }
@@ -1652,7 +1666,7 @@
         function refreshRouteHistory() {
             const routeHistory = document.getElementById('routeHistory');
             routeHistory.innerHTML = '';
-            
+
             if (state.pathCoordinates.length === 0) {
                 routeHistory.innerHTML = `
                     <div class="text-gray-400 text-center py-8 flex flex-col items-center">
@@ -1666,4 +1680,5 @@
         }
     </script>
 </body>
+
 </html>
