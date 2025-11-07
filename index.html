@@ -154,7 +154,7 @@
         
         /* Map styles */
         #map {
-            height: 60vh;
+            height: 70vh;
             width: 100%;
             z-index: 1;
             border-radius: 16px;
@@ -162,21 +162,6 @@
             box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Stats card styles */
-        .stat-card {
-            background: linear-gradient(135deg, rgba(120, 119, 198, 0.2) 0%, rgba(91, 89, 166, 0.2) 100%);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(120, 119, 198, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            background: linear-gradient(135deg, rgba(120, 119, 198, 0.3) 0%, rgba(91, 89, 166, 0.3) 100%);
-            border-color: rgba(120, 119, 198, 0.3);
-            transform: translateY(-2px);
         }
         
         /* Status indicator */
@@ -251,11 +236,15 @@
         .map-controls {
             position: absolute;
             bottom: 16px;
-            left: 16px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 1000;
             display: flex;
-            gap: 12px;
+            gap: 8px;
             flex-wrap: wrap;
+            justify-content: center;
+            width: auto;
+            max-width: 90%;
         }
         
         .map-control {
@@ -263,13 +252,14 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
+            padding: 6px 10px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
+            font-size: 12px;
         }
         
         .map-control:hover {
@@ -282,7 +272,8 @@
             color: white;
             border: none;
             outline: none;
-            max-width: 150px;
+            max-width: 120px;
+            font-size: 12px;
         }
         
         .map-control select option {
@@ -294,10 +285,11 @@
             background: linear-gradient(135deg, #7877c6 0%, #5b59a6 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
+            border-radius: 6px;
+            padding: 4px 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 11px;
         }
         
         .map-control button:hover {
@@ -317,11 +309,11 @@
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            min-width: 240px;
+            min-width: 200px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             z-index: 1001;
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 12px;
             bottom: 100%;
             left: 0;
             margin-bottom: 8px;
@@ -349,7 +341,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
@@ -360,9 +352,9 @@
         
         .route-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            margin: 0 -16px;
-            padding: 12px 16px;
-            border-radius: 8px;
+            margin: 0 -12px;
+            padding: 10px 12px;
+            border-radius: 6px;
         }
         
         /* Transit icon */
@@ -381,17 +373,17 @@
         
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         
         ::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
+            border-radius: 3px;
         }
         
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #7877c6 0%, #5b59a6 100%);
-            border-radius: 4px;
+            border-radius: 3px;
         }
         
         ::-webkit-scrollbar-thumb:hover {
@@ -401,7 +393,7 @@
         /* Mobile optimizations */
         @media (max-width: 768px) {
             #map {
-                height: 50vh;
+                height: 65vh;
             }
             
             .mobile-hidden {
@@ -413,18 +405,20 @@
             }
             
             .map-controls {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            
-            .map-controls > * {
-                margin-bottom: 0;
+                flex-direction: row;
+                align-items: center;
+                gap: 6px;
+                max-width: 95%;
             }
             
             .glass-card {
                 margin: 0 -8px;
                 border-radius: 12px;
+            }
+            
+            .map-control {
+                padding: 5px 8px;
+                font-size: 11px;
             }
         }
         
@@ -459,13 +453,13 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             color: white;
-            width: 320px;
-            border-radius: 12px;
+            width: 280px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .leaflet-routing-alt {
-            max-height: 200px;
+            max-height: 180px;
         }
         
         .leaflet-routing-alt h2, 
@@ -489,7 +483,7 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            border-radius: 6px;
         }
         
         .leaflet-routing-geocoders input:focus {
@@ -501,7 +495,7 @@
         .leaflet-routing-geocoders button {
             background: linear-gradient(135deg, #7877c6 0%, #5b59a6 100%);
             color: white;
-            border-radius: 8px;
+            border-radius: 6px;
         }
         
         .leaflet-routing-geocoders button:hover {
@@ -511,8 +505,8 @@
         /* Loading animation */
         .loading {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #7877c6;
@@ -549,19 +543,20 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             width: 100%;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1002;
             margin-top: 4px;
         }
         
         .suggestion-item {
-            padding: 10px 12px;
+            padding: 8px 10px;
             cursor: pointer;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.2s ease;
+            font-size: 12px;
         }
         
         .suggestion-item:hover {
@@ -570,29 +565,6 @@
         
         .suggestion-item:last-child {
             border-bottom: none;
-        }
-        
-        /* Map info panel */
-        .map-info-panel {
-            position: absolute;
-            bottom: 16px;
-            right: 16px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .map-info-item {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 12px;
-            font-weight: 500;
         }
     </style>
 </head>
@@ -654,38 +626,6 @@
             </div>
         </div>
         
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat-card p-4 rounded-2xl shadow-lg text-white">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-xs font-medium text-gray-300 uppercase tracking-wide">Distance</div>
-                    <i data-lucide="route" class="w-4 h-4 text-gray-300"></i>
-                </div>
-                <div class="text-2xl font-bold" id="distanceTraveled">0.00 km</div>
-            </div>
-            <div class="stat-card p-4 rounded-2xl shadow-lg text-white">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-xs font-medium text-gray-300 uppercase tracking-wide">Speed</div>
-                    <i data-lucide="gauge" class="w-4 h-4 text-gray-300"></i>
-                </div>
-                <div class="text-2xl font-bold" id="currentSpeed">0.00 km/h</div>
-            </div>
-            <div class="stat-card p-4 rounded-2xl shadow-lg text-white">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-xs font-medium text-gray-300 uppercase tracking-wide">Time</div>
-                    <i data-lucide="clock" class="w-4 h-4 text-gray-300"></i>
-                </div>
-                <div class="text-2xl font-bold" id="trackingTime">00:00:00</div>
-            </div>
-            <div class="stat-card p-4 rounded-2xl shadow-lg text-white">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-xs font-medium text-gray-300 uppercase tracking-wide">ETA</div>
-                    <i data-lucide="flag" class="w-4 h-4 text-gray-300"></i>
-                </div>
-                <div class="text-2xl font-bold" id="eta">--:--</div>
-            </div>
-        </div>
-        
         <!-- Map and Controls -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <!-- Map Container -->
@@ -696,9 +636,9 @@
                 <div class="map-controls">
                     <!-- Map Type Selector -->
                     <div class="map-control">
-                        <i data-lucide="map" class="w-4 h-4 text-gray-300"></i>
+                        <i data-lucide="map" class="w-3 h-3 text-gray-300"></i>
                         <select id="mapType">
-                            <option value="standard">Standard Map</option>
+                            <option value="standard">Standard</option>
                             <option value="satellite">Satellite</option>
                         </select>
                     </div>
@@ -706,9 +646,9 @@
                     <!-- Destination Search -->
                     <div class="dropdown">
                         <div class="map-control cursor-pointer">
-                            <i data-lucide="map-pin" class="w-4 h-4 text-gray-300"></i>
+                            <i data-lucide="map-pin" class="w-3 h-3 text-gray-300"></i>
                             <span>Destination</span>
-                            <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
                         </div>
                         <div class="dropdown-content">
                             <div class="text-sm mb-3 font-medium">Set Destination</div>
@@ -740,15 +680,15 @@
                     <!-- WhatsApp Sharing Dropdown -->
                     <div class="dropdown">
                         <div class="map-control cursor-pointer">
-                            <i data-lucide="message-circle" class="w-4 h-4 text-gray-300"></i>
-                            <span>Share Location</span>
-                            <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            <i data-lucide="message-circle" class="w-3 h-3 text-gray-300"></i>
+                            <span>Share</span>
+                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
                         </div>
                         <div class="dropdown-content">
-                            <div class="text-sm mb-3 font-medium">Share Live Location via WhatsApp</div>
+                            <div class="text-sm mb-3 font-medium">Share Location via WhatsApp</div>
                             <div class="flex mb-3">
                                 <input type="text" id="whatsappNumber" placeholder="Phone number" class="flex-grow glass-input text-white rounded-l-lg p-2 text-sm">
-                                <button id="shareWhatsAppBtn" class="glass-button text-white px-4 rounded-r-lg text-sm">
+                                <button id="shareWhatsAppBtn" class="glass-button text-white px-3 rounded-r-lg text-sm">
                                     <i data-lucide="send" class="w-3 h-3"></i>
                                 </button>
                             </div>
@@ -765,16 +705,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Map Info Panel -->
-                <div class="map-info-panel">
-                    <div class="map-info-item">
-                        <span id="zoomLevel">Zoom: --</span>
-                    </div>
-                    <div class="map-info-item">
-                        <span id="coordinates">Lat: --, Lng: --</span>
                     </div>
                 </div>
             </div>
@@ -998,19 +928,6 @@
                 opacity: 0.7,
                 lineJoin: 'round'
             }).addTo(state.map);
-            
-            // Update zoom level display
-            state.map.on('zoomend', function() {
-                document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
-            });
-            
-            // Update coordinates on map move
-            state.map.on('mousemove', function(e) {
-                document.getElementById('coordinates').textContent = 
-                    `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
-            });
-            
-            document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
         }
 
         // Update marker icon based on transit type
@@ -1554,7 +1471,6 @@
             // Update speed
             if (speed) {
                 state.currentSpeed = speed * 3.6; // Convert to km/h
-                document.getElementById('currentSpeed').textContent = state.currentSpeed.toFixed(2) + ' km/h';
                 
                 // Update top speed
                 if (state.currentSpeed > state.topSpeed) {
@@ -1593,7 +1509,6 @@
                     lat, lng
                 );
                 state.totalDistance += distance;
-                document.getElementById('distanceTraveled').textContent = (state.totalDistance / 1000).toFixed(2) + ' km';
                 
                 // Calculate ETA (simplified calculation)
                 updateETA();
@@ -1625,9 +1540,6 @@
                 const remainingDistance = 10; // Example: 10km to destination
                 const timeHours = remainingDistance / state.currentSpeed;
                 const etaTime = new Date(Date.now() + timeHours * 3600000);
-                document.getElementById('eta').textContent = etaTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } else {
-                document.getElementById('eta').textContent = '--:--';
             }
         }
 
@@ -1681,9 +1593,6 @@
                 const hours = Math.floor(diff / 3600000);
                 const minutes = Math.floor((diff % 3600000) / 60000);
                 const seconds = Math.floor((diff % 60000) / 1000);
-                
-                document.getElementById('trackingTime').textContent = 
-                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }
 
@@ -1728,8 +1637,6 @@
             state.totalDistance = 0;
             state.currentSpeed = 0;
             state.topSpeed = 0;
-            document.getElementById('distanceTraveled').textContent = '0.00 km';
-            document.getElementById('currentSpeed').textContent = '0.00 km/h';
             refreshRouteHistory();
             showStatus('Route cleared.', 'info');
         }
