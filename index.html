@@ -3,1113 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackRide - GPS Tracking App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>GPS Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=Function.prototype"></script>
     <style>
-        :root {
-            --primary-color: #3b82f6;
-            --primary-dark: #1e40af;
-            --secondary-color: #8b5cf6;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --light-bg: #f8fafc;
-            --dark-bg: #1e293b;
-            --text-light: #334155;
-            --text-dark: #f1f5f9;
-            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--light-bg);
-            color: var(--text-light);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        body.dark-mode {
-            background-color: var(--dark-bg);
-            color: var(--text-dark);
-        }
-
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 100%;
-            overflow: hidden;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background-color: white;
-            box-shadow: var(--header-shadow);
-            z-index: 1000;
-        }
-
-        body.dark-mode .header {
-            background-color: #334155;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--text-light);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-
-        .theme-toggle:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        body.dark-mode .theme-toggle {
-            color: var(--text-dark);
-        }
-
-        body.dark-mode .theme-toggle:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .main-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .map-container {
-            flex: 1;
-            position: relative;
-        }
-
+        /* Custom styles for better appearance */
         #map {
+            height: 70vh;
             width: 100%;
-            height: 100%;
         }
-
-        .sidebar {
-            width: 380px;
-            background-color: white;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            overflow-y: auto;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
+        
+        .tracking-active {
+            background-color: #ef4444 !important;
         }
-
-        body.dark-mode .sidebar {
-            background-color: #334155;
+        
+        .smooth-move {
+            transition: transform 0.5s ease-out;
         }
-
-        .sidebar.collapsed {
-            transform: translateX(100%);
+        
+        /* Dark theme adjustments */
+        .dark-theme {
+            background-color: #1f2937;
+            color: #f9fafb;
         }
-
-        .sidebar-toggle {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: white;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--card-shadow);
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.2s;
-        }
-
-        .sidebar-toggle:hover {
-            transform: scale(1.05);
-        }
-
-        body.dark-mode .sidebar-toggle {
-            background-color: #334155;
-            color: white;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: var(--card-shadow);
-            transition: all 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        body.dark-mode .card {
-            background-color: #475569;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .card-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 1.25rem;
-        }
-
-        .status-arriving {
-            background-color: rgba(16, 185, 129, 0.15);
-            color: var(--success-color);
-        }
-
-        .status-pickup {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: var(--warning-color);
-        }
-
-        .driver-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.25rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        body.dark-mode .driver-info {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .driver-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .driver-details {
-            flex: 1;
-        }
-
-        .driver-name {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 1.2rem;
-        }
-
-        .driver-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--warning-color);
-            font-size: 0.95rem;
-        }
-
-        .trip-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-            margin-top: 1.25rem;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .detail-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        body.dark-mode .detail-label {
-            color: #94a3b8;
-        }
-
-        .detail-value {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn {
-            padding: 0.85rem 1rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-            flex: 1;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: var(--text-light);
-        }
-
-        body.dark-mode .btn-secondary {
-            background-color: #475569;
-            color: var(--text-dark);
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .route-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .route-point {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .route-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .route-start {
-            background: linear-gradient(135deg, var(--success-color), #34d399);
-        }
-
-        .route-end {
-            background: linear-gradient(135deg, var(--danger-color), #f87171);
-        }
-
-        .route-details {
-            flex: 1;
-        }
-
-        .route-address {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .route-note {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        body.dark-mode .route-note {
-            color: #94a3b8;
-        }
-
-        .map-controls {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            z-index: 1000;
-        }
-
-        .map-control {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background-color: white;
-            border: none;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            transition: all 0.2s;
-        }
-
-        .map-control:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        body.dark-mode .map-control {
-            background-color: #334155;
-            color: var(--primary-color);
-        }
-
-        /* Custom Google Maps styling */
-        .gm-style .gm-style-iw-c {
-            border-radius: 12px;
-            padding: 1rem;
-        }
-
-        .gm-style .gm-style-iw-t::after {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                top: 0;
-                right: 0;
-                height: 100%;
-                width: 85%;
-                max-width: 320px;
-                z-index: 1000;
-                transform: translateX(100%);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .sidebar-toggle {
-                display: flex;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .sidebar-toggle {
-                display: none;
-            }
+        
+        .card-dark {
+            background-color: #374151;
+            border-color: #4b5563;
         }
     </style>
 </head>
-<body>
-    <div class="app-container">
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <span>TrackRide</span>
-            </div>
-            <button class="theme-toggle" id="themeToggle">
-                <i class="fas fa-moon"></i>
-            </button>
+<body class="dark-theme min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-center text-white">GPS Tracker</h1>
+            <p class="text-center text-gray-400 mt-2">Track your location in real-time</p>
         </header>
-
-        <div class="main-content">
-            <div class="map-container">
-                <div id="map"></div>
-                <div class="map-controls">
-                    <button class="map-control" id="locateMe" title="Locate Me">
-                        <i class="fas fa-location-arrow"></i>
+        
+        <!-- Map Container -->
+        <div class="mb-6 rounded-lg overflow-hidden shadow-lg">
+            <div id="map"></div>
+        </div>
+        
+        <!-- Controls and Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Control Panel -->
+            <div class="card-dark p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 text-white">Controls</h2>
+                <div class="flex flex-col space-y-4">
+                    <button id="trackBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                        Start Tracking
                     </button>
-                    <button class="map-control" id="findRide" title="Find My Ride">
-                        <i class="fas fa-car"></i>
+                    <button id="clearRouteBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                        Clear Route
                     </button>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
-
-            <div class="sidebar" id="sidebar">
-                <div class="card">
-                    <h2 class="card-title">
-                        <div class="card-icon"><i class="fas fa-car"></i></div>
-                        Ride Information
-                    </h2>
-                    <div class="status-badge status-arriving">
-                        <i class="fas fa-clock"></i>
-                        <span>Driver Arriving - 5 min</span>
+            
+            <!-- Location Info -->
+            <div class="card-dark p-4 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4 text-white">Location Information</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Latitude:</span>
+                        <span id="latitude" class="text-white">--</span>
                     </div>
-                    
-                    <div class="driver-info">
-                        <div class="driver-avatar">JD</div>
-                        <div class="driver-details">
-                            <div class="driver-name">John Driver</div>
-                            <div class="driver-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>4.2</span>
-                            </div>
-                        </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Longitude:</span>
+                        <span id="longitude" class="text-white">--</span>
                     </div>
-                    
-                    <div class="trip-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Vehicle</div>
-                            <div class="detail-value">Toyota Camry</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">License</div>
-                            <div class="detail-value">ABC 123</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">ETA</div>
-                            <div class="detail-value" id="etaValue">5 min</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Distance</div>
-                            <div class="detail-value" id="distanceValue">2.3 km</div>
-                        </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Accuracy:</span>
+                        <span id="accuracy" class="text-white">--</span>
                     </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-secondary" id="callDriver">
-                            <i class="fas fa-phone"></i> Call Driver
-                        </button>
-                        <button class="btn btn-primary" id="cancelRide">
-                            <i class="fas fa-times"></i> Cancel Ride
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2 class="card-title">
-                        <div class="card-icon"><i class="fas fa-route"></i></div>
-                        Route Details
-                    </h2>
-                    
-                    <div class="route-info">
-                        <div class="route-point">
-                            <div class="route-icon route-start"><i class="fas fa-location-arrow"></i></div>
-                            <div class="route-details">
-                                <div class="route-address">123 Main Street</div>
-                                <div class="route-note">Your current location</div>
-                            </div>
-                        </div>
-                        
-                        <div class="route-point">
-                            <div class="route-icon route-end"><i class="fas fa-flag-checkered"></i></div>
-                            <div class="route-details">
-                                <div class="route-address">456 Central Avenue</div>
-                                <div class="route-note">Your destination</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h2 class="card-title">
-                        <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
-                        Fare Estimate
-                    </h2>
-                    <div class="detail-item">
-                        <div class="detail-label">Estimated Fare</div>
-                        <div class="detail-value">$15.50 - $20.00</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Payment Method</div>
-                        <div class="detail-value">
-                            <i class="fas fa-credit-card"></i> Credit Card ****1234
-                        </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Last Update:</span>
+                        <span id="lastUpdate" class="text-white">--</span>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- Status Messages -->
+        <div id="statusMessage" class="mt-6 p-4 rounded-lg hidden"></div>
     </div>
-
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5dY-3YTyV3xZQpJXx1p5p5p5p5p5p5p5p5&callback=initMap&libraries=geometry" async defer></script>
 
     <script>
         // App state
-        const appState = {
-            map: null,
-            userLocation: null,
-            driverLocation: null,
-            riderLocation: null,
-            routeLine: null,
-            userMarker: null,
-            driverMarker: null,
-            riderMarker: null,
+        const state = {
             isTracking: false,
-            isDarkMode: false,
-            driverInterval: null,
-            eta: 5, // minutes
-            distance: 2.3, // km
-            directionsService: null,
-            directionsRenderer: null
+            watchId: null,
+            map: null,
+            marker: null,
+            pathCoordinates: [],
+            polyline: null,
+            lastPosition: null
         };
 
-        // DOM elements
-        const mapElement = document.getElementById('map');
-        const themeToggle = document.getElementById('themeToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const locateMeBtn = document.getElementById('locateMe');
-        const findRideBtn = document.getElementById('findRide');
-        const callDriverBtn = document.getElementById('callDriver');
-        const cancelRideBtn = document.getElementById('cancelRide');
-        const etaValue = document.getElementById('etaValue');
-        const distanceValue = document.getElementById('distanceValue');
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            setupEventListeners();
+            checkGeolocationSupport();
+        });
 
-        // Initialize the app
+        // Initialize Google Map
         function initMap() {
-            // Default coordinates (San Francisco)
-            const defaultCoords = { lat: 37.7749, lng: -122.4194 };
+            // Default center (San Francisco)
+            const defaultCenter = { lat: 37.7749, lng: -122.4194 };
             
-            // Create the map
-            appState.map = new google.maps.Map(mapElement, {
-                center: defaultCoords,
-                zoom: 13,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
+            state.map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: defaultCenter,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
                 styles: [
+                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
                     {
-                        "featureType": "all",
-                        "elementType": "geometry.fill",
-                        "stylers": [
-                            {
-                                "weight": "2.00"
-                            }
-                        ]
+                        featureType: "administrative.locality",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }]
                     },
                     {
-                        "featureType": "all",
-                        "elementType": "geometry.stroke",
-                        "stylers": [
-                            {
-                                "color": "#9c9c9c"
-                            }
-                        ]
+                        featureType: "poi",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }]
                     },
                     {
-                        "featureType": "all",
-                        "elementType": "labels.text",
-                        "stylers": [
-                            {
-                                "visibility": "on"
-                            }
-                        ]
+                        featureType: "poi.park",
+                        elementType: "geometry",
+                        stylers: [{ color: "#263c3f" }]
                     },
                     {
-                        "featureType": "landscape",
-                        "elementType": "all",
-                        "stylers": [
-                            {
-                                "color": "#f2f2f2"
-                            }
-                        ]
+                        featureType: "poi.park",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#6b9a76" }]
                     },
                     {
-                        "featureType": "landscape",
-                        "elementType": "geometry.fill",
-                        "stylers": [
-                            {
-                                "color": "#ffffff"
-                            }
-                        ]
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#38414e" }]
                     },
                     {
-                        "featureType": "landscape.man_made",
-                        "elementType": "geometry.fill",
-                        "stylers": [
-                            {
-                                "color": "#ffffff"
-                            }
-                        ]
+                        featureType: "road",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#212a37" }]
                     },
                     {
-                        "featureType": "poi",
-                        "elementType": "all",
-                        "stylers": [
-                            {
-                                "visibility": "off"
-                            }
-                        ]
+                        featureType: "road",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#9ca5b3" }]
                     },
                     {
-                        "featureType": "road",
-                        "elementType": "all",
-                        "stylers": [
-                            {
-                                "saturation": -100
-                            },
-                            {
-                                "lightness": 45
-                            }
-                        ]
+                        featureType: "road.highway",
+                        elementType: "geometry",
+                        stylers: [{ color: "#746855" }]
                     },
                     {
-                        "featureType": "road",
-                        "elementType": "geometry.fill",
-                        "stylers": [
-                            {
-                                "color": "#eeeeee"
-                            }
-                        ]
+                        featureType: "road.highway",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#1f2835" }]
                     },
                     {
-                        "featureType": "road",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                            {
-                                "color": "#7b7b7b"
-                            }
-                        ]
+                        featureType: "road.highway",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#f3d19c" }]
                     },
                     {
-                        "featureType": "road",
-                        "elementType": "labels.text.stroke",
-                        "stylers": [
-                            {
-                                "color": "#ffffff"
-                            }
-                        ]
+                        featureType: "transit",
+                        elementType: "geometry",
+                        stylers: [{ color: "#2f3948" }]
                     },
                     {
-                        "featureType": "road.highway",
-                        "elementType": "all",
-                        "stylers": [
-                            {
-                                "visibility": "simplified"
-                            }
-                        ]
+                        featureType: "transit.station",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }]
                     },
                     {
-                        "featureType": "road.arterial",
-                        "elementType": "labels.icon",
-                        "stylers": [
-                            {
-                                "visibility": "off"
-                            }
-                        ]
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#17263c" }]
                     },
                     {
-                        "featureType": "transit",
-                        "elementType": "all",
-                        "stylers": [
-                            {
-                                "visibility": "off"
-                            }
-                        ]
+                        featureType: "water",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#515c6d" }]
                     },
                     {
-                        "featureType": "water",
-                        "elementType": "all",
-                        "stylers": [
-                            {
-                                "color": "#46bcec"
-                            },
-                            {
-                                "visibility": "on"
-                            }
-                        ]
-                    },
-                    {
-                        "featureType": "water",
-                        "elementType": "geometry.fill",
-                        "stylers": [
-                            {
-                                "color": "#c8d7d4"
-                            }
-                        ]
-                    },
-                    {
-                        "featureType": "water",
-                        "elementType": "labels.text.fill",
-                        "stylers": [
-                            {
-                                "color": "#070707"
-                            }
-                        ]
-                    },
-                    {
-                        "featureType": "water",
-                        "elementType": "labels.text.stroke",
-                        "stylers": [
-                            {
-                                "color": "#ffffff"
-                            }
-                        ]
+                        featureType: "water",
+                        elementType: "labels.text.stroke",
+                        stylers: [{ color: "#17263c" }]
                     }
                 ]
             });
             
-            // Initialize directions service
-            appState.directionsService = new google.maps.DirectionsService();
-            appState.directionsRenderer = new google.maps.DirectionsRenderer({
-                map: appState.map,
-                suppressMarkers: true,
-                polylineOptions: {
-                    strokeColor: '#3b82f6',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 5
+            // Create initial marker
+            state.marker = new google.maps.Marker({
+                position: defaultCenter,
+                map: state.map,
+                title: 'Your Location',
+                icon: {
+                    url: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(40, 40),
+                    anchor: new google.maps.Point(12, 24)
                 }
             });
             
-            // Try to get user's current location
-            locateUser();
-            
-            // Set initial driver and rider locations
-            appState.driverLocation = { lat: 37.7849, lng: -122.4294 };
-            appState.riderLocation = { lat: 37.7649, lng: -122.4094 };
-            
-            // Add markers
-            addMarkers();
-            
-            // Draw initial route
-            drawRoute();
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Simulate driver movement
-            simulateDriverMovement();
+            // Initialize polyline for route tracking
+            state.polyline = new google.maps.Polyline({
+                path: state.pathCoordinates,
+                geodesic: true,
+                strokeColor: '#3b82f6',
+                strokeOpacity: 1.0,
+                strokeWeight: 4,
+                map: state.map
+            });
         }
 
         // Set up event listeners
         function setupEventListeners() {
-            themeToggle.addEventListener('click', toggleTheme);
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            locateMeBtn.addEventListener('click', locateUser);
-            findRideBtn.addEventListener('click', findMyRide);
-            callDriverBtn.addEventListener('click', callDriver);
-            cancelRideBtn.addEventListener('click', cancelRide);
+            document.getElementById('trackBtn').addEventListener('click', toggleTracking);
+            document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
         }
 
-        // Toggle dark/light mode
-        function toggleTheme() {
-            appState.isDarkMode = !appState.isDarkMode;
-            document.body.classList.toggle('dark-mode', appState.isDarkMode);
-            
-            // Update theme toggle icon
-            if (appState.isDarkMode) {
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        // Check if geolocation is supported
+        function checkGeolocationSupport() {
+            if (!navigator.geolocation) {
+                showStatus('Geolocation is not supported by this browser.', 'error');
+                document.getElementById('trackBtn').disabled = true;
             }
         }
 
-        // Toggle sidebar visibility (mobile)
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
+        // Toggle tracking on/off
+        function toggleTracking() {
+            if (state.isTracking) {
+                stopTracking();
+            } else {
+                startTracking();
+            }
         }
 
-        // Locate user using GPS
-        function locateUser() {
+        // Start location tracking
+        function startTracking() {
             if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
+                showStatus('Geolocation is not supported by this browser.', 'error');
                 return;
             }
-            
-            // Show loading state
-            locateMeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    appState.userLocation = { lat: latitude, lng: longitude };
-                    
-                    // Update map view
-                    appState.map.setCenter(appState.userLocation);
-                    appState.map.setZoom(15);
-                    
-                    // Update user marker
-                    updateUserMarker();
-                    
-                    // Reset button
-                    locateMeBtn.innerHTML = '<i class="fas fa-location-arrow"></i>';
-                },
-                (error) => {
-                    console.error('Error getting location:', error);
-                    alert('Unable to retrieve your location. Using default location.');
-                    
-                    // Use default location as fallback
-                    appState.userLocation = { lat: 37.7749, lng: -122.4194 };
-                    appState.map.setCenter(appState.userLocation);
-                    appState.map.setZoom(13);
-                    updateUserMarker();
-                    
-                    // Reset button
-                    locateMeBtn.innerHTML = '<i class="fas fa-location-arrow"></i>';
-                }
-            );
-        }
 
-        // Find my ride (simulate tracking)
-        function findMyRide() {
-            if (!appState.isTracking) {
-                appState.isTracking = true;
-                findRideBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                
-                // In a real app, this would connect to a live tracking service
-                alert('Tracking your ride... Driver location will update in real-time.');
-                
-                // Simulate driver movement
-                if (appState.driverInterval) {
-                    clearInterval(appState.driverInterval);
-                }
-                
-                appState.driverInterval = setInterval(moveDriver, 3000);
-                
-                // Reset button after a moment
-                setTimeout(() => {
-                    findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
-                }, 1000);
-            } else {
-                appState.isTracking = false;
-                findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
-                
-                if (appState.driverInterval) {
-                    clearInterval(appState.driverInterval);
-                }
-            }
-        }
-
-        // Call driver (simulated)
-        function callDriver() {
-            alert('Calling driver... This would connect to the driver in a real app.');
-        }
-
-        // Cancel ride (simulated)
-        function cancelRide() {
-            if (confirm('Are you sure you want to cancel this ride?')) {
-                alert('Ride cancelled. In a real app, this would notify the driver and process any cancellation fees.');
-                
-                // Reset tracking
-                appState.isTracking = false;
-                findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
-                
-                if (appState.driverInterval) {
-                    clearInterval(appState.driverInterval);
-                }
-            }
-        }
-
-        // Add markers to the map
-        function addMarkers() {
-            // Clear existing markers
-            if (appState.userMarker) appState.userMarker.setMap(null);
-            if (appState.driverMarker) appState.driverMarker.setMap(null);
-            if (appState.riderMarker) appState.riderMarker.setMap(null);
-            
-            // Add user marker (if location available)
-            if (appState.userLocation) {
-                appState.userMarker = new google.maps.Marker({
-                    position: appState.userLocation,
-                    map: appState.map,
-                    title: 'Your Location',
-                    icon: {
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path fill="#3b82f6" d="M12 0C7.58 0 4 3.58 4 8c0 8 8 16 8 16s8-8 8-16c0-4.42-3.58-8-8-8zm0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-                                <circle cx="12" cy="8" r="2" fill="white"/>
-                            </svg>
-                        `),
-                        scaledSize: new google.maps.Size(24, 24),
-                        anchor: new google.maps.Point(12, 24)
-                    }
-                });
-            }
-            
-            // Add driver marker
-            appState.driverMarker = new google.maps.Marker({
-                position: appState.driverLocation,
-                map: appState.map,
-                title: 'Driver - John Driver',
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-                            <path fill="#ef4444" d="M14 0C6.27 0 0 6.27 0 14s6.27 14 14 14 14-6.27 14-14S21.73 0 14 0zm0 25.2C7.83 25.2 2.8 20.17 2.8 14S7.83 2.8 14 2.8 25.2 7.83 25.2 14 20.17 25.2 14 25.2z"/>
-                            <path fill="#ef4444" d="M14 4.2c5.41 0 9.8 4.39 9.8 9.8s-4.39 9.8-9.8 9.8S4.2 19.41 4.2 14 8.59 4.2 14 4.2z"/>
-                            <circle cx="14" cy="14" r="6" fill="white"/>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(28, 28),
-                    anchor: new google.maps.Point(14, 28)
-                }
-            });
-            
-            // Add rider marker (destination)
-            appState.riderMarker = new google.maps.Marker({
-                position: appState.riderLocation,
-                map: appState.map,
-                title: 'Destination',
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="12" fill="#10b981"/>
-                            <circle cx="12" cy="12" r="6" fill="white"/>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(24, 24),
-                    anchor: new google.maps.Point(12, 12)
-                }
-            });
-        }
-
-        // Update user marker position
-        function updateUserMarker() {
-            if (appState.userMarker && appState.userLocation) {
-                appState.userMarker.setPosition(appState.userLocation);
-            }
-        }
-
-        // Draw route between driver and rider
-        function drawRoute() {
-            const request = {
-                origin: appState.driverLocation,
-                destination: appState.riderLocation,
-                travelMode: google.maps.TravelMode.DRIVING
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             };
-            
-            appState.directionsService.route(request, function(result, status) {
-                if (status === google.maps.DirectionsStatus.OK) {
-                    appState.directionsRenderer.setDirections(result);
-                    
-                    // Update ETA and distance
-                    const route = result.routes[0];
-                    if (route.legs.length > 0) {
-                        const leg = route.legs[0];
-                        appState.eta = Math.round(leg.duration.value / 60); // Convert to minutes
-                        appState.distance = Math.round(leg.distance.value / 1000 * 10) / 10; // Convert to km
-                        
-                        etaValue.textContent = `${appState.eta} min`;
-                        distanceValue.textContent = `${appState.distance} km`;
-                    }
-                } else {
-                    // Fallback to straight line if directions fail
-                    console.error('Directions request failed:', status);
-                }
-            });
+
+            state.watchId = navigator.geolocation.watchPosition(
+                updatePosition,
+                handleGeolocationError,
+                options
+            );
+
+            state.isTracking = true;
+            document.getElementById('trackBtn').textContent = 'Stop Tracking';
+            document.getElementById('trackBtn').classList.add('tracking-active');
+            showStatus('Tracking started. Your location is now being monitored.', 'success');
         }
 
-        // Simulate driver movement toward rider
-        function moveDriver() {
-            if (!appState.driverLocation || !appState.riderLocation) return;
-            
-            // Calculate direction vector
-            const latDiff = appState.riderLocation.lat - appState.driverLocation.lat;
-            const lngDiff = appState.riderLocation.lng - appState.driverLocation.lng;
-            
-            // Move driver a small step toward rider
-            const stepSize = 0.0005;
-            const latStep = latDiff * stepSize;
-            const lngStep = lngDiff * stepSize;
-            
-            appState.driverLocation.lat += latStep;
-            appState.driverLocation.lng += lngStep;
-            
-            // Update driver marker position
-            appState.driverMarker.setPosition(appState.driverLocation);
-            
-            // Update route
-            drawRoute();
-            
-            // Check if driver has arrived
-            const distanceToRider = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
-            if (distanceToRider < 0.001) {
-                clearInterval(appState.driverInterval);
-                alert('Driver has arrived!');
-                appState.isTracking = false;
-                findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
+        // Stop location tracking
+        function stopTracking() {
+            if (state.watchId) {
+                navigator.geolocation.clearWatch(state.watchId);
+                state.watchId = null;
             }
+            
+            state.isTracking = false;
+            document.getElementById('trackBtn').textContent = 'Start Tracking';
+            document.getElementById('trackBtn').classList.remove('tracking-active');
+            showStatus('Tracking stopped.', 'info');
         }
 
-        // Initialize driver movement simulation
-        function simulateDriverMovement() {
-            // Start with a small movement to show the feature
-            setTimeout(() => {
-                moveDriver();
-            }, 2000);
+        // Update position on the map
+        function updatePosition(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            
+            // Update location display
+            document.getElementById('latitude').textContent = lat.toFixed(6);
+            document.getElementById('longitude').textContent = lng.toFixed(6);
+            document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)} meters`;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+            
+            // Create new position object
+            const newPosition = { lat, lng };
+            
+            // Update marker position with smooth animation
+            if (state.lastPosition) {
+                // Calculate direction for smooth animation
+                const heading = calculateHeading(state.lastPosition, newPosition);
+                state.marker.setPosition(newPosition);
+                
+                // Add a subtle rotation effect based on movement direction
+                if (heading !== null) {
+                    // This would require a custom marker with rotation capability
+                    // For simplicity, we're just updating position
+                }
+            } else {
+                state.marker.setPosition(newPosition);
+            }
+            
+            // Center map on new position
+            state.map.setCenter(newPosition);
+            
+            // Add to path and update polyline
+            state.pathCoordinates.push(newPosition);
+            state.polyline.setPath(state.pathCoordinates);
+            
+            // Store last position for heading calculation
+            state.lastPosition = newPosition;
+        }
+
+        // Calculate heading between two points (for animation)
+        function calculateHeading(from, to) {
+            if (!from || !to) return null;
+            
+            const fromLat = from.lat * Math.PI / 180;
+            const fromLng = from.lng * Math.PI / 180;
+            const toLat = to.lat * Math.PI / 180;
+            const toLng = to.lng * Math.PI / 180;
+            
+            const dLng = toLng - fromLng;
+            
+            const y = Math.sin(dLng) * Math.cos(toLat);
+            const x = Math.cos(fromLat) * Math.sin(toLat) -
+                      Math.sin(fromLat) * Math.cos(toLat) * Math.cos(dLng);
+            
+            let heading = Math.atan2(y, x) * 180 / Math.PI;
+            return (heading + 360) % 360;
+        }
+
+        // Handle geolocation errors
+        function handleGeolocationError(error) {
+            let message = '';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Location access denied. Please enable location permissions in your browser settings.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Location information is unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    message = 'The request to get your location timed out.';
+                    break;
+                case error.UNKNOWN_ERROR:
+                    message = 'An unknown error occurred while retrieving your location.';
+                    break;
+            }
+            
+            showStatus(message, 'error');
+            stopTracking();
+        }
+
+        // Clear the route/path
+        function clearRoute() {
+            state.pathCoordinates = [];
+            state.polyline.setPath(state.pathCoordinates);
+            showStatus('Route cleared.', 'info');
+        }
+
+        // Show status messages
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'mt-6 p-4 rounded-lg';
+            
+            switch(type) {
+                case 'success':
+                    statusEl.classList.add('bg-green-600', 'text-white');
+                    break;
+                case 'error':
+                    statusEl.classList.add('bg-red-600', 'text-white');
+                    break;
+                case 'info':
+                    statusEl.classList.add('bg-blue-600', 'text-white');
+                    break;
+                default:
+                    statusEl.classList.add('bg-gray-600', 'text-white');
+            }
+            
+            statusEl.classList.remove('hidden');
+            
+            // Auto-hide success and info messages after 5 seconds
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 5000);
+            }
         }
     </script>
 </body>
