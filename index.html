@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrackRide - GPS Tracking App</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -439,66 +437,14 @@
             color: var(--primary-color);
         }
 
-        .location-marker {
-            width: 24px;
-            height: 24px;
-            border-radius: 50% 50% 50% 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            transform: rotate(-45deg);
-            position: relative;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        /* Custom Google Maps styling */
+        .gm-style .gm-style-iw-c {
+            border-radius: 12px;
+            padding: 1rem;
         }
 
-        .location-marker::after {
-            content: '';
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: white;
-            position: absolute;
-            top: 5px;
-            left: 5px;
-        }
-
-        .driver-marker {
-            width: 28px;
-            height: 28px;
-            border-radius: 50% 50% 50% 0;
-            background: linear-gradient(135deg, var(--danger-color), #f87171);
-            transform: rotate(45deg);
-            position: relative;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-        }
-
-        .driver-marker::after {
-            content: '';
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: white;
-            position: absolute;
-            top: 6px;
-            left: 6px;
-        }
-
-        .rider-marker {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--success-color), #34d399);
-            position: relative;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
-        }
-
-        .rider-marker::after {
-            content: '';
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: white;
-            position: absolute;
-            top: 5px;
-            left: 5px;
+        .gm-style .gm-style-iw-t::after {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
         }
 
         /* Responsive styles */
@@ -658,6 +604,9 @@
         </div>
     </div>
 
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5dY-3YTyV3xZQpJXx1p5p5p5p5p5p5p5p5&callback=initMap&libraries=geometry" async defer></script>
+
     <script>
         // App state
         const appState = {
@@ -674,7 +623,8 @@
             driverInterval: null,
             eta: 5, // minutes
             distance: 2.3, // km
-            currentTileLayer: null
+            directionsService: null,
+            directionsRenderer: null
         };
 
         // DOM elements
@@ -690,37 +640,219 @@
         const distanceValue = document.getElementById('distanceValue');
 
         // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeMap();
-            setupEventListeners();
-            simulateDriverMovement();
-        });
-
-        // Initialize the map
-        function initializeMap() {
+        function initMap() {
             // Default coordinates (San Francisco)
-            const defaultCoords = [37.7749, -122.4194];
+            const defaultCoords = { lat: 37.7749, lng: -122.4194 };
             
             // Create the map
-            appState.map = L.map('map').setView(defaultCoords, 13);
+            appState.map = new google.maps.Map(mapElement, {
+                center: defaultCoords,
+                zoom: 13,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                styles: [
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry.fill",
+                        "stylers": [
+                            {
+                                "weight": "2.00"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry.stroke",
+                        "stylers": [
+                            {
+                                "color": "#9c9c9c"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "labels.text",
+                        "stylers": [
+                            {
+                                "visibility": "on"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "landscape",
+                        "elementType": "all",
+                        "stylers": [
+                            {
+                                "color": "#f2f2f2"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "landscape",
+                        "elementType": "geometry.fill",
+                        "stylers": [
+                            {
+                                "color": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "landscape.man_made",
+                        "elementType": "geometry.fill",
+                        "stylers": [
+                            {
+                                "color": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "poi",
+                        "elementType": "all",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "all",
+                        "stylers": [
+                            {
+                                "saturation": -100
+                            },
+                            {
+                                "lightness": 45
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "geometry.fill",
+                        "stylers": [
+                            {
+                                "color": "#eeeeee"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "labels.text.fill",
+                        "stylers": [
+                            {
+                                "color": "#7b7b7b"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [
+                            {
+                                "color": "#ffffff"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "road.highway",
+                        "elementType": "all",
+                        "stylers": [
+                            {
+                                "visibility": "simplified"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "road.arterial",
+                        "elementType": "labels.icon",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "transit",
+                        "elementType": "all",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "all",
+                        "stylers": [
+                            {
+                                "color": "#46bcec"
+                            },
+                            {
+                                "visibility": "on"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "geometry.fill",
+                        "stylers": [
+                            {
+                                "color": "#c8d7d4"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "labels.text.fill",
+                        "stylers": [
+                            {
+                                "color": "#070707"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [
+                            {
+                                "color": "#ffffff"
+                            }
+                        ]
+                    }
+                ]
+            });
             
-            // Add light theme tile layer
-            appState.currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(appState.map);
+            // Initialize directions service
+            appState.directionsService = new google.maps.DirectionsService();
+            appState.directionsRenderer = new google.maps.DirectionsRenderer({
+                map: appState.map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: '#3b82f6',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 5
+                }
+            });
             
             // Try to get user's current location
             locateUser();
             
             // Set initial driver and rider locations
-            appState.driverLocation = [37.7849, -122.4294];
-            appState.riderLocation = [37.7649, -122.4094];
+            appState.driverLocation = { lat: 37.7849, lng: -122.4294 };
+            appState.riderLocation = { lat: 37.7649, lng: -122.4094 };
             
             // Add markers
             addMarkers();
             
             // Draw initial route
             drawRoute();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Simulate driver movement
+            simulateDriverMovement();
         }
 
         // Set up event listeners
@@ -744,8 +876,6 @@
             } else {
                 themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
             }
-            
-            // Note: We're not changing the map theme to keep it consistent
         }
 
         // Toggle sidebar visibility (mobile)
@@ -766,10 +896,11 @@
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
-                    appState.userLocation = [latitude, longitude];
+                    appState.userLocation = { lat: latitude, lng: longitude };
                     
                     // Update map view
-                    appState.map.setView(appState.userLocation, 15);
+                    appState.map.setCenter(appState.userLocation);
+                    appState.map.setZoom(15);
                     
                     // Update user marker
                     updateUserMarker();
@@ -782,8 +913,9 @@
                     alert('Unable to retrieve your location. Using default location.');
                     
                     // Use default location as fallback
-                    appState.userLocation = [37.7749, -122.4194];
-                    appState.map.setView(appState.userLocation, 13);
+                    appState.userLocation = { lat: 37.7749, lng: -122.4194 };
+                    appState.map.setCenter(appState.userLocation);
+                    appState.map.setZoom(13);
                     updateUserMarker();
                     
                     // Reset button
@@ -845,77 +977,99 @@
         // Add markers to the map
         function addMarkers() {
             // Clear existing markers
-            if (appState.userMarker) appState.map.removeLayer(appState.userMarker);
-            if (appState.driverMarker) appState.map.removeLayer(appState.driverMarker);
-            if (appState.riderMarker) appState.map.removeLayer(appState.riderMarker);
+            if (appState.userMarker) appState.userMarker.setMap(null);
+            if (appState.driverMarker) appState.driverMarker.setMap(null);
+            if (appState.riderMarker) appState.riderMarker.setMap(null);
             
             // Add user marker (if location available)
             if (appState.userLocation) {
-                appState.userMarker = L.marker(appState.userLocation, {
-                    icon: L.divIcon({
-                        className: 'user-marker',
-                        html: '<div class="location-marker"></div>',
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 24]
-                    })
-                }).addTo(appState.map)
-                .bindPopup('Your Location');
+                appState.userMarker = new google.maps.Marker({
+                    position: appState.userLocation,
+                    map: appState.map,
+                    title: 'Your Location',
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#3b82f6" d="M12 0C7.58 0 4 3.58 4 8c0 8 8 16 8 16s8-8 8-16c0-4.42-3.58-8-8-8zm0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                                <circle cx="12" cy="8" r="2" fill="white"/>
+                            </svg>
+                        `),
+                        scaledSize: new google.maps.Size(24, 24),
+                        anchor: new google.maps.Point(12, 24)
+                    }
+                });
             }
             
             // Add driver marker
-            appState.driverMarker = L.marker(appState.driverLocation, {
-                icon: L.divIcon({
-                    className: 'driver-marker',
-                    html: '<div class="driver-marker"></div>',
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 28]
-                })
-            }).addTo(appState.map)
-            .bindPopup('Driver - John Driver');
+            appState.driverMarker = new google.maps.Marker({
+                position: appState.driverLocation,
+                map: appState.map,
+                title: 'Driver - John Driver',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="#ef4444" d="M14 0C6.27 0 0 6.27 0 14s6.27 14 14 14 14-6.27 14-14S21.73 0 14 0zm0 25.2C7.83 25.2 2.8 20.17 2.8 14S7.83 2.8 14 2.8 25.2 7.83 25.2 14 20.17 25.2 14 25.2z"/>
+                            <path fill="#ef4444" d="M14 4.2c5.41 0 9.8 4.39 9.8 9.8s-4.39 9.8-9.8 9.8S4.2 19.41 4.2 14 8.59 4.2 14 4.2z"/>
+                            <circle cx="14" cy="14" r="6" fill="white"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(28, 28),
+                    anchor: new google.maps.Point(14, 28)
+                }
+            });
             
             // Add rider marker (destination)
-            appState.riderMarker = L.marker(appState.riderLocation, {
-                icon: L.divIcon({
-                    className: 'rider-marker',
-                    html: '<div class="rider-marker"></div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 24]
-                })
-            }).addTo(appState.map)
-            .bindPopup('Destination');
+            appState.riderMarker = new google.maps.Marker({
+                position: appState.riderLocation,
+                map: appState.map,
+                title: 'Destination',
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="12" fill="#10b981"/>
+                            <circle cx="12" cy="12" r="6" fill="white"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(24, 24),
+                    anchor: new google.maps.Point(12, 12)
+                }
+            });
         }
 
         // Update user marker position
         function updateUserMarker() {
             if (appState.userMarker && appState.userLocation) {
-                appState.userMarker.setLatLng(appState.userLocation);
+                appState.userMarker.setPosition(appState.userLocation);
             }
         }
 
         // Draw route between driver and rider
         function drawRoute() {
-            // Remove existing route
-            if (appState.routeLine) {
-                appState.map.removeLayer(appState.routeLine);
-            }
+            const request = {
+                origin: appState.driverLocation,
+                destination: appState.riderLocation,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
             
-            // Create a simple curved route for demonstration
-            const routeCoordinates = [
-                appState.driverLocation,
-                [
-                    (appState.driverLocation[0] + appState.riderLocation[0]) / 2 + 0.005,
-                    (appState.driverLocation[1] + appState.riderLocation[1]) / 2 + 0.005
-                ],
-                appState.riderLocation
-            ];
-            
-            // Draw the route
-            appState.routeLine = L.polyline(routeCoordinates, {
-                color: '#3b82f6',
-                weight: 5,
-                opacity: 0.7,
-                lineJoin: 'round'
-            }).addTo(appState.map);
+            appState.directionsService.route(request, function(result, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    appState.directionsRenderer.setDirections(result);
+                    
+                    // Update ETA and distance
+                    const route = result.routes[0];
+                    if (route.legs.length > 0) {
+                        const leg = route.legs[0];
+                        appState.eta = Math.round(leg.duration.value / 60); // Convert to minutes
+                        appState.distance = Math.round(leg.distance.value / 1000 * 10) / 10; // Convert to km
+                        
+                        etaValue.textContent = `${appState.eta} min`;
+                        distanceValue.textContent = `${appState.distance} km`;
+                    }
+                } else {
+                    // Fallback to straight line if directions fail
+                    console.error('Directions request failed:', status);
+                }
+            });
         }
 
         // Simulate driver movement toward rider
@@ -923,25 +1077,22 @@
             if (!appState.driverLocation || !appState.riderLocation) return;
             
             // Calculate direction vector
-            const latDiff = appState.riderLocation[0] - appState.driverLocation[0];
-            const lngDiff = appState.riderLocation[1] - appState.driverLocation[1];
+            const latDiff = appState.riderLocation.lat - appState.driverLocation.lat;
+            const lngDiff = appState.riderLocation.lng - appState.driverLocation.lng;
             
             // Move driver a small step toward rider
             const stepSize = 0.0005;
             const latStep = latDiff * stepSize;
             const lngStep = lngDiff * stepSize;
             
-            appState.driverLocation[0] += latStep;
-            appState.driverLocation[1] += lngStep;
+            appState.driverLocation.lat += latStep;
+            appState.driverLocation.lng += lngStep;
             
             // Update driver marker position
-            appState.driverMarker.setLatLng(appState.driverLocation);
+            appState.driverMarker.setPosition(appState.driverLocation);
             
             // Update route
             drawRoute();
-            
-            // Update ETA and distance
-            updateTripInfo();
             
             // Check if driver has arrived
             const distanceToRider = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
@@ -950,18 +1101,6 @@
                 alert('Driver has arrived!');
                 appState.isTracking = false;
                 findRideBtn.innerHTML = '<i class="fas fa-car"></i>';
-            }
-        }
-
-        // Update ETA and distance information
-        function updateTripInfo() {
-            // Simulate decreasing ETA and distance
-            if (appState.eta > 0.5) {
-                appState.eta -= 0.2;
-                appState.distance -= 0.1;
-                
-                etaValue.textContent = `${appState.eta.toFixed(1)} min`;
-                distanceValue.textContent = `${appState.distance.toFixed(1)} km`;
             }
         }
 
