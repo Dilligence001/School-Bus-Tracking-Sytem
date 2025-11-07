@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced GPS Tracker</title>
+    <title>Transit Tracker - Real-time GPS Tracking</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         #map {
-            height: 65vh;
+            height: 60vh;
             width: 100%;
             z-index: 1;
         }
@@ -67,7 +70,7 @@
         
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         
         ::-webkit-scrollbar-track {
@@ -113,183 +116,401 @@
         .route-item:last-child {
             border-bottom: none;
         }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            #map {
+                height: 50vh;
+            }
+            
+            .mobile-hidden {
+                display: none;
+            }
+            
+            .mobile-full {
+                width: 100%;
+            }
+        }
+        
+        /* Tracking status indicator */
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-active {
+            background-color: #10b981;
+            animation: blink 2s infinite;
+        }
+        
+        .status-inactive {
+            background-color: #ef4444;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Transit type icons */
+        .transit-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 8px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Map type selector */
+        .map-type-selector {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        /* Destination input */
+        .destination-input {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            width: 300px;
+        }
+        
+        /* WhatsApp sharing */
+        .whatsapp-share {
+            position: absolute;
+            bottom: 60px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        /* Leaflet Routing Machine customization */
+        .leaflet-routing-container {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            width: 320px;
+        }
+        
+        .leaflet-routing-alt {
+            max-height: 200px;
+        }
+        
+        .leaflet-routing-alt h2, 
+        .leaflet-routing-alt h3 {
+            color: white;
+        }
+        
+        .leaflet-routing-alt table {
+            color: white;
+        }
+        
+        .leaflet-routing-alt table tr:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .leaflet-routing-collapse-btn {
+            color: white;
+        }
+        
+        .leaflet-routing-geocoders input {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+        
+        .leaflet-routing-geocoders input:focus {
+            background: #444;
+            color: white;
+        }
+        
+        .leaflet-routing-geocoders button {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .leaflet-routing-geocoders button:hover {
+            background: var(--secondary-color);
+        }
     </style>
 </head>
 <body class="theme-blue min-h-screen bg-gray-900 text-white">
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto px-4 py-4">
         <!-- Header -->
-        <header class="mb-6 flex justify-between items-center">
+        <header class="mb-4 flex justify-between items-center">
             <div>
-                <h1 class="text-3xl font-bold text-white">GPS Tracker</h1>
-                <p class="text-gray-400 mt-2">Advanced real-time location tracking</p>
+                <h1 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-satellite-dish text-blue-400 mr-2"></i>
+                    Transit Tracker
+                </h1>
+                <p class="text-gray-400 text-sm">Real-time GPS tracking for vehicles & packages</p>
             </div>
-            <div class="flex items-center space-x-4">
-                <!-- Theme Selector -->
-                <div class="relative">
-                    <select id="themeSelector" class="bg-gray-800 text-white py-2 px-4 rounded-lg appearance-none cursor-pointer">
-                        <option value="blue">Blue Theme</option>
-                        <option value="green">Green Theme</option>
-                        <option value="purple">Purple Theme</option>
-                        <option value="orange">Orange Theme</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                    </div>
+            <div class="flex items-center space-x-2">
+                <!-- Tracking Status -->
+                <div class="bg-gray-800 px-3 py-1 rounded-lg flex items-center">
+                    <span class="status-indicator status-inactive" id="statusIndicator"></span>
+                    <span id="statusText" class="text-sm">Not Tracking</span>
                 </div>
                 
-                <!-- Map Style Selector -->
-                <div class="relative">
-                    <select id="mapStyleSelector" class="bg-gray-800 text-white py-2 px-4 rounded-lg appearance-none cursor-pointer">
-                        <option value="standard">Standard Map</option>
-                        <option value="dark">Dark Map</option>
-                        <option value="satellite">Satellite</option>
-                        <option value="terrain">Terrain</option>
+                <!-- Theme Selector -->
+                <div class="relative mobile-hidden">
+                    <select id="themeSelector" class="bg-gray-800 text-white py-2 px-3 rounded-lg appearance-none cursor-pointer text-sm">
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
+                        <i class="fas fa-chevron-down text-xs"></i>
                     </div>
                 </div>
             </div>
         </header>
         
+        <!-- Transit Info Bar -->
+        <div class="bg-gray-800 p-3 rounded-lg mb-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="transit-icon">
+                    <i class="fas fa-truck text-xs"></i>
+                </div>
+                <div>
+                    <div class="font-medium" id="transitName">Delivery Truck #1245</div>
+                    <div class="text-xs text-gray-400" id="transitDescription">Package Delivery Service</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-sm" id="transitStatus">In Transit</div>
+                <div class="text-xs text-gray-400" id="transitUpdate">Last update: --</div>
+            </div>
+        </div>
+        
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat-card p-4 rounded-lg shadow text-white">
-                <div class="text-sm opacity-80">Distance Traveled</div>
-                <div class="text-2xl font-bold" id="distanceTraveled">0.00 km</div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div class="stat-card p-3 rounded-lg shadow text-white">
+                <div class="text-xs opacity-80">Distance Traveled</div>
+                <div class="text-lg font-bold flex items-center">
+                    <i class="fas fa-route mr-2 text-sm"></i>
+                    <span id="distanceTraveled">0.00 km</span>
+                </div>
             </div>
-            <div class="stat-card p-4 rounded-lg shadow text-white">
-                <div class="text-sm opacity-80">Top Speed</div>
-                <div class="text-2xl font-bold" id="topSpeed">0.00 km/h</div>
+            <div class="stat-card p-3 rounded-lg shadow text-white">
+                <div class="text-xs opacity-80">Current Speed</div>
+                <div class="text-lg font-bold flex items-center">
+                    <i class="fas fa-tachometer-alt mr-2 text-sm"></i>
+                    <span id="currentSpeed">0.00 km/h</span>
+                </div>
             </div>
-            <div class="stat-card p-4 rounded-lg shadow text-white">
-                <div class="text-sm opacity-80">Tracking Time</div>
-                <div class="text-2xl font-bold" id="trackingTime">00:00:00</div>
+            <div class="stat-card p-3 rounded-lg shadow text-white">
+                <div class="text-xs opacity-80">Tracking Time</div>
+                <div class="text-lg font-bold flex items-center">
+                    <i class="fas fa-clock mr-2 text-sm"></i>
+                    <span id="trackingTime">00:00:00</span>
+                </div>
             </div>
-            <div class="stat-card p-4 rounded-lg shadow text-white">
-                <div class="text-sm opacity-80">Points Recorded</div>
-                <div class="text-2xl font-bold" id="pointsRecorded">0</div>
+            <div class="stat-card p-3 rounded-lg shadow text-white">
+                <div class="text-xs opacity-80">ETA to Destination</div>
+                <div class="text-lg font-bold flex items-center">
+                    <i class="fas fa-flag-checkered mr-2 text-sm"></i>
+                    <span id="eta">--:--</span>
+                </div>
             </div>
         </div>
         
         <!-- Map and Controls -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             <!-- Map Container -->
             <div class="lg:col-span-2 rounded-lg overflow-hidden shadow-lg relative">
                 <div id="map"></div>
-                <div class="absolute top-4 right-4 z-10 bg-gray-800 bg-opacity-70 text-white px-3 py-2 rounded-lg">
+                
+                <!-- Map Type Selector -->
+                <div class="map-type-selector">
+                    <select id="mapType" class="bg-transparent text-white border-none outline-none">
+                        <option value="standard">Standard Map</option>
+                        <option value="satellite">Satellite</option>
+                    </select>
+                </div>
+                
+                <!-- Destination Input -->
+                <div class="destination-input">
+                    <div class="text-sm mb-1">Destination</div>
+                    <div class="flex">
+                        <input type="text" id="destinationInput" placeholder="Enter destination" class="flex-grow bg-gray-700 text-white rounded-l p-2 text-sm">
+                        <button id="setDestinationBtn" class="bg-blue-600 text-white px-3 rounded-r text-sm">Set</button>
+                    </div>
+                </div>
+                
+                <!-- WhatsApp Sharing -->
+                <div class="whatsapp-share">
+                    <div class="text-sm mb-1">Share Live Location</div>
+                    <div class="flex">
+                        <input type="text" id="whatsappNumber" placeholder="Phone number" class="flex-grow bg-gray-700 text-white rounded-l p-2 text-sm">
+                        <button id="shareWhatsAppBtn" class="bg-green-600 text-white px-3 rounded-r text-sm">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="absolute top-3 right-3 z-10 bg-gray-800 bg-opacity-70 text-white px-2 py-1 rounded-lg text-sm">
                     <span id="zoomLevel">Zoom: --</span>
                 </div>
-                <div class="absolute bottom-4 left-4 z-10 bg-gray-800 bg-opacity-70 text-white px-3 py-2 rounded-lg">
+                <div class="absolute bottom-3 left-3 z-10 bg-gray-800 bg-opacity-70 text-white px-2 py-1 rounded-lg text-sm">
                     <span id="coordinates">Lat: --, Lng: --</span>
                 </div>
             </div>
             
             <!-- Controls Panel -->
-            <div class="bg-gray-800 p-6 rounded-lg shadow">
-                <h2 class="text-xl font-semibold mb-4 text-white">Controls</h2>
-                <div class="space-y-4">
-                    <button id="trackBtn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg transition-colors">
+            <div class="bg-gray-800 p-4 rounded-lg shadow">
+                <h2 class="text-lg font-semibold mb-3 text-white flex items-center">
+                    <i class="fas fa-sliders-h mr-2"></i>
+                    Tracking Controls
+                </h2>
+                <div class="space-y-3">
+                    <button id="trackBtn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                        <i class="fas fa-play mr-2"></i>
                         Start Tracking
                     </button>
                     
                     <div class="grid grid-cols-2 gap-2">
-                        <button id="centerBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                            Center Map
+                        <button id="centerBtn" class="btn-secondary text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-sm">
+                            <i class="fas fa-crosshairs mr-1"></i>
+                            Center
                         </button>
-                        <button id="clearRouteBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                            Clear Route
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="exportBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                            Export Data
-                        </button>
-                        <button id="shareBtn" class="btn-secondary text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                            Share Location
+                        <button id="clearRouteBtn" class="btn-secondary text-white font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center text-sm">
+                            <i class="fas fa-trash mr-1"></i>
+                            Clear
                         </button>
                     </div>
                     
-                    <div class="pt-4 border-t border-gray-700">
-                        <h3 class="font-semibold mb-2">Tracking Settings</h3>
+                    <div class="pt-3 border-t border-gray-700">
+                        <h3 class="font-semibold mb-2 flex items-center">
+                            <i class="fas fa-cog mr-2"></i>
+                            Tracking Settings
+                        </h3>
                         <div class="space-y-2">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="highAccuracy" class="mr-2" checked>
-                                <label for="highAccuracy">High Accuracy</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="recordAltitude" class="mr-2">
-                                <label for="recordAltitude">Record Altitude</label>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="highAccuracy" class="mr-2" checked>
+                                    <label for="highAccuracy" class="text-sm">High Accuracy</label>
+                                </div>
+                                <div class="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded">Battery Intensive</div>
                             </div>
                             <div class="flex items-center">
                                 <input type="checkbox" id="autoCenter" class="mr-2" checked>
-                                <label for="autoCenter">Auto Center Map</label>
+                                <label for="autoCenter" class="text-sm">Auto Center Map</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="shareLive" class="mr-2">
+                                <label for="shareLive" class="text-sm">Share Live Location</label>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Location Details -->
-                <div class="mt-6 pt-4 border-t border-gray-700">
-                    <h2 class="text-xl font-semibold mb-4 text-white">Location Details</h2>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Latitude:</span>
-                            <span id="latitude" class="text-white">--</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Longitude:</span>
-                            <span id="longitude" class="text-white">--</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Accuracy:</span>
-                            <span id="accuracy" class="text-white">--</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Altitude:</span>
-                            <span id="altitude" class="text-white">--</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Speed:</span>
-                            <span id="speed" class="text-white">--</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Heading:</span>
-                            <span id="heading" class="text-white">--</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Last Update:</span>
-                            <span id="lastUpdate" class="text-white">--</span>
+                    
+                    <div class="pt-3 border-t border-gray-700">
+                        <h3 class="font-semibold mb-2 flex items-center">
+                            <i class="fas fa-truck mr-2"></i>
+                            Transit Details
+                        </h3>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="text-xs text-gray-400">Transit Name</label>
+                                <input type="text" id="transitNameInput" class="w-full bg-gray-700 text-white rounded p-2 text-sm" value="Delivery Truck #1245">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400">Transit Type</label>
+                                <select id="transitType" class="w-full bg-gray-700 text-white rounded p-2 text-sm">
+                                    <option value="truck">Delivery Truck</option>
+                                    <option value="van">Delivery Van</option>
+                                    <option value="car">Car</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                    <option value="person">Person</option>
+                                    <option value="package">Package</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- Location Details -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow mb-4">
+            <h2 class="text-lg font-semibold mb-3 text-white flex items-center">
+                <i class="fas fa-info-circle mr-2"></i>
+                Location Details
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="text-xs text-gray-400">Latitude</div>
+                    <div class="text-sm font-medium" id="latitude">--</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="text-xs text-gray-400">Longitude</div>
+                    <div class="text-sm font-medium" id="longitude">--</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="text-xs text-gray-400">Accuracy</div>
+                    <div class="text-sm font-medium" id="accuracy">--</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="text-xs text-gray-400">Altitude</div>
+                    <div class="text-sm font-medium" id="altitude">--</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="text-xs text-gray-400">Heading</div>
+                    <div class="text-sm font-medium" id="heading">--</div>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <div class="text-xs text-gray-400">Last Update</div>
+                    <div class="text-sm font-medium" id="lastUpdate">--</div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Route History -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow mb-6">
-            <h2 class="text-xl font-semibold mb-4 text-white">Route History</h2>
+        <div class="bg-gray-800 p-4 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-3 text-white flex items-center">
+                <i class="fas fa-history mr-2"></i>
+                Route History
+            </h2>
             <div id="routeHistory" class="max-h-40 overflow-y-auto">
                 <p class="text-gray-400 text-center py-4">No route history yet. Start tracking to record your journey.</p>
             </div>
         </div>
         
         <!-- Status Messages -->
-        <div id="statusMessage" class="mt-6 p-4 rounded-lg hidden"></div>
+        <div id="statusMessage" class="mt-4 p-3 rounded-lg hidden"></div>
         
         <!-- Map Attribution -->
-        <div class="mt-6 text-center text-gray-500 text-sm">
+        <div class="mt-4 text-center text-gray-500 text-xs">
             Map data © <a href="https://www.openstreetmap.org/" class="text-blue-400" target="_blank">OpenStreetMap</a> contributors
         </div>
     </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     
     <script>
         // App state
@@ -304,12 +525,19 @@
             polyline: null,
             lastPosition: null,
             totalDistance: 0,
+            currentSpeed: 0,
             topSpeed: 0,
             startTime: null,
             trackingInterval: null,
             currentTheme: 'blue',
-            currentMapStyle: 'standard',
-            mapLayers: {}
+            transitType: 'truck',
+            transitName: 'Delivery Truck #1245',
+            destination: null,
+            eta: null,
+            routingControl: null,
+            currentMapType: 'standard',
+            mapLayers: {},
+            destinationMarker: null
         };
 
         // Initialize the app when DOM is loaded
@@ -317,6 +545,7 @@
             initMap();
             setupEventListeners();
             checkGeolocationSupport();
+            updateTransitInfo();
         });
 
         // Initialize Leaflet Map with OpenStreetMap tiles
@@ -333,33 +562,17 @@
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19
                 }),
-                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    maxZoom: 19
-                }),
                 satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
                     maxZoom: 19
-                }),
-                terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-                    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
-                    maxZoom: 17
                 })
             };
             
             // Add default layer
             state.mapLayers.standard.addTo(state.map);
             
-            // Create initial marker with custom icon
-            const customIcon = L.divIcon({
-                className: 'pulse-marker',
-                html: `<div style="background-color: var(--primary-color); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>`,
-                iconSize: [26, 26],
-                iconAnchor: [13, 13]
-            });
-            
-            state.marker = L.marker(defaultCenter, { icon: customIcon }).addTo(state.map);
-            state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
+            // Create initial marker with custom icon based on transit type
+            updateMarkerIcon();
             
             // Initialize accuracy circle
             state.accuracyCircle = L.circle(defaultCenter, {
@@ -391,15 +604,191 @@
             document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
         }
 
+        // Update marker icon based on transit type
+        function updateMarkerIcon() {
+            let iconHtml = '';
+            
+            switch(state.transitType) {
+                case 'truck':
+                    iconHtml = '<i class="fas fa-truck"></i>';
+                    break;
+                case 'van':
+                    iconHtml = '<i class="fas fa-shuttle-van"></i>';
+                    break;
+                case 'car':
+                    iconHtml = '<i class="fas fa-car"></i>';
+                    break;
+                case 'motorcycle':
+                    iconHtml = '<i class="fas fa-motorcycle"></i>';
+                    break;
+                case 'person':
+                    iconHtml = '<i class="fas fa-walking"></i>';
+                    break;
+                case 'package':
+                    iconHtml = '<i class="fas fa-box"></i>';
+                    break;
+                default:
+                    iconHtml = '<i class="fas fa-map-marker-alt"></i>';
+            }
+            
+            const customIcon = L.divIcon({
+                className: 'pulse-marker',
+                html: `<div style="background-color: var(--primary-color); width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center;">${iconHtml}</div>`,
+                iconSize: [38, 38],
+                iconAnchor: [19, 19]
+            });
+            
+            if (state.marker) {
+                state.marker.setIcon(customIcon);
+            } else {
+                state.marker = L.marker([51.505, -0.09], { icon: customIcon }).addTo(state.map);
+                state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
+            }
+        }
+
         // Set up event listeners
         function setupEventListeners() {
             document.getElementById('trackBtn').addEventListener('click', toggleTracking);
             document.getElementById('centerBtn').addEventListener('click', centerMap);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-            document.getElementById('shareBtn').addEventListener('click', shareLocation);
             document.getElementById('themeSelector').addEventListener('change', changeTheme);
-            document.getElementById('mapStyleSelector').addEventListener('change', changeMapStyle);
+            document.getElementById('transitType').addEventListener('change', updateTransitType);
+            document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
+            document.getElementById('mapType').addEventListener('change', changeMapType);
+            document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
+            document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
+        }
+
+        // Change map type
+        function changeMapType() {
+            const mapType = document.getElementById('mapType').value;
+            
+            // Remove current layer
+            if (state.currentMapType && state.mapLayers[state.currentMapType]) {
+                state.map.removeLayer(state.mapLayers[state.currentMapType]);
+            }
+            
+            // Add new layer
+            state.mapLayers[mapType].addTo(state.map);
+            state.currentMapType = mapType;
+        }
+
+        // Set destination and calculate route
+        function setDestination() {
+            const destinationInput = document.getElementById('destinationInput').value.trim();
+            
+            if (!destinationInput) {
+                showStatus('Please enter a destination.', 'error');
+                return;
+            }
+            
+            if (!state.lastPosition) {
+                showStatus('Please start tracking to get your current location first.', 'error');
+                return;
+            }
+            
+            // Remove existing routing control if any
+            if (state.routingControl) {
+                state.map.removeControl(state.routingControl);
+            }
+            
+            // Remove existing destination marker if any
+            if (state.destinationMarker) {
+                state.map.removeLayer(state.destinationMarker);
+            }
+            
+            // Create routing control
+            state.routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(state.lastPosition[0], state.lastPosition[1]),
+                    L.latLng(0, 0) // Will be updated after geocoding
+                ],
+                routeWhileDragging: false,
+                showAlternatives: false,
+                lineOptions: {
+                    styles: [{ color: 'var(--primary-color)', weight: 5 }]
+                },
+                createMarker: function(i, waypoint, n) {
+                    if (i === 0) {
+                        // Don't create marker for start point (we already have one)
+                        return null;
+                    }
+                    // Create destination marker
+                    state.destinationMarker = L.marker(waypoint.latLng, {
+                        icon: L.divIcon({
+                            className: 'destination-marker',
+                            html: '<div style="background-color: #ef4444; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white;"></div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        })
+                    }).addTo(state.map);
+                    
+                    state.destinationMarker.bindPopup(`<b>Destination</b><br>${destinationInput}`).openPopup();
+                    
+                    return state.destinationMarker;
+                }
+            }).addTo(state.map);
+            
+            // Geocode the destination
+            const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinationInput)}`;
+            
+            fetch(geocodeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const destination = data[0];
+                        const destLatLng = L.latLng(destination.lat, destination.lon);
+                        
+                        // Update routing waypoints
+                        state.routingControl.setWaypoints([
+                            L.latLng(state.lastPosition[0], state.lastPosition[1]),
+                            destLatLng
+                        ]);
+                        
+                        // Store destination
+                        state.destination = {
+                            name: destinationInput,
+                            latLng: destLatLng
+                        };
+                        
+                        showStatus(`Route to ${destinationInput} calculated.`, 'success');
+                    } else {
+                        showStatus('Destination not found. Please try a different location.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Geocoding error:', error);
+                    showStatus('Error finding destination. Please try again.', 'error');
+                });
+        }
+
+        // Share location via WhatsApp
+        function shareLocationViaWhatsApp() {
+            const phoneNumber = document.getElementById('whatsappNumber').value.trim();
+            
+            if (!phoneNumber) {
+                showStatus('Please enter a phone number.', 'error');
+                return;
+            }
+            
+            if (!state.lastPosition) {
+                showStatus('No location data available. Start tracking first.', 'error');
+                return;
+            }
+            
+            // Format phone number (remove any non-digit characters)
+            const formattedNumber = phoneNumber.replace(/\D/g, '');
+            
+            // Create message with location
+            const message = `My current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
+            
+            // Create WhatsApp URL
+            const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
+            
+            // Open WhatsApp in a new tab
+            window.open(whatsappUrl, '_blank');
+            
+            showStatus('WhatsApp sharing initiated.', 'success');
         }
 
         // Change theme
@@ -409,6 +798,78 @@
             state.currentTheme = theme;
             
             updateTheme();
+        }
+
+        // Update transit type
+        function updateTransitType() {
+            state.transitType = document.getElementById('transitType').value;
+            updateMarkerIcon();
+            updateTransitInfo();
+        }
+
+        // Update transit name
+        function updateTransitName() {
+            state.transitName = document.getElementById('transitNameInput').value;
+            updateTransitInfo();
+        }
+
+        // Update transit info display
+        function updateTransitInfo() {
+            document.getElementById('transitName').textContent = state.transitName;
+            
+            let description = '';
+            switch(state.transitType) {
+                case 'truck':
+                    description = 'Delivery Truck Service';
+                    break;
+                case 'van':
+                    description = 'Delivery Van Service';
+                    break;
+                case 'car':
+                    description = 'Personal Vehicle';
+                    break;
+                case 'motorcycle':
+                    description = 'Motorcycle Courier';
+                    break;
+                case 'person':
+                    description = 'Person in Transit';
+                    break;
+                case 'package':
+                    description = 'Package Tracking';
+                    break;
+            }
+            
+            document.getElementById('transitDescription').textContent = description;
+            
+            // Update transit icon
+            const transitIcon = document.querySelector('.transit-icon');
+            transitIcon.innerHTML = '';
+            
+            let iconClass = '';
+            switch(state.transitType) {
+                case 'truck':
+                    iconClass = 'fas fa-truck';
+                    break;
+                case 'van':
+                    iconClass = 'fas fa-shuttle-van';
+                    break;
+                case 'car':
+                    iconClass = 'fas fa-car';
+                    break;
+                case 'motorcycle':
+                    iconClass = 'fas fa-motorcycle';
+                    break;
+                case 'person':
+                    iconClass = 'fas fa-walking';
+                    break;
+                case 'package':
+                    iconClass = 'fas fa-box';
+                    break;
+            }
+            
+            const icon = document.createElement('i');
+            icon.className = `${iconClass} text-xs`;
+            transitIcon.appendChild(icon);
         }
 
         // Update theme-specific elements
@@ -429,29 +890,7 @@
             }
             
             // Update marker
-            if (state.marker) {
-                const customIcon = L.divIcon({
-                    className: 'pulse-marker',
-                    html: `<div style="background-color: var(--primary-color); width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>`,
-                    iconSize: [26, 26],
-                    iconAnchor: [13, 13]
-                });
-                state.marker.setIcon(customIcon);
-            }
-        }
-
-        // Change map style
-        function changeMapStyle() {
-            const style = document.getElementById('mapStyleSelector').value;
-            state.currentMapStyle = style;
-            
-            // Remove all existing layers
-            for (const key in state.mapLayers) {
-                state.map.removeLayer(state.mapLayers[key]);
-            }
-            
-            // Add selected layer
-            state.mapLayers[style].addTo(state.map);
+            updateMarkerIcon();
         }
 
         // Check if geolocation is supported
@@ -498,9 +937,15 @@
             // Start tracking timer
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
             
-            document.getElementById('trackBtn').textContent = 'Stop Tracking';
+            document.getElementById('trackBtn').innerHTML = '<i class="fas fa-stop mr-2"></i>Stop Tracking';
             document.getElementById('trackBtn').classList.add('tracking-active');
-            showStatus('Tracking started. Your location is now being monitored.', 'success');
+            
+            // Update status indicator
+            document.getElementById('statusIndicator').className = 'status-indicator status-active';
+            document.getElementById('statusText').textContent = 'Tracking Active';
+            document.getElementById('transitStatus').textContent = 'In Transit';
+            
+            showStatus('Tracking started. Your transit is now being monitored.', 'success');
         }
 
         // Stop location tracking
@@ -516,8 +961,14 @@
             }
             
             state.isTracking = false;
-            document.getElementById('trackBtn').textContent = 'Start Tracking';
+            document.getElementById('trackBtn').innerHTML = '<i class="fas fa-play mr-2"></i>Start Tracking';
             document.getElementById('trackBtn').classList.remove('tracking-active');
+            
+            // Update status indicator
+            document.getElementById('statusIndicator').className = 'status-indicator status-inactive';
+            document.getElementById('statusText').textContent = 'Not Tracking';
+            document.getElementById('transitStatus').textContent = 'Stopped';
+            
             showStatus('Tracking stopped.', 'info');
         }
 
@@ -534,16 +985,21 @@
             // Update location display
             document.getElementById('latitude').textContent = lat.toFixed(6);
             document.getElementById('longitude').textContent = lng.toFixed(6);
-            document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)} meters`;
-            document.getElementById('speed').textContent = speed ? `${(speed * 3.6).toFixed(2)} km/h` : '--';
+            document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)}m`;
+            document.getElementById('altitude').textContent = altitude ? `${altitude.toFixed(2)}m` : '--';
             document.getElementById('heading').textContent = heading ? `${heading.toFixed(0)}°` : '--';
-            document.getElementById('altitude').textContent = altitude ? `${altitude.toFixed(2)} meters` : '--';
             document.getElementById('lastUpdate').textContent = timestamp.toLocaleTimeString();
+            document.getElementById('transitUpdate').textContent = `Last update: ${timestamp.toLocaleTimeString()}`;
             
-            // Update top speed
-            if (speed && speed * 3.6 > state.topSpeed) {
-                state.topSpeed = speed * 3.6;
-                document.getElementById('topSpeed').textContent = state.topSpeed.toFixed(2) + ' km/h';
+            // Update speed
+            if (speed) {
+                state.currentSpeed = speed * 3.6; // Convert to km/h
+                document.getElementById('currentSpeed').textContent = state.currentSpeed.toFixed(2) + ' km/h';
+                
+                // Update top speed
+                if (state.currentSpeed > state.topSpeed) {
+                    state.topSpeed = state.currentSpeed;
+                }
             }
             
             // Create new position object
@@ -558,11 +1014,10 @@
             
             // Update marker popup
             state.marker.bindPopup(`
-                <b>Your Location</b><br>
-                Lat: ${lat.toFixed(6)}<br>
-                Lng: ${lng.toFixed(6)}<br>
-                Accuracy: ${accuracy.toFixed(2)}m<br>
-                ${speed ? `Speed: ${(speed * 3.6).toFixed(2)} km/h` : ''}
+                <b>${state.transitName}</b><br>
+                Status: In Transit<br>
+                Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
+                Last Update: ${timestamp.toLocaleTimeString()}
             `);
             
             // Center map on new position if auto-center is enabled
@@ -579,20 +1034,41 @@
                 );
                 state.totalDistance += distance;
                 document.getElementById('distanceTraveled').textContent = (state.totalDistance / 1000).toFixed(2) + ' km';
+                
+                // Calculate ETA (simplified calculation)
+                updateETA();
             }
             
             state.pathCoordinates.push(newPosition);
             state.timestamps.push(timestamp);
             state.polyline.setLatLngs(state.pathCoordinates);
             
-            // Update points recorded
-            document.getElementById('pointsRecorded').textContent = state.pathCoordinates.length;
-            
             // Add to route history
             addToRouteHistory(newPosition, timestamp);
             
+            // Update routing if destination is set
+            if (state.routingControl && state.lastPosition) {
+                state.routingControl.setWaypoints([
+                    L.latLng(newPosition[0], newPosition[1]),
+                    state.routingControl.getWaypoints()[1]
+                ]);
+            }
+            
             // Store last position
             state.lastPosition = newPosition;
+        }
+
+        // Update ETA calculation
+        function updateETA() {
+            // Simplified ETA calculation - in a real app, you would use a routing service
+            if (state.currentSpeed > 5) { // Only calculate if moving
+                const remainingDistance = 10; // Example: 10km to destination
+                const timeHours = remainingDistance / state.currentSpeed;
+                const etaTime = new Date(Date.now() + timeHours * 3600000);
+                document.getElementById('eta').textContent = etaTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } else {
+                document.getElementById('eta').textContent = '--:--';
+            }
         }
 
         // Add point to route history
@@ -611,61 +1087,13 @@
                     <span class="text-sm">${timestamp.toLocaleTimeString()}</span>
                     <span class="text-xs text-gray-400 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
                 </div>
-                <button class="text-xs text-red-400 hover:text-red-300" onclick="removeRoutePoint(${state.pathCoordinates.length - 1})">Remove</button>
+                <div class="text-xs text-gray-400">${state.currentSpeed.toFixed(1)} km/h</div>
             `;
             
             routeHistory.appendChild(historyItem);
             
             // Scroll to bottom
             routeHistory.scrollTop = routeHistory.scrollHeight;
-        }
-
-        // Remove a point from the route
-        function removeRoutePoint(index) {
-            if (index >= 0 && index < state.pathCoordinates.length) {
-                state.pathCoordinates.splice(index, 1);
-                state.timestamps.splice(index, 1);
-                state.polyline.setLatLngs(state.pathCoordinates);
-                document.getElementById('pointsRecorded').textContent = state.pathCoordinates.length;
-                
-                // Recalculate total distance
-                state.totalDistance = 0;
-                for (let i = 1; i < state.pathCoordinates.length; i++) {
-                    state.totalDistance += calculateDistance(
-                        state.pathCoordinates[i-1][0], state.pathCoordinates[i-1][1],
-                        state.pathCoordinates[i][0], state.pathCoordinates[i][1]
-                    );
-                }
-                document.getElementById('distanceTraveled').textContent = (state.totalDistance / 1000).toFixed(2) + ' km';
-                
-                // Refresh route history
-                refreshRouteHistory();
-            }
-        }
-
-        // Refresh route history display
-        function refreshRouteHistory() {
-            const routeHistory = document.getElementById('routeHistory');
-            routeHistory.innerHTML = '';
-            
-            if (state.pathCoordinates.length === 0) {
-                routeHistory.innerHTML = '<p class="text-gray-400 text-center py-4">No route history yet. Start tracking to record your journey.</p>';
-                return;
-            }
-            
-            state.pathCoordinates.forEach((position, index) => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'route-item';
-                historyItem.innerHTML = `
-                    <div>
-                        <span class="text-sm">${state.timestamps[index].toLocaleTimeString()}</span>
-                        <span class="text-xs text-gray-400 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
-                    </div>
-                    <button class="text-xs text-red-400 hover:text-red-300" onclick="removeRoutePoint(${index})">Remove</button>
-                `;
-                
-                routeHistory.appendChild(historyItem);
-            });
         }
 
         // Calculate distance between two coordinates in meters
@@ -703,7 +1131,7 @@
         function centerMap() {
             if (state.lastPosition) {
                 state.map.setView(state.lastPosition, state.map.getZoom());
-                showStatus('Map centered on your location.', 'info');
+                showStatus('Map centered on current location.', 'info');
             } else {
                 showStatus('No location data available. Start tracking first.', 'error');
             }
@@ -738,90 +1166,44 @@
             state.timestamps = [];
             state.polyline.setLatLngs(state.pathCoordinates);
             state.totalDistance = 0;
+            state.currentSpeed = 0;
             state.topSpeed = 0;
             document.getElementById('distanceTraveled').textContent = '0.00 km';
-            document.getElementById('topSpeed').textContent = '0.00 km/h';
-            document.getElementById('pointsRecorded').textContent = '0';
+            document.getElementById('currentSpeed').textContent = '0.00 km/h';
             refreshRouteHistory();
             showStatus('Route cleared.', 'info');
         }
 
-        // Export tracking data
-        function exportData() {
+        // Refresh route history display
+        function refreshRouteHistory() {
+            const routeHistory = document.getElementById('routeHistory');
+            routeHistory.innerHTML = '';
+            
             if (state.pathCoordinates.length === 0) {
-                showStatus('No data to export. Start tracking first.', 'error');
+                routeHistory.innerHTML = '<p class="text-gray-400 text-center py-4">No route history yet. Start tracking to record your journey.</p>';
                 return;
             }
             
-            const data = {
-                metadata: {
-                    exportedAt: new Date().toISOString(),
-                    totalPoints: state.pathCoordinates.length,
-                    totalDistance: state.totalDistance,
-                    topSpeed: state.topSpeed,
-                    theme: state.currentTheme
-                },
-                coordinates: state.pathCoordinates.map((coord, index) => ({
-                    lat: coord[0],
-                    lng: coord[1],
-                    timestamp: state.timestamps[index].toISOString()
-                }))
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `gps-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showStatus('Data exported successfully.', 'success');
-        }
-
-        // Share current location
-        function shareLocation() {
-            if (!state.lastPosition) {
-                showStatus('No location data available. Start tracking first.', 'error');
-                return;
-            }
-            
-            const lat = state.lastPosition[0];
-            const lng = state.lastPosition[1];
-            
-            const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
-            const text = `My current location: ${lat.toFixed(6)}, ${lng.toFixed(6)} - ${url}`;
-            
-            if (navigator.share) {
-                navigator.share({
-                    title: 'My Current Location',
-                    text: text,
-                    url: url
-                }).then(() => {
-                    showStatus('Location shared successfully.', 'success');
-                }).catch((error) => {
-                    console.log('Error sharing:', error);
-                    showStatus('Sharing cancelled or failed.', 'error');
-                });
-            } else {
-                // Fallback: copy to clipboard
-                navigator.clipboard.writeText(text).then(() => {
-                    showStatus('Location copied to clipboard.', 'success');
-                }).catch(() => {
-                    // Final fallback: show the text
-                    prompt('Copy this location:', text);
-                });
-            }
+            state.pathCoordinates.forEach((position, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'route-item';
+                historyItem.innerHTML = `
+                    <div>
+                        <span class="text-sm">${state.timestamps[index].toLocaleTimeString()}</span>
+                        <span class="text-xs text-gray-400 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
+                    </div>
+                    <div class="text-xs text-gray-400">-- km/h</div>
+                `;
+                
+                routeHistory.appendChild(historyItem);
+            });
         }
 
         // Show status messages
         function showStatus(message, type) {
             const statusEl = document.getElementById('statusMessage');
             statusEl.textContent = message;
-            statusEl.className = 'mt-6 p-4 rounded-lg';
+            statusEl.className = 'mt-4 p-3 rounded-lg';
             
             switch(type) {
                 case 'success':
