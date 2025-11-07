@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideTrack - GPS Tracking App</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <style>
+        #map {
+            height: 500px;
+            z-index: 1;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+            display: none;
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                height: 100vh;
+                z-index: 10;
+                top: 0;
+                left: 0;
+                width: 80%;
+                overflow-y: auto;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 9;
+            }
+            .overlay.active {
+                display: block;
+            }
+        }
+        .driver-marker {
+            background-color: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+        <div class="flex items-center">
+            <h1 class="text-xl font-bold text-blue-600">RideTrack</h1>
+            <button id="themeToggle" class="ml-4 p-2 rounded-full bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+            </button>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="menuToggle" class="md:hidden p-2 rounded-md bg-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <div id="userSection" class="hidden">
+                <span id="userName" class="mr-4"></span>
+                <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded-md">Logout</button>
+            </div>
+            <div id="authSection">
+                <button id="loginBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md mr-2">Login</button>
+                <button id="signupBtn" class="bg-green-500 text-white px-4 py-2 rounded-md">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-4 flex flex-col md:flex-row">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white p-4 rounded-lg shadow-md w-full md:w-1/4 mb-4 md:mb-0 md:mr-4">
+            <div id="authForms" class="mb-6">
+                <!-- Login Form -->
+                <div id="loginForm" class="hidden">
+                    <h2 class="text-xl font-bold mb-4">Login</h2>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <button id="submitLogin" class="w-full bg-blue-500 text-white p-2 rounded-md flex justify-center items-center">
+                        <span id="loginText">Login</span>
+                        <span id="loginSpinner" class="loading hidden ml-2"></span>
+                    </button>
+                    <p class="mt-2 text-center">Don't have an account? <button id="showSignup" class="text-blue-500">Sign up</button></p>
+                </div>
+
+                <!-- Signup Form -->
+                <div id="signupForm" class="hidden">
+                    <h2 class="text-xl font-bold mb-4">Sign Up</h2>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="signupName">Full Name</label>
+                        <input type="text" id="signupName" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <button id="submitSignup" class="w-full bg-green-500 text-white p-2 rounded-md flex justify-center items-center">
+                        <span id="signupText">Sign Up</span>
+                        <span id="signupSpinner" class="loading hidden ml-2"></span>
+                    </button>
+                    <p class="mt-2 text-center">Already have an account? <button id="showLogin" class="text-blue-500">Login</button></p>
+                </div>
+            </div>
+
+            <!-- User Dashboard -->
+            <div id="userDashboard" class="hidden">
+                <h2 class="text-xl font-bold mb-4">Dashboard</h2>
+                
+                <!-- User Profile -->
+                <div class="mb-6">
+                    <h3 class="font-bold mb-2">Profile</h3>
+                    <div class="bg-gray-100 p-3 rounded-md">
+                        <p><strong>Name:</strong> <span id="profileName"></span></p>
+                        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                        <p><strong>User Type:</strong> <span id="profileType"></span></p>
+                    </div>
+                </div>
+
+                <!-- Active Ride -->
+                <div id="activeRide" class="mb-6 hidden">
+                    <h3 class="font-bold mb-2">Active Ride</h3>
+                    <div class="bg-blue-100 p-3 rounded-md">
+                        <p><strong>Driver:</strong> <span id="driverName">John Doe</span></p>
+                        <p><strong>Vehicle:</strong> <span id="vehicleInfo">Toyota Camry - ABC123</span></p>
+                        <p><strong>ETA:</strong> <span id="eta">5 minutes</span></p>
+                        <p><strong>Distance:</strong> <span id="distance">2.3 km</span></p>
+                        <button id="trackRide" class="w-full bg-blue-500 text-white p-2 rounded-md mt-2">Track Ride</button>
+                        <button id="cancelRide" class="w-full bg-red-500 text-white p-2 rounded-md mt-2">Cancel Ride</button>
+                    </div>
+                </div>
+
+                <!-- Ride Controls -->
+                <div id="rideControls" class="mb-6">
+                    <h3 class="font-bold mb-2">Book a Ride</h3>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="pickupLocation">Pickup Location</label>
+                        <input type="text" id="pickupLocation" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter pickup location">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="destination">Destination</label>
+                        <input type="text" id="destination" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter destination">
+                    </div>
+                    <button id="requestRide" class="w-full bg-blue-500 text-white p-2 rounded-md flex justify-center items-center">
+                        <span id="requestRideText">Request Ride</span>
+                        <span id="requestRideSpinner" class="loading hidden ml-2"></span>
+                    </button>
+                </div>
+
+                <!-- Trip History -->
+                <div id="tripHistory" class="mb-6">
+                    <h3 class="font-bold mb-2">Trip History</h3>
+                    <div class="bg-gray-100 p-3 rounded-md max-h-40 overflow-y-auto">
+                        <ul id="tripList">
+                            <!-- Trip history items will be added here dynamically -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard (only visible to admins) -->
+                <div id="adminDashboard" class="hidden">
+                    <h3 class="font-bold mb-2">Admin Dashboard</h3>
+                    <div class="bg-gray-100 p-3 rounded-md">
+                        <h4 class="font-bold mb-2">Active Rides</h4>
+                        <div id="activeRidesList" class="max-h-40 overflow-y-auto">
+                            <!-- Active rides will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="flex-1">
+            <div id="map" class="rounded-lg shadow-md"></div>
+            
+            <!-- Map Controls -->
+            <div class="mt-4 flex flex-wrap gap-2">
+                <button id="locateMe" class="bg-blue-500 text-white px-4 py-2 rounded-md">Locate Me</button>
+                <button id="findRide" class="bg-green-500 text-white px-4 py-2 rounded-md">Find My Ride</button>
+                <button id="simulateDriver" class="bg-purple-500 text-white px-4 py-2 rounded-md">Simulate Driver</button>
+                <button id="clearRoute" class="bg-gray-500 text-white px-4 py-2 rounded-md">Clear Route</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification bg-white p-4 rounded-lg shadow-lg">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 class="font-bold" id="notificationTitle">Notification</h3>
+                <p id="notificationMessage">This is a notification message.</p>
+            </div>
+            <button id="closeNotification" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Firebase Configuration (Replace with your Firebase config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Application State
+        let currentUser = null;
+        let map = null;
+        let userMarker = null;
+        let driverMarker = null;
+        let routeLine = null;
+        let isDarkMode = false;
+        let watchId = null;
+        let activeRide = null;
+        let simulationInterval = null;
+        let userLocation = null;
+
+        // DOM Elements
+        const elements = {
+            // Auth elements
+            authSection: document.getElementById('authSection'),
+            userSection: document.getElementById('userSection'),
+            userName: document.getElementById('userName'),
+            loginBtn: document.getElementById('loginBtn'),
+            signupBtn: document.getElementById('signupBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            
+            // Form elements
+            authForms: document.getElementById('authForms'),
+            loginForm: document.getElementById('loginForm'),
+            signupForm: document.getElementById('signupForm'),
+            submitLogin: document.getElementById('submitLogin'),
+            submitSignup: document.getElementById('submitSignup'),
+            showLogin: document.getElementById('showLogin'),
+            showSignup: document.getElementById('showSignup'),
+            loginText: document.getElementById('loginText'),
+            loginSpinner: document.getElementById('loginSpinner'),
+            signupText: document.getElementById('signupText'),
+            signupSpinner: document.getElementById('signupSpinner'),
+            
+            // Dashboard elements
+            userDashboard: document.getElementById('userDashboard'),
+            profileName: document.getElementById('profileName'),
+            profileEmail: document.getElementById('profileEmail'),
+            profileType: document.getElementById('profileType'),
+            activeRide: document.getElementById('activeRide'),
+            rideControls: document.getElementById('rideControls'),
+            tripHistory: document.getElementById('tripHistory'),
+            tripList: document.getElementById('tripList'),
+            adminDashboard: document.getElementById('adminDashboard'),
+            activeRidesList: document.getElementById('activeRidesList'),
+            
+            // Ride elements
+            requestRide: document.getElementById('requestRide'),
+            pickupLocation: document.getElementById('pickupLocation'),
+            destination: document.getElementById('destination'),
+            trackRide: document.getElementById('trackRide'),
+            cancelRide: document.getElementById('cancelRide'),
+            requestRideText: document.getElementById('requestRideText'),
+            requestRideSpinner: document.getElementById('requestRideSpinner'),
+            
+            // Map controls
+            locateMe: document.getElementById('locateMe'),
+            findRide: document.getElementById('findRide'),
+            simulateDriver: document.getElementById('simulateDriver'),
+            clearRoute: document.getElementById('clearRoute'),
+            themeToggle: document.getElementById('themeToggle'),
+            
+            // Notification
+            notification: document.getElementById('notification'),
+            notificationTitle: document.getElementById('notificationTitle'),
+            notificationMessage: document.getElementById('notificationMessage'),
+            closeNotification: document.getElementById('closeNotification'),
+            
+            // Mobile menu
+            menuToggle: document.getElementById('menuToggle'),
+            overlay: document.getElementById('overlay'),
+            sidebar: document.querySelector('.sidebar')
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+        });
+
+        // Initialize the application
+        function initializeApp() {
+            // Initialize the map
+            initMap();
+            
+            // Check if user is already logged in
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    currentUser = user;
+                    updateUIForUser(user);
+                    loadUserData(user);
+                    startLocationTracking();
+                    
+                    // Check for active ride
+                    checkActiveRide(user.uid);
+                } else {
+                    // User is signed out
+                    currentUser = null;
+                    updateUIForGuest();
+                    stopLocationTracking();
+                }
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Auth buttons
+            elements.loginBtn.addEventListener('click', showLoginForm);
+            elements.signupBtn.addEventListener('click', showSignupForm);
+            elements.logoutBtn.addEventListener('click', handleLogout);
+            elements.submitLogin.addEventListener('click', handleLogin);
+            elements.submitSignup.addEventListener('click', handleSignup);
+            elements.showLogin.addEventListener('click', showLoginForm);
+            elements.showSignup.addEventListener('click', showSignupForm);
+            
+            // Form enter key listeners
+            document.getElementById('loginEmail').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+            document.getElementById('signupName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleSignup();
+            });
+            document.getElementById('signupEmail').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleSignup();
+            });
+            document.getElementById('signupPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleSignup();
+            });
+            
+            // Ride controls
+            elements.requestRide.addEventListener('click', requestRide);
+            elements.trackRide.addEventListener('click', trackActiveRide);
+            elements.cancelRide.addEventListener('click', cancelRide);
+            
+            // Map controls
+            elements.locateMe.addEventListener('click', locateUser);
+            elements.findRide.addEventListener('click', findMyRide);
+            elements.simulateDriver.addEventListener('click', simulateDriverMovement);
+            elements.clearRoute.addEventListener('click', clearRoute);
+            elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // Notification
+            elements.closeNotification.addEventListener('click', hideNotification);
+            
+            // Mobile menu
+            elements.menuToggle.addEventListener('click', toggleMobileMenu);
+            elements.overlay.addEventListener('click', toggleMobileMenu);
+        }
+
+        // Initialize the map
+        function initMap() {
+            // Default coordinates (San Francisco)
+            const defaultCoords = [37.7749, -122.4194];
+            
+            // Create the map
+            map = L.map('map').setView(defaultCoords, 13);
+            
+            // Add light theme tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add locate control
+            L.control.locate({
+                position: 'topright',
+                strings: {
+                    title: "Show my location"
+                }
+            }).addTo(map);
+        }
+
+        // Show login form
+        function showLoginForm() {
+            elements.loginForm.classList.remove('hidden');
+            elements.signupForm.classList.add('hidden');
+            elements.authForms.classList.remove('hidden');
+            toggleMobileMenu(false);
+        }
+
+        // Show signup form
+        function showSignupForm() {
+            elements.signupForm.classList.remove('hidden');
+            elements.loginForm.classList.add('hidden');
+            elements.authForms.classList.remove('hidden');
+            toggleMobileMenu(false);
+        }
+
+        // Handle user login
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showNotification('Error', 'Please enter both email and password');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                elements.loginText.textContent = 'Logging in...';
+                elements.loginSpinner.classList.remove('hidden');
+                elements.submitLogin.disabled = true;
+                
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                showNotification('Success', 'Logged in successfully!');
+                elements.authForms.classList.add('hidden');
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Error', error.message);
+            } finally {
+                // Reset loading state
+                elements.loginText.textContent = 'Login';
+                elements.loginSpinner.classList.add('hidden');
+                elements.submitLogin.disabled = false;
+            }
+        }
+
+        // Handle user signup
+        async function handleSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!name || !email || !password) {
+                showNotification('Error', 'Please fill in all fields');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('Error', 'Password should be at least 6 characters');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                elements.signupText.textContent = 'Creating account...';
+                elements.signupSpinner.classList.remove('hidden');
+                elements.submitSignup.disabled = true;
+                
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Save user profile to database
+                await database.ref('users/' + user.uid).set({
+                    name: name,
+                    email: email,
+                    userType: 'rider', // Default user type
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                showNotification('Success', 'Account created successfully!');
+                elements.authForms.classList.add('hidden');
+            } catch (error) {
+                console.error('Signup error:', error);
+                showNotification('Error', error.message);
+            } finally {
+                // Reset loading state
+                elements.signupText.textContent = 'Sign Up';
+                elements.signupSpinner.classList.add('hidden');
+                elements.submitSignup.disabled = false;
+            }
+        }
+
+        // Handle user logout
+        function handleLogout() {
+            auth.signOut();
+            showNotification('Info', 'Logged out successfully!');
+            clearRoute();
+        }
+
+        // Update UI for logged in user
+        function updateUIForUser(user) {
+            elements.authSection.classList.add('hidden');
+            elements.userSection.classList.remove('hidden');
+            elements.userDashboard.classList.remove('hidden');
+            elements.authForms.classList.add('hidden');
+        }
+
+        // Update UI for guest
+        function updateUIForGuest() {
+            elements.authSection.classList.remove('hidden');
+            elements.userSection.classList.add('hidden');
+            elements.userDashboard.classList.add('hidden');
+            elements.authForms.classList.remove('hidden');
+            showLoginForm();
+        }
+
+        // Load user data from database
+        function loadUserData(user) {
+            database.ref('users/' + user.uid).once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData) {
+                        elements.userName.textContent = userData.name;
+                        elements.profileName.textContent = userData.name;
+                        elements.profileEmail.textContent = userData.email;
+                        elements.profileType.textContent = userData.userType;
+                        
+                        // Show admin dashboard if user is admin
+                        if (userData.userType === 'admin') {
+                            elements.adminDashboard.classList.remove('hidden');
+                            loadActiveRides();
+                        }
+                        
+                        // Load trip history
+                        loadTripHistory(user.uid);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading user data:', error);
+                });
+        }
+
+        // Check if user has an active ride
+        function checkActiveRide(userId) {
+            database.ref('rides').orderByChild('riderId').equalTo(userId).once('value')
+                .then((snapshot) => {
+                    const rides = snapshot.val();
+                    if (rides) {
+                        Object.keys(rides).forEach(rideId => {
+                            const ride = rides[rideId];
+                            if (ride.status === 'assigned' || ride.status === 'active') {
+                                // Found an active ride
+                                activeRide = {
+                                    id: rideId,
+                                    ...ride
+                                };
+                                
+                                elements.activeRide.classList.remove('hidden');
+                                document.getElementById('driverName').textContent = ride.driverName || 'Unknown Driver';
+                                document.getElementById('vehicleInfo').textContent = ride.vehicle || 'Unknown Vehicle';
+                                
+                                // Update ETA and distance if available
+                                if (ride.eta) {
+                                    document.getElementById('eta').textContent = ride.eta;
+                                }
+                                if (ride.distance) {
+                                    document.getElementById('distance').textContent = ride.distance;
+                                }
+                                
+                                // Start tracking the ride
+                                trackActiveRide();
+                            }
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error checking active ride:', error);
+                });
+        }
+
+        // Start tracking user location
+        function startLocationTracking() {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        userLocation = [position.coords.latitude, position.coords.longitude];
+                        
+                        // Update or create user marker
+                        if (userMarker) {
+                            userMarker.setLatLng(userLocation);
+                        } else {
+                            userMarker = L.marker(userLocation)
+                                .addTo(map)
+                                .bindPopup('Your location')
+                                .openPopup();
+                            
+                            // Center map on user location
+                            map.setView(userLocation, 15);
+                        }
+                        
+                        // Update user location in database if logged in
+                        if (currentUser) {
+                            database.ref('users/' + currentUser.uid + '/location').set({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                timestamp: firebase.database.ServerValue.TIMESTAMP
+                            });
+                        }
+                    },
+                    (error) => {
+                        console.error('Error getting location:', error);
+                        showNotification('Error', 'Unable to get your location');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 60000
+                    }
+                );
+            } else {
+                showNotification('Error', 'Geolocation is not supported by this browser');
+            }
+        }
+
+        // Stop tracking user location
+        function stopLocationTracking() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            // Remove user marker from map
+            if (userMarker) {
+                map.removeLayer(userMarker);
+                userMarker = null;
+            }
+        }
+
+        // Locate user on map
+        function locateUser() {
+            if (userMarker) {
+                map.setView(userMarker.getLatLng(), 15);
+                userMarker.openPopup();
+            } else {
+                showNotification('Info', 'Your location is not available yet');
+            }
+        }
+
+        // Request a ride
+        function requestRide() {
+            const pickup = elements.pickupLocation.value || 'Current Location';
+            const destination = elements.destination.value;
+            
+            if (!destination) {
+                showNotification('Error', 'Please enter a destination');
+                return;
+            }
+            
+            // Show loading state
+            elements.requestRideText.textContent = 'Requesting...';
+            elements.requestRideSpinner.classList.remove('hidden');
+            elements.requestRide.disabled = true;
+            
+            // Create a new ride request
+            const rideId = database.ref('rides').push().key;
+            const rideData = {
+                riderId: currentUser.uid,
+                riderName: elements.profileName.textContent,
+                pickup: pickup,
+                destination: destination,
+                status: 'requested',
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('rides/' + rideId).set(rideData)
+                .then(() => {
+                    showNotification('Success', 'Ride requested successfully!');
+                    elements.pickupLocation.value = '';
+                    elements.destination.value = '';
+                    
+                    // Simulate driver assignment (in a real app, this would be handled by a matching system)
+                    setTimeout(() => {
+                        simulateDriverAssignment(rideId);
+                    }, 2000);
+                })
+                .catch((error) => {
+                    console.error('Error requesting ride:', error);
+                    showNotification('Error', 'Failed to request ride');
+                })
+                .finally(() => {
+                    // Reset loading state
+                    elements.requestRideText.textContent = 'Request Ride';
+                    elements.requestRideSpinner.classList.add('hidden');
+                    elements.requestRide.disabled = false;
+                });
+        }
+
+        // Simulate driver assignment
+        function simulateDriverAssignment(rideId) {
+            const driverData = {
+                driverId: 'driver_' + Date.now(),
+                driverName: 'John Driver',
+                vehicle: 'Toyota Camry - ABC123',
+                status: 'assigned',
+                assignedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('rides/' + rideId).update(driverData)
+                .then(() => {
+                    showNotification('Info', 'Driver assigned to your ride!');
+                    
+                    // Update UI to show active ride
+                    elements.activeRide.classList.remove('hidden');
+                    document.getElementById('driverName').textContent = driverData.driverName;
+                    document.getElementById('vehicleInfo').textContent = driverData.vehicle;
+                    
+                    // Store active ride info
+                    activeRide = {
+                        id: rideId,
+                        ...driverData
+                    };
+                    
+                    // Start tracking the ride
+                    trackActiveRide();
+                })
+                .catch((error) => {
+                    console.error('Error assigning driver:', error);
+                });
+        }
+
+        // Cancel active ride
+        function cancelRide() {
+            if (!activeRide) {
+                showNotification('Error', 'No active ride to cancel');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to cancel this ride?')) {
+                database.ref('rides/' + activeRide.id).update({
+                    status: 'cancelled',
+                    cancelledAt: firebase.database.ServerValue.TIMESTAMP
+                })
+                .then(() => {
+                    showNotification('Info', 'Ride cancelled successfully');
+                    clearRoute();
+                    elements.activeRide.classList.add('hidden');
+                    activeRide = null;
+                })
+                .catch((error) => {
+                    console.error('Error cancelling ride:', error);
+                    showNotification('Error', 'Failed to cancel ride');
+                });
+            }
+        }
+
+        // Track active ride
+        function trackActiveRide() {
+            if (!activeRide) {
+                showNotification('Error', 'No active ride to track');
+                return;
+            }
+            
+            // In a real app, this would get the driver's actual location from the database
+            // For demo purposes, we'll simulate a driver location near the user
+            
+            if (userMarker) {
+                const userLatLng = userMarker.getLatLng();
+                const driverLatLng = [
+                    userLatLng.lat + (Math.random() * 0.01 - 0.005),
+                    userLatLng.lng + (Math.random() * 0.01 - 0.005)
+                ];
+                
+                // Update or create driver marker
+                if (driverMarker) {
+                    driverMarker.setLatLng(driverLatLng);
+                } else {
+                    driverMarker = L.marker(driverLatLng, {
+                        icon: L.divIcon({
+                            className: 'driver-marker',
+                            html: '<div class="bg-blue-500 w-6 h-6 rounded-full border-2 border-white"></div>',
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        })
+                    }).addTo(map)
+                    .bindPopup('Your driver')
+                    .openPopup();
+                }
+                
+                // Draw route between user and driver
+                if (routeLine) {
+                    map.removeLayer(routeLine);
+                }
+                
+                routeLine = L.polyline([userLatLng, driverLatLng], {
+                    color: 'blue',
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '10, 10'
+                }).addTo(map);
+                
+                // Calculate and display ETA and distance
+                const distance = calculateDistance(userLatLng, driverLatLng);
+                const eta = calculateETA(distance);
+                
+                document.getElementById('eta').textContent = eta;
+                document.getElementById('distance').textContent = distance.toFixed(2) + ' km';
+                
+                // Update ride info in database
+                database.ref('rides/' + activeRide.id).update({
+                    distance: distance.toFixed(2) + ' km',
+                    eta: eta
+                });
+                
+                // Show notification when driver is close
+                if (distance < 0.5) {
+                    showNotification('Driver Arrived', 'Your driver has arrived!');
+                }
+            }
+        }
+
+        // Find my ride
+        function findMyRide() {
+            if (activeRide) {
+                trackActiveRide();
+                
+                // Center map on the route
+                if (userMarker && driverMarker) {
+                    const bounds = L.latLngBounds([
+                        userMarker.getLatLng(),
+                        driverMarker.getLatLng()
+                    ]);
+                    map.fitBounds(bounds, { padding: [20, 20] });
+                }
+            } else {
+                showNotification('Info', 'No active ride to track');
+            }
+        }
+
+        // Simulate driver movement
+        function simulateDriverMovement() {
+            if (!driverMarker) {
+                showNotification('Info', 'No driver to simulate. Request a ride first.');
+                return;
+            }
+            
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+                elements.simulateDriver.textContent = 'Simulate Driver';
+                showNotification('Info', 'Driver simulation stopped');
+                return;
+            }
+            
+            elements.simulateDriver.textContent = 'Stop Simulation';
+            showNotification('Info', 'Driver simulation started');
+            
+            simulationInterval = setInterval(() => {
+                if (driverMarker && userMarker) {
+                    const driverLatLng = driverMarker.getLatLng();
+                    const userLatLng = userMarker.getLatLng();
+                    
+                    // Move driver slightly towards user
+                    const newLat = driverLatLng.lat + (userLatLng.lat - driverLatLng.lat) * 0.1;
+                    const newLng = driverLatLng.lng + (userLatLng.lng - driverLatLng.lng) * 0.1;
+                    
+                    driverMarker.setLatLng([newLat, newLng]);
+                    
+                    // Update route
+                    if (routeLine) {
+                        map.removeLayer(routeLine);
+                    }
+                    
+                    routeLine = L.polyline([userLatLng, [newLat, newLng]], {
+                        color: 'blue',
+                        weight: 4,
+                        opacity: 0.7,
+                        dashArray: '10, 10'
+                    }).addTo(map);
+                    
+                    // Update ETA and distance
+                    const distance = calculateDistance(userLatLng, [newLat, newLng]);
+                    const eta = calculateETA(distance);
+                    
+                    document.getElementById('eta').textContent = eta;
+                    document.getElementById('distance').textContent = distance.toFixed(2) + ' km';
+                    
+                    // Update ride info in database
+                    if (activeRide) {
+                        database.ref('rides/' + activeRide.id).update({
+                            distance: distance.toFixed(2) + ' km',
+                            eta: eta
+                        });
+                    }
+                    
+                    // Show notification when driver is close
+                    if (distance < 0.5) {
+                        showNotification('Driver Arrived', 'Your driver has arrived!');
+                        clearInterval(simulationInterval);
+                        simulationInterval = null;
+                        elements.simulateDriver.textContent = 'Simulate Driver';
+                    }
+                }
+            }, 1000);
+        }
+
+        // Clear route from map
+        function clearRoute() {
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+            
+            if (driverMarker) {
+                map.removeLayer(driverMarker);
+                driverMarker = null;
+            }
+            
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+                elements.simulateDriver.textContent = 'Simulate Driver';
+            }
+            
+            elements.activeRide.classList.add('hidden');
+            activeRide = null;
+            
+            showNotification('Info', 'Route cleared');
+        }
+
+        // Toggle between light and dark map themes
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            
+            // Remove existing tile layer
+            map.eachLayer((layer) => {
+                if (layer instanceof L.TileLayer) {
+                    map.removeLayer(layer);
+                }
+            });
+            
+            // Add appropriate tile layer
+            if (isDarkMode) {
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }).addTo(map);
+                
+                elements.themeToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                    </svg>
+                `;
+            } else {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                elements.themeToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                `;
+            }
+        }
+
+        // Load trip history for user
+        function loadTripHistory(userId) {
+            database.ref('rides').orderByChild('riderId').equalTo(userId).limitToLast(5).once('value')
+                .then((snapshot) => {
+                    const trips = snapshot.val();
+                    elements.tripList.innerHTML = '';
+                    
+                    if (trips) {
+                        Object.keys(trips).forEach(rideId => {
+                            const trip = trips[rideId];
+                            const li = document.createElement('li');
+                            li.className = 'border-b border-gray-300 py-2';
+                            li.innerHTML = `
+                                <div class="flex justify-between">
+                                    <span>${trip.pickup} → ${trip.destination}</span>
+                                    <span class="text-sm text-gray-600">${formatDate(trip.createdAt)}</span>
+                                </div>
+                                <div class="text-sm text-gray-500">Status: ${trip.status}</div>
+                            `;
+                            elements.tripList.appendChild(li);
+                        });
+                    } else {
+                        elements.tripList.innerHTML = '<li class="py-2 text-gray-500">No trip history</li>';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading trip history:', error);
+                    elements.tripList.innerHTML = '<li class="py-2 text-gray-500">Error loading trips</li>';
+                });
+        }
+
+        // Load active rides for admin dashboard
+        function loadActiveRides() {
+            database.ref('rides').orderByChild('status').equalTo('assigned').once('value')
+                .then((snapshot) => {
+                    const rides = snapshot.val();
+                    elements.activeRidesList.innerHTML = '';
+                    
+                    if (rides) {
+                        Object.keys(rides).forEach(rideId => {
+                            const ride = rides[rideId];
+                            const div = document.createElement('div');
+                            div.className = 'border-b border-gray-300 py-2';
+                            div.innerHTML = `
+                                <div class="font-bold">${ride.riderName}</div>
+                                <div class="text-sm">${ride.pickup} → ${ride.destination}</div>
+                                <div class="text-sm text-gray-500">Driver: ${ride.driverName}</div>
+                            `;
+                            elements.activeRidesList.appendChild(div);
+                        });
+                    } else {
+                        elements.activeRidesList.innerHTML = '<div class="py-2 text-gray-500">No active rides</div>';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading active rides:', error);
+                    elements.activeRidesList.innerHTML = '<div class="py-2 text-gray-500">Error loading rides</div>';
+                });
+        }
+
+        // Show notification
+        function showNotification(title, message) {
+            elements.notificationTitle.textContent = title;
+            elements.notificationMessage.textContent = message;
+            elements.notification.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideNotification();
+            }, 5000);
+        }
+
+        // Hide notification
+        function hideNotification() {
+            elements.notification.style.display = 'none';
+        }
+
+        // Toggle mobile menu
+        function toggleMobileMenu(forceClose = false) {
+            if (forceClose) {
+                elements.sidebar.classList.remove('open');
+                elements.overlay.classList.remove('active');
+            } else {
+                elements.sidebar.classList.toggle('open');
+                elements.overlay.classList.toggle('active');
+            }
+        }
+
+        // Calculate distance between two coordinates in kilometers
+        function calculateDistance(coord1, coord2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (coord2[0] - coord1[0]) * Math.PI / 180;
+            const dLon = (coord2[1] - coord1[1]) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(coord1[0] * Math.PI / 180) * Math.cos(coord2[0] * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Calculate ETA based on distance
+        function calculateETA(distance) {
+            // Assuming average speed of 30 km/h in urban areas
+            const timeInMinutes = Math.round((distance / 30) * 60);
+            return timeInMinutes <= 1 ? '1 minute' : `${timeInMinutes} minutes`;
+        }
+
+        // Format timestamp to readable date
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+    </script>
+</body>
+</html>
