@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         #map {
-            height: 60vh;
+            height: 70vh;
             width: 100%;
             z-index: 1;
         }
@@ -120,7 +120,7 @@
         /* Mobile optimizations */
         @media (max-width: 768px) {
             #map {
-                height: 50vh;
+                height: 60vh;
             }
             
             .mobile-hidden {
@@ -234,7 +234,7 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             min-width: 200px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
@@ -295,6 +295,56 @@
         
         .leaflet-routing-geocoders button:hover {
             background: var(--secondary-color);
+        }
+        
+        /* Zoom level indicator */
+        .zoom-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        
+        .zoom-indicator.show {
+            opacity: 1;
+        }
+        
+        /* Contact search */
+        .contact-search {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+        
+        /* Suggestion list */
+        .suggestions-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+        
+        .suggestion-item {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+        }
+        
+        .suggestion-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -381,10 +431,15 @@
         </div>
         
         <!-- Map and Controls -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-            <!-- Map Container -->
-            <div class="lg:col-span-2 rounded-lg overflow-hidden shadow-lg relative">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+            <!-- Map Container - Increased size -->
+            <div class="lg:col-span-3 rounded-lg overflow-hidden shadow-lg relative">
                 <div id="map"></div>
+                
+                <!-- Zoom Level Indicator -->
+                <div id="zoomIndicator" class="zoom-indicator">
+                    Zoom: <span id="zoomLevel">--</span>
+                </div>
                 
                 <!-- Map Controls -->
                 <div class="map-controls">
@@ -410,12 +465,9 @@
                                 <input type="text" id="destinationInput" placeholder="Enter destination" class="flex-grow bg-gray-700 text-white rounded-l p-2 text-sm">
                                 <button id="setDestinationBtn" class="bg-blue-600 text-white px-3 rounded-r text-sm">Set</button>
                             </div>
-                            <div class="mt-2 text-xs text-gray-400">Popular destinations:</div>
-                            <div class="mt-1 space-y-1">
-                                <button class="destination-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm" data-destination="Central Station">Central Station</button>
-                                <button class="destination-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm" data-destination="Airport">Airport</button>
-                                <button class="destination-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm" data-destination="Shopping Mall">Shopping Mall</button>
-                                <button class="destination-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm" data-destination="City Center">City Center</button>
+                            <div class="mt-2 text-xs text-gray-400">Nearby suggestions:</div>
+                            <div id="nearbySuggestions" class="suggestions-list">
+                                <!-- Nearby suggestions will be populated here -->
                             </div>
                         </div>
                     </div>
@@ -429,31 +481,28 @@
                         </div>
                         <div class="dropdown-content">
                             <div class="text-sm mb-2">Share Live Location via WhatsApp</div>
-                            <div class="flex mb-2">
-                                <input type="text" id="whatsappNumber" placeholder="Phone number" class="flex-grow bg-gray-700 text-white rounded-l p-2 text-sm">
-                                <button id="shareWhatsAppBtn" class="bg-green-600 text-white px-3 rounded-r text-sm">
-                                    <i class="fab fa-whatsapp"></i>
-                                </button>
-                            </div>
-                            <div class="text-xs text-gray-400">Recent contacts:</div>
-                            <div class="mt-1 space-y-1">
-                                <button class="contact-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm flex items-center" data-number="+1234567890">
+                            <input type="text" id="contactSearch" class="contact-search" placeholder="Search contacts...">
+                            <div id="contactList" class="suggestions-list">
+                                <div class="contact-option suggestion-item flex items-center" data-number="+1234567890">
                                     <i class="fas fa-user-circle mr-2"></i> John Doe
-                                </button>
-                                <button class="contact-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm flex items-center" data-number="+0987654321">
+                                </div>
+                                <div class="contact-option suggestion-item flex items-center" data-number="+0987654321">
                                     <i class="fas fa-user-circle mr-2"></i> Jane Smith
-                                </button>
-                                <button class="contact-option w-full text-left p-1 hover:bg-gray-700 rounded text-sm flex items-center" data-number="+1122334455">
+                                </div>
+                                <div class="contact-option suggestion-item flex items-center" data-number="+1122334455">
                                     <i class="fas fa-user-circle mr-2"></i> Delivery HQ
-                                </button>
+                                </div>
+                                <div class="contact-option suggestion-item flex items-center" data-number="+5566778899">
+                                    <i class="fas fa-user-circle mr-2"></i> Mike Johnson
+                                </div>
+                                <div class="contact-option suggestion-item flex items-center" data-number="+9988776655">
+                                    <i class="fas fa-user-circle mr-2"></i> Sarah Williams
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="absolute top-3 right-3 z-10 bg-gray-800 bg-opacity-70 text-white px-2 py-1 rounded-lg text-sm">
-                    <span id="zoomLevel">Zoom: --</span>
-                </div>
                 <div class="absolute bottom-3 left-3 z-10 bg-gray-800 bg-opacity-70 text-white px-2 py-1 rounded-lg text-sm">
                     <span id="coordinates">Lat: --, Lng: --</span>
                 </div>
@@ -482,30 +531,38 @@
                         </button>
                     </div>
                     
-                    <div class="pt-3 border-t border-gray-700">
-                        <h3 class="font-semibold mb-2 flex items-center">
-                            <i class="fas fa-cog mr-2"></i>
-                            Tracking Settings
-                        </h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="highAccuracy" class="mr-2" checked>
-                                    <label for="highAccuracy" class="text-sm">High Accuracy</label>
+                    <!-- Tracking Settings Dropdown -->
+                    <div class="dropdown">
+                        <div class="map-control w-full justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-cog mr-2"></i>
+                                <span>Tracking Settings</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                        <div class="dropdown-content w-full">
+                            <h3 class="font-semibold mb-2">Tracking Settings</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="highAccuracy" class="mr-2" checked>
+                                        <label for="highAccuracy" class="text-sm">High Accuracy</label>
+                                    </div>
+                                    <div class="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded">Battery Intensive</div>
                                 </div>
-                                <div class="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded">Battery Intensive</div>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="autoCenter" class="mr-2" checked>
-                                <label for="autoCenter" class="text-sm">Auto Center Map</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="shareLive" class="mr-2">
-                                <label for="shareLive" class="text-sm">Share Live Location</label>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="autoCenter" class="mr-2" checked>
+                                    <label for="autoCenter" class="text-sm">Auto Center Map</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="shareLive" class="mr-2">
+                                    <label for="shareLive" class="text-sm">Share Live Location</label>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Transit Details -->
                     <div class="pt-3 border-t border-gray-700">
                         <h3 class="font-semibold mb-2 flex items-center">
                             <i class="fas fa-truck mr-2"></i>
@@ -529,40 +586,46 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Location Details -->
-        <div class="bg-gray-800 p-4 rounded-lg shadow mb-4">
-            <h2 class="text-lg font-semibold mb-3 text-white flex items-center">
-                <i class="fas fa-info-circle mr-2"></i>
-                Location Details
-            </h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div class="bg-gray-700 p-3 rounded">
-                    <div class="text-xs text-gray-400">Latitude</div>
-                    <div class="text-sm font-medium" id="latitude">--</div>
-                </div>
-                <div class="bg-gray-700 p-3 rounded">
-                    <div class="text-xs text-gray-400">Longitude</div>
-                    <div class="text-sm font-medium" id="longitude">--</div>
-                </div>
-                <div class="bg-gray-700 p-3 rounded">
-                    <div class="text-xs text-gray-400">Accuracy</div>
-                    <div class="text-sm font-medium" id="accuracy">--</div>
-                </div>
-                <div class="bg-gray-700 p-3 rounded">
-                    <div class="text-xs text-gray-400">Altitude</div>
-                    <div class="text-sm font-medium" id="altitude">--</div>
-                </div>
-                <div class="bg-gray-700 p-3 rounded">
-                    <div class="text-xs text-gray-400">Heading</div>
-                    <div class="text-sm font-medium" id="heading">--</div>
-                </div>
-                <div class="bg-gray-700 p-3 rounded">
-                    <div class="text-xs text-gray-400">Last Update</div>
-                    <div class="text-sm font-medium" id="lastUpdate">--</div>
+                    
+                    <!-- Location Details Dropdown -->
+                    <div class="dropdown">
+                        <div class="map-control w-full justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <span>Location Details</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                        <div class="dropdown-content w-full">
+                            <h3 class="font-semibold mb-2">Location Details</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-gray-700 p-2 rounded">
+                                    <div class="text-xs text-gray-400">Latitude</div>
+                                    <div class="text-sm font-medium" id="latitude">--</div>
+                                </div>
+                                <div class="bg-gray-700 p-2 rounded">
+                                    <div class="text-xs text-gray-400">Longitude</div>
+                                    <div class="text-sm font-medium" id="longitude">--</div>
+                                </div>
+                                <div class="bg-gray-700 p-2 rounded">
+                                    <div class="text-xs text-gray-400">Accuracy</div>
+                                    <div class="text-sm font-medium" id="accuracy">--</div>
+                                </div>
+                                <div class="bg-gray-700 p-2 rounded">
+                                    <div class="text-xs text-gray-400">Altitude</div>
+                                    <div class="text-sm font-medium" id="altitude">--</div>
+                                </div>
+                                <div class="bg-gray-700 p-2 rounded">
+                                    <div class="text-xs text-gray-400">Heading</div>
+                                    <div class="text-sm font-medium" id="heading">--</div>
+                                </div>
+                                <div class="bg-gray-700 p-2 rounded">
+                                    <div class="text-xs text-gray-400">Last Update</div>
+                                    <div class="text-sm font-medium" id="lastUpdate">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -617,7 +680,9 @@
             routingControl: null,
             currentMapType: 'standard',
             mapLayers: {},
-            destinationMarker: null
+            destinationMarker: null,
+            zoomTimeout: null,
+            nearbyPlaces: []
         };
 
         // Initialize the app when DOM is loaded
@@ -626,6 +691,7 @@
             setupEventListeners();
             checkGeolocationSupport();
             updateTransitInfo();
+            setupContactSearch();
         });
 
         // Initialize Leaflet Map with OpenStreetMap tiles
@@ -672,7 +738,8 @@
             
             // Update zoom level display
             state.map.on('zoomend', function() {
-                document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
+                document.getElementById('zoomLevel').textContent = state.map.getZoom();
+                showZoomIndicator();
             });
             
             // Update coordinates on map move
@@ -681,7 +748,104 @@
                     `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
             });
             
-            document.getElementById('zoomLevel').textContent = `Zoom: ${state.map.getZoom()}`;
+            document.getElementById('zoomLevel').textContent = state.map.getZoom();
+        }
+
+        // Show zoom indicator with timeout
+        function showZoomIndicator() {
+            const zoomIndicator = document.getElementById('zoomIndicator');
+            zoomIndicator.classList.add('show');
+            
+            // Clear existing timeout
+            if (state.zoomTimeout) {
+                clearTimeout(state.zoomTimeout);
+            }
+            
+            // Hide after 2 seconds
+            state.zoomTimeout = setTimeout(() => {
+                zoomIndicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // Setup contact search functionality
+        function setupContactSearch() {
+            const contactSearch = document.getElementById('contactSearch');
+            const contactList = document.getElementById('contactList');
+            const contacts = contactList.querySelectorAll('.contact-option');
+            
+            contactSearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                contacts.forEach(contact => {
+                    const contactName = contact.textContent.toLowerCase();
+                    if (contactName.includes(searchTerm)) {
+                        contact.style.display = 'flex';
+                    } else {
+                        contact.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Add click handlers to contact options
+            contacts.forEach(contact => {
+                contact.addEventListener('click', function() {
+                    const number = this.getAttribute('data-number');
+                    shareLocationViaWhatsApp(number);
+                });
+            });
+        }
+
+        // Get nearby places based on current location
+        function getNearbyPlaces(lat, lng) {
+            // In a real app, you would use a geocoding API like Google Places or OpenStreetMap Nominatim
+            // For this demo, we'll use a predefined list of common places
+            
+            const commonPlaces = [
+                { name: "Gas Station", type: "gas_station" },
+                { name: "Restaurant", type: "restaurant" },
+                { name: "Hotel", type: "lodging" },
+                { name: "Shopping Mall", type: "shopping_mall" },
+                { name: "Hospital", type: "hospital" },
+                { name: "Airport", type: "airport" },
+                { name: "Train Station", type: "train_station" },
+                { name: "Bus Station", type: "bus_station" },
+                { name: "Park", type: "park" },
+                { name: "Supermarket", type: "supermarket" }
+            ];
+            
+            // Simulate nearby places by adding random offsets
+            state.nearbyPlaces = commonPlaces.map(place => {
+                // Add small random offset to simulate different locations
+                const offsetLat = (Math.random() - 0.5) * 0.05;
+                const offsetLng = (Math.random() - 0.5) * 0.05;
+                
+                return {
+                    name: place.name,
+                    type: place.type,
+                    lat: lat + offsetLat,
+                    lng: lng + offsetLng
+                };
+            });
+            
+            updateNearbySuggestions();
+        }
+
+        // Update nearby suggestions in the UI
+        function updateNearbySuggestions() {
+            const suggestionsContainer = document.getElementById('nearbySuggestions');
+            suggestionsContainer.innerHTML = '';
+            
+            state.nearbyPlaces.forEach(place => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.textContent = place.name;
+                suggestionItem.addEventListener('click', function() {
+                    document.getElementById('destinationInput').value = place.name;
+                    setDestination(place.name, place.lat, place.lng);
+                });
+                
+                suggestionsContainer.appendChild(suggestionItem);
+            });
         }
 
         // Update marker icon based on transit type
@@ -736,23 +900,10 @@
             document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
             document.getElementById('mapType').addEventListener('change', changeMapType);
             document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
-            document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
             
-            // Add event listeners for destination options
-            document.querySelectorAll('.destination-option').forEach(button => {
-                button.addEventListener('click', function() {
-                    const destination = this.getAttribute('data-destination');
-                    document.getElementById('destinationInput').value = destination;
-                    setDestination();
-                });
-            });
-            
-            // Add event listeners for contact options
-            document.querySelectorAll('.contact-option').forEach(button => {
-                button.addEventListener('click', function() {
-                    const number = this.getAttribute('data-number');
-                    document.getElementById('whatsappNumber').value = number;
-                });
+            // Add event listeners for destination input
+            document.getElementById('destinationInput').addEventListener('input', function() {
+                // In a real app, you would fetch autocomplete suggestions here
             });
         }
 
@@ -771,12 +922,20 @@
         }
 
         // Set destination and calculate route
-        function setDestination() {
-            const destinationInput = document.getElementById('destinationInput').value.trim();
+        function setDestination(destinationName, destLat, destLng) {
+            let destinationInput;
             
-            if (!destinationInput) {
-                showStatus('Please enter a destination.', 'error');
-                return;
+            if (destinationName && destLat && destLng) {
+                // If coordinates are provided directly (from nearby suggestions)
+                destinationInput = destinationName;
+            } else {
+                // If called from the input field
+                destinationInput = document.getElementById('destinationInput').value.trim();
+                
+                if (!destinationInput) {
+                    showStatus('Please enter a destination.', 'error');
+                    return;
+                }
             }
             
             if (!state.lastPosition) {
@@ -826,46 +985,67 @@
                 }
             }).addTo(state.map);
             
-            // Geocode the destination
-            const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinationInput)}`;
-            
-            fetch(geocodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const destination = data[0];
-                        const destLatLng = L.latLng(destination.lat, destination.lon);
-                        
-                        // Update routing waypoints
-                        state.routingControl.setWaypoints([
-                            L.latLng(state.lastPosition[0], state.lastPosition[1]),
-                            destLatLng
-                        ]);
-                        
-                        // Store destination
-                        state.destination = {
-                            name: destinationInput,
-                            latLng: destLatLng
-                        };
-                        
-                        showStatus(`Route to ${destinationInput} calculated.`, 'success');
-                    } else {
-                        showStatus('Destination not found. Please try a different location.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Geocoding error:', error);
-                    showStatus('Error finding destination. Please try again.', 'error');
-                });
+            // If we have coordinates from nearby suggestions, use them directly
+            if (destLat && destLng) {
+                const destLatLng = L.latLng(destLat, destLng);
+                
+                // Update routing waypoints
+                state.routingControl.setWaypoints([
+                    L.latLng(state.lastPosition[0], state.lastPosition[1]),
+                    destLatLng
+                ]);
+                
+                // Store destination
+                state.destination = {
+                    name: destinationInput,
+                    latLng: destLatLng
+                };
+                
+                showStatus(`Route to ${destinationInput} calculated.`, 'success');
+            } else {
+                // Otherwise, geocode the destination
+                const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinationInput)}`;
+                
+                fetch(geocodeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const destination = data[0];
+                            const destLatLng = L.latLng(destination.lat, destination.lon);
+                            
+                            // Update routing waypoints
+                            state.routingControl.setWaypoints([
+                                L.latLng(state.lastPosition[0], state.lastPosition[1]),
+                                destLatLng
+                            ]);
+                            
+                            // Store destination
+                            state.destination = {
+                                name: destinationInput,
+                                latLng: destLatLng
+                            };
+                            
+                            showStatus(`Route to ${destinationInput} calculated.`, 'success');
+                        } else {
+                            showStatus('Destination not found. Please try a different location.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Geocoding error:', error);
+                        showStatus('Error finding destination. Please try again.', 'error');
+                    });
+            }
         }
 
         // Share location via WhatsApp
-        function shareLocationViaWhatsApp() {
-            const phoneNumber = document.getElementById('whatsappNumber').value.trim();
-            
+        function shareLocationViaWhatsApp(phoneNumber) {
             if (!phoneNumber) {
-                showStatus('Please enter a phone number.', 'error');
-                return;
+                phoneNumber = document.getElementById('whatsappNumber').value.trim();
+                
+                if (!phoneNumber) {
+                    showStatus('Please enter a phone number.', 'error');
+                    return;
+                }
             }
             
             if (!state.lastPosition) {
@@ -1149,6 +1329,11 @@
                     L.latLng(newPosition[0], newPosition[1]),
                     state.routingControl.getWaypoints()[1]
                 ]);
+            }
+            
+            // Get nearby places if we don't have them yet
+            if (state.nearbyPlaces.length === 0) {
+                getNearbyPlaces(lat, lng);
             }
             
             // Store last position
