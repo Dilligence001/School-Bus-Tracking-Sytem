@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>School Bus Tracker - Real-Time Student Transportation Monitoring</title>
+    <title>School Bus Tracker - Single Bus</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Leaflet Routing Machine CSS -->
@@ -678,57 +679,6 @@
             background: #eab308;
         }
 
-        /* NEW STYLES FOR ADD DEVICE CARD */
-        .add-device-card {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            width: 320px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            padding: 16px;
-            display: none;
-        }
-
-        .add-device-card.show {
-            display: block;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .device-search-results {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-        }
-
-        .device-search-item {
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .device-search-item:hover {
-            background-color: #f8fafc;
-        }
-
-        .device-search-item:last-child {
-            border-bottom: none;
-        }
-
-        .searching-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            color: #64748b;
-        }
-
         /* School-specific styles */
         .student-list {
             max-height: 200px;
@@ -840,12 +790,6 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
-
-            .add-device-card {
-                width: 90vw;
-                left: 5vw;
-                right: 5vw;
-            }
         }
 
         /* Touch-friendly improvements */
@@ -887,43 +831,6 @@
         </div>
     </div>
 
-    <!-- Add Device Card -->
-    <div id="addDeviceCard" class="add-device-card">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">Add School Bus</h3>
-            <button id="closeAddDeviceCard" class="text-gray-500 hover:text-gray-700 touch-friendly">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <label class="text-sm text-gray-700 font-medium mb-2 block">Search for Available Buses</label>
-                <div class="flex space-x-2">
-                    <button id="searchDevicesBtn" class="w-full btn-primary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                        <i data-lucide="search" class="w-4 h-4 mr-2"></i>
-                        Search for Buses
-                    </button>
-                </div>
-            </div>
-            <div id="deviceSearchResults" class="device-search-results hidden">
-                <div class="searching-indicator">
-                    <div class="loading mr-2"></div>
-                    <span>Searching for buses...</span>
-                </div>
-            </div>
-            <div class="border-t pt-4">
-                <label class="text-sm text-gray-700 font-medium mb-2 block">Add Bus Manually</label>
-                <div class="flex space-x-2">
-                    <input type="text" id="manualDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm touch-friendly-text">
-                    <input type="text" id="manualDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm touch-friendly-text">
-                    <button id="addManualDeviceBtn" class="btn-primary px-3 text-sm touch-friendly">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main App Container -->
     <div class="app-container">
         <!-- Sidebar -->
@@ -938,7 +845,7 @@
                             </div>
                             <div>
                                 <h1 class="text-xl font-bold text-white">School Bus Tracker</h1>
-                                <p class="text-yellow-100 text-xs">Real-Time Student Transportation Monitoring</p>
+                                <p class="text-yellow-100 text-xs">Single Bus - GPS Tracking</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -980,21 +887,25 @@
                 </div>
             </div>
 
-            <!-- Bus Management -->
+            <!-- Bus Information -->
             <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Bus Management</h2>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Bus Information</h2>
                 <div class="space-y-4">
-                    <div class="device-list" id="deviceList">
-                        <!-- Buses will be dynamically added here -->
+                    <div class="flex items-center p-3 bg-amber-50 rounded-lg">
+                        <span class="status-indicator status-active mr-3"></span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">School Bus #1245</div>
+                            <div class="text-xs text-gray-500">Active - Using Phone GPS</div>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                             <i data-lucide="play" class="w-4 h-4 mr-2"></i>
                             Start Route
                         </button>
-                        <button id="addDeviceBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                            Add Bus
+                        <button id="clearRouteBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
+                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                            Clear Route
                         </button>
                     </div>
                 </div>
@@ -1012,7 +923,7 @@
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Bus Number</label>
                         <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="Bus #SB-1245">
+                            value="Bus #SB-1245" readonly>
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Driver</label>
@@ -1059,15 +970,15 @@
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Tracking Controls</h2>
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
-                        <button id="clearRouteBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                            Clear Route
-                        </button>
                         <button id="saveRouteBtn"
                             class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                             <i data-lucide="save" class="w-4 h-4 mr-2"></i>
                             Save Route
+                        </button>
+                        <button id="exportBtn"
+                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                            Export
                         </button>
                     </div>
 
@@ -1135,10 +1046,6 @@
                 <div class="card p-4">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold text-gray-800">Route History</h2>
-                        <button id="exportBtn" class="btn-secondary py-2 px-3 text-sm flex items-center touch-friendly">
-                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
-                            Export
-                        </button>
                     </div>
                     <div id="routeHistory" class="max-h-48 overflow-y-auto">
                         <div class="text-gray-400 text-center py-8 flex flex-col items-center">
@@ -1239,35 +1146,6 @@
         </div>
     </div>
 
-    <!-- Device Management Modal -->
-    <div id="deviceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Manage School Buses</h3>
-                <button id="closeDeviceModal" class="text-gray-500 hover:text-gray-700 touch-friendly">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm text-gray-700 font-medium mb-2 block">Add New Bus</label>
-                    <div class="flex space-x-2">
-                        <input type="text" id="newDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm touch-friendly-text">
-                        <input type="text" id="newDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm touch-friendly-text">
-                        <button id="addNewDeviceBtn" class="btn-primary px-3 text-sm touch-friendly">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="max-h-64 overflow-y-auto">
-                    <div id="deviceManagementList" class="space-y-2">
-                        <!-- Buses will be dynamically added here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Leaflet Routing Machine JS -->
@@ -1310,19 +1188,11 @@
             transitTimer: null,
             lastVoiceGuidance: null,
             voiceGuidanceInterval: null,
-            devices: [],
-            activeDeviceId: null,
-            deviceMarkers: {},
-            devicePolylines: {},
-            deviceData: {},
             // School bus specific state
             students: [],
             routeStops: [],
             currentStopIndex: 0,
             emergencyAlertActive: false,
-            // Device search state
-            deviceSearchInProgress: false,
-            availableDevices: [],
             // Fullscreen state
             isFullscreen: false
         };
@@ -1334,8 +1204,6 @@
             checkGeolocationSupport();
             updateTransitInfo();
             initVoiceGuidance();
-            loadDevices();
-            renderDeviceList();
             initFullscreen();
             initializeStudentRoster();
             initializeRouteStops();
@@ -1808,10 +1676,6 @@
             document.getElementById('mapType').addEventListener('change', changeMapType);
             document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
             document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
-            document.getElementById('addDeviceBtn').addEventListener('click', showAddDeviceCard);
-            document.getElementById('closeAddDeviceCard').addEventListener('click', hideAddDeviceCard);
-            document.getElementById('searchDevicesBtn').addEventListener('click', searchForDevices);
-            document.getElementById('addManualDeviceBtn').addEventListener('click', addManualDevice);
             document.getElementById('markAllPresentBtn').addEventListener('click', markAllStudentsPresent);
             document.getElementById('generateReportBtn').addEventListener('click', generateStudentReport);
             document.getElementById('emergencyAlertBtn').addEventListener('click', toggleEmergencyAlert);
@@ -1857,148 +1721,6 @@
                 icon.setAttribute('data-lucide', 'x');
             }
             lucide.createIcons();
-        }
-
-        // Show Add Device Card
-        function showAddDeviceCard() {
-            document.getElementById('addDeviceCard').classList.add('show');
-        }
-
-        // Hide Add Device Card
-        function hideAddDeviceCard() {
-            document.getElementById('addDeviceCard').classList.remove('show');
-        }
-
-        // Search for available GPS devices
-        function searchForDevices() {
-            if (state.deviceSearchInProgress) return;
-            
-            state.deviceSearchInProgress = true;
-            const resultsContainer = document.getElementById('deviceSearchResults');
-            resultsContainer.classList.remove('hidden');
-            
-            // Show searching indicator
-            resultsContainer.innerHTML = `
-                <div class="searching-indicator">
-                    <div class="loading mr-2"></div>
-                    <span>Searching for buses...</span>
-                </div>
-            `;
-            
-            // Simulate device discovery (in a real app, this would use Bluetooth, WiFi, or other discovery methods)
-            setTimeout(() => {
-                // Simulate finding some devices
-                state.availableDevices = [
-                    { id: 'BUS-001', name: 'School Bus #001', type: 'schoolbus', signalStrength: 'Strong', distance: '15m' },
-                    { id: 'BUS-002', name: 'School Bus #002', type: 'schoolbus', signalStrength: 'Medium', distance: '25m' },
-                    { id: 'BUS-003', name: 'School Bus #003', type: 'schoolbus', signalStrength: 'Weak', distance: '45m' }
-                ];
-                
-                // Display found devices
-                displayAvailableDevices();
-                state.deviceSearchInProgress = false;
-                
-                showNotification('Bus Search', `Found ${state.availableDevices.length} available buses`, 'success');
-            }, 3000);
-        }
-
-        // Display available devices in search results
-        function displayAvailableDevices() {
-            const resultsContainer = document.getElementById('deviceSearchResults');
-            
-            if (state.availableDevices.length === 0) {
-                resultsContainer.innerHTML = `
-                    <div class="searching-indicator">
-                        <span>No buses found nearby</span>
-                    </div>
-                `;
-                return;
-            }
-            
-            resultsContainer.innerHTML = '';
-            
-            state.availableDevices.forEach(device => {
-                const deviceItem = document.createElement('div');
-                deviceItem.className = 'device-search-item';
-                deviceItem.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">${device.name}</div>
-                            <div class="text-xs text-gray-500">ID: ${device.id} | Type: ${device.type}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xs text-gray-500">${device.distance}</div>
-                            <div class="text-xs ${device.signalStrength === 'Strong' ? 'text-green-600' : device.signalStrength === 'Medium' ? 'text-yellow-600' : 'text-red-600'}">
-                                ${device.signalStrength}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                deviceItem.addEventListener('click', () => {
-                    addDeviceFromSearch(device);
-                });
-                
-                resultsContainer.appendChild(deviceItem);
-            });
-        }
-
-        // Add device from search results
-        function addDeviceFromSearch(device) {
-            // Check if device already exists
-            if (state.devices.some(d => d.id === device.id)) {
-                showNotification('Add Bus', `Bus ${device.name} is already added`, 'error');
-                return;
-            }
-            
-            // Add the device
-            state.devices.push({
-                id: device.id,
-                name: device.name,
-                type: device.type,
-                active: false
-            });
-            
-            saveDevices();
-            renderDeviceList();
-            hideAddDeviceCard();
-            
-            showNotification('Add Bus', `Bus ${device.name} added successfully`, 'success');
-        }
-
-        // Add device manually
-        function addManualDevice() {
-            const name = document.getElementById('manualDeviceName').value.trim();
-            const id = document.getElementById('manualDeviceId').value.trim();
-
-            if (!name || !id) {
-                showNotification('Add Bus', 'Please enter both bus name and ID', 'error');
-                return;
-            }
-
-            // Check if device ID already exists
-            if (state.devices.some(device => device.id === id)) {
-                showNotification('Add Bus', 'Bus ID already exists', 'error');
-                return;
-            }
-
-            // Add new device
-            state.devices.push({
-                id: id,
-                name: name,
-                type: 'schoolbus',
-                active: false
-            });
-
-            saveDevices();
-            renderDeviceList();
-            
-            // Clear input fields
-            document.getElementById('manualDeviceName').value = '';
-            document.getElementById('manualDeviceId').value = '';
-            hideAddDeviceCard();
-
-            showNotification('Add Bus', `Bus ${name} added successfully`, 'success');
         }
 
         // Mark all students as present
@@ -2114,104 +1836,6 @@
             
             // Re-initialize Lucide icons
             lucide.createIcons();
-        }
-
-        // Device Management Functions
-        function loadDevices() {
-            // Load devices from localStorage or use default devices
-            const savedDevices = localStorage.getItem('schoolBusTrackerDevices');
-            if (savedDevices) {
-                state.devices = JSON.parse(savedDevices);
-            } else {
-                // Add some default devices
-                state.devices = [
-                    { id: 'bus-001', name: 'School Bus #1245', type: 'schoolbus', active: true },
-                    { id: 'bus-002', name: 'School Bus #5678', type: 'schoolbus', active: false },
-                    { id: 'bus-003', name: 'Activity Bus #9012', type: 'schoolbus', active: false }
-                ];
-                saveDevices();
-            }
-
-            // Set the first device as active by default
-            if (state.devices.length > 0) {
-                state.activeDeviceId = state.devices[0].id;
-                initializeDeviceData(state.activeDeviceId);
-            }
-        }
-
-        function saveDevices() {
-            localStorage.setItem('schoolBusTrackerDevices', JSON.stringify(state.devices));
-        }
-
-        function renderDeviceList() {
-            const deviceList = document.getElementById('deviceList');
-            deviceList.innerHTML = '';
-
-            state.devices.forEach(device => {
-                const deviceItem = document.createElement('div');
-                deviceItem.className = `device-item ${device.id === state.activeDeviceId ? 'active' : ''}`;
-                deviceItem.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <span class="status-indicator ${device.active ? 'status-active' : 'status-inactive'}"></span>
-                            <div>
-                                <div class="text-sm font-medium text-gray-800">${device.name}</div>
-                                <div class="text-xs text-gray-500">${device.id}</div>
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-500">${device.type}</div>
-                    </div>
-                `;
-                deviceItem.addEventListener('click', () => switchActiveDevice(device.id));
-                deviceList.appendChild(deviceItem);
-            });
-        }
-
-        function switchActiveDevice(deviceId) {
-            state.activeDeviceId = deviceId;
-            renderDeviceList();
-            
-            // Update the transit info based on the active device
-            const device = state.devices.find(d => d.id === deviceId);
-            if (device) {
-                document.getElementById('transitNameInput').value = device.name;
-                updateTransitName();
-            }
-
-            // Initialize device data if not already done
-            if (!state.deviceData[deviceId]) {
-                initializeDeviceData(deviceId);
-            }
-
-            // Update the map with the active device's data
-            updateMapForActiveDevice();
-
-            showNotification('Bus Switched', `Now tracking ${device.name}`, 'info');
-        }
-
-        function initializeDeviceData(deviceId) {
-            if (!state.deviceData[deviceId]) {
-                state.deviceData[deviceId] = {
-                    pathCoordinates: [],
-                    timestamps: [],
-                    totalDistance: 0,
-                    currentSpeed: 0,
-                    topSpeed: 0,
-                    averageSpeed: 0,
-                    startTime: null,
-                    polyline: null,
-                    marker: null
-                };
-            }
-        }
-
-        function updateMapForActiveDevice() {
-            // In a real app, this would update the map to show the selected bus's location and route
-            // For this demo, we'll just show a notification
-            const device = state.devices.find(d => d.id === state.activeDeviceId);
-            if (device) {
-                showNotification('Bus Selected', `Now viewing ${device.name}`, 'info');
-            }
         }
 
         // Save route
