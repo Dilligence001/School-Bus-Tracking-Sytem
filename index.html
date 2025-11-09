@@ -1,24 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>School Bus Tracker - Single Bus</title>
+    <title>School Bus Tracker - Real-Time Location Broadcasting</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Leaflet Routing Machine CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <!-- jsPDF for PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -33,13 +27,11 @@
             overflow: hidden;
         }
 
-        /* Professional header styling */
         .header-gradient {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
         }
 
-        /* Card styling */
         .card {
             background: white;
             border-radius: 8px;
@@ -48,11 +40,6 @@
             transition: all 0.2s ease;
         }
 
-        .card:hover {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Button styling */
         .btn-primary {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
@@ -91,13 +78,6 @@
             transition: all 0.2s ease;
         }
 
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
-        }
-
-        /* Status indicators */
         .status-indicator {
             width: 8px;
             height: 8px;
@@ -114,11 +94,10 @@
             background-color: #ef4444;
         }
 
-        .status-warning {
-            background-color: #f59e0b;
+        .status-broadcasting {
+            background-color: #3b82f6;
         }
 
-        /* Map styling */
         #map {
             height: 100%;
             width: 100%;
@@ -127,7 +106,6 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        /* Form controls */
         .form-input {
             background: white;
             border: 1px solid #cbd5e1;
@@ -136,25 +114,6 @@
             transition: all 0.2s ease;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #f59e0b;
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-        }
-
-        .form-select {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px 12px;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 16px;
-        }
-
-        /* Metric cards */
         .metric-card {
             background: white;
             border-radius: 8px;
@@ -177,175 +136,6 @@
             font-weight: 500;
         }
 
-        /* Table styling */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th {
-            text-align: left;
-            padding: 12px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .table tr:hover {
-            background-color: #f8fafc;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Map controls */
-        .map-controls {
-            position: absolute;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: auto;
-            max-width: 90%;
-        }
-
-        .map-control {
-            background: white;
-            color: #334155;
-            padding: 6px 10px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #cbd5e1;
-            transition: all 0.2s ease;
-            font-size: 12px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        .map-control:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-        }
-
-        .map-control select,
-        .map-control input {
-            background: transparent;
-            color: #334155;
-            border: none;
-            outline: none;
-            max-width: 120px;
-            font-size: 12px;
-        }
-
-        .map-control select option {
-            background: white;
-            color: #334155;
-        }
-
-        .map-control button {
-            background: #f59e0b;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 11px;
-        }
-
-        .map-control button:hover {
-            background: #eab308;
-        }
-
-        /* Dropdown styles */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: white;
-            min-width: 200px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            z-index: 1001;
-            border-radius: 6px;
-            padding: 12px;
-            bottom: 100%;
-            left: 0;
-            margin-bottom: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-            animation: fadeInUp 0.2s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Voice guidance indicator */
-        .voice-indicator {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #10b981;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
-            transition: all 0.2s ease;
-            border: none;
-            color: white;
-        }
-
-        .voice-indicator:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 10px rgba(16, 185, 129, 0.4);
-        }
-
-        /* Notification system */
         .notification {
             position: fixed;
             top: 20px;
@@ -365,58 +155,26 @@
             transform: translateX(0);
         }
 
-        .notification.success {
-            border-left-color: #10b981;
-        }
-
-        .notification.error {
-            border-left-color: #ef4444;
-        }
-
-        .notification.warning {
-            border-left-color: #f59e0b;
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .student-status {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
+            display: inline-block;
+            margin-right: 8px;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .student-present {
+            background-color: #10b981;
         }
 
-        /* Device list styling */
-        .device-list {
-            max-height: 300px;
-            overflow-y: auto;
+        .student-absent {
+            background-color: #ef4444;
         }
 
-        .device-item {
-            padding: 12px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .student-pending {
+            background-color: #f59e0b;
         }
 
-        .device-item:hover {
-            background-color: #f8fafc;
-        }
-
-        .device-item.active {
-            background-color: #fef7e5;
-            border-left: 3px solid #f59e0b;
-        }
-
-        /* NEW STYLES FOR SIDEBAR AND FULLSCREEN */
         .app-container {
             display: flex;
             height: 100vh;
@@ -449,377 +207,30 @@
             padding: 16px;
         }
 
-        .fullscreen-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
+        .broadcasting-indicator {
+            animation: pulse 2s infinite;
         }
 
-        .fullscreen-btn:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
-        .sidebar-toggle {
-            display: none;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px;
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Fullscreen mode styles */
-        .fullscreen .sidebar {
-            transform: translateX(-100%);
-            width: 0;
-            min-width: 0;
-            padding: 0;
-        }
-
-        .fullscreen .map-container {
-            padding: 0;
-        }
-
-        .fullscreen #map {
-            border-radius: 0;
-        }
-
-        /* Mobile optimizations */
         @media (max-width: 768px) {
             .app-container {
                 flex-direction: column;
             }
-
             .sidebar {
                 width: 100%;
                 height: auto;
                 max-height: 50vh;
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-                padding: 12px;
             }
-
-            .sidebar-toggle {
-                display: block;
-            }
-
-            .sidebar.collapsed {
-                max-height: 60px;
-                overflow: hidden;
-            }
-
-            .main-content {
-                height: 100%;
-            }
-
-            .mobile-hidden {
-                display: none;
-            }
-
-            .mobile-full {
-                width: 100%;
-            }
-
-            .map-controls {
-                flex-direction: row;
-                align-items: center;
-                gap: 6px;
-                max-width: 95%;
-                bottom: 10px;
-            }
-
-            .card {
-                margin: 0 -8px;
-                border-radius: 0;
-            }
-
-            .map-control {
-                padding: 5px 8px;
-                font-size: 11px;
-            }
-
-            .metric-card {
-                padding: 12px;
-            }
-
-            .metric-value {
-                font-size: 18px;
-            }
-
-            .metric-label {
-                font-size: 10px;
-            }
-
-            .notification {
-                max-width: 90%;
-                right: 5%;
-                top: 10px;
-            }
-
-            .voice-indicator {
-                width: 40px;
-                height: 40px;
-                bottom: 10px;
-                right: 10px;
-            }
-
-            .fullscreen-btn {
-                top: 10px;
-                right: 10px;
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-
-            .sidebar-toggle {
-                top: 10px;
-                left: 10px;
-            }
-
-            .header-gradient {
-                padding: 12px;
-            }
-
-            .header-gradient h1 {
-                font-size: 18px;
-            }
-
-            .header-gradient p {
-                font-size: 10px;
-            }
-
-            .btn-primary, .btn-secondary, .btn-danger {
-                padding: 10px 12px;
-                font-size: 12px;
-            }
-
-            .form-input, .form-select {
-                padding: 10px;
-                font-size: 14px;
-            }
-
-            .table th, .table td {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
-            .dropdown-content {
-                min-width: 180px;
-                padding: 10px;
-            }
-        }
-
-        /* Leaflet Routing Machine customization */
-        .leaflet-routing-container {
-            background: white;
-            color: #334155;
-            width: 280px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .leaflet-routing-alt {
-            max-height: 180px;
-        }
-
-        .leaflet-routing-alt h2,
-        .leaflet-routing-alt h3 {
-            color: #334155;
-        }
-
-        .leaflet-routing-alt table {
-            color: #334155;
-        }
-
-        .leaflet-routing-alt table tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .leaflet-routing-collapse-btn {
-            color: #334155;
-        }
-
-        .leaflet-routing-geocoders input {
-            background: white;
-            color: #334155;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .leaflet-routing-geocoders input:focus {
-            background: white;
-            color: #334155;
-            border-color: #f59e0b;
-        }
-
-        .leaflet-routing-geocoders button {
-            background: #f59e0b;
-            color: white;
-            border-radius: 4px;
-        }
-
-        .leaflet-routing-geocoders button:hover {
-            background: #eab308;
-        }
-
-        /* School-specific styles */
-        .student-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .student-item {
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .student-item:last-child {
-            border-bottom: none;
-        }
-
-        .student-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .student-present {
-            background-color: #10b981;
-        }
-
-        .student-absent {
-            background-color: #ef4444;
-        }
-
-        .student-pending {
-            background-color: #f59e0b;
-        }
-
-        .route-stop {
-            padding: 8px 12px;
-            border-left: 3px solid #f59e0b;
-            margin-bottom: 8px;
-            background: #fef7e5;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .route-stop.active {
-            background: #fef3c7;
-            border-left-color: #d97706;
-        }
-
-        .emergency-alert {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* Mobile-specific improvements */
-        @media (max-width: 480px) {
-            .sidebar {
-                padding: 8px;
-            }
-
-            .card {
-                margin: 0 -4px;
-                padding: 12px;
-            }
-
-            .grid-cols-2 {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-
-            .metric-card {
-                padding: 8px;
-            }
-
-            .metric-value {
-                font-size: 16px;
-            }
-
-            .map-controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 4px;
-                max-width: 90%;
-            }
-
-            .map-control {
-                justify-content: space-between;
-                padding: 8px;
-            }
-
-            .fullscreen-btn span {
-                display: none;
-            }
-
-            .fullscreen-btn {
-                padding: 8px;
-            }
-
-            .dropdown-content {
-                width: 90vw;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-        }
-
-        /* Touch-friendly improvements */
-        .touch-friendly {
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        .touch-friendly-text {
-            font-size: 16px; /* Prevents zoom on iOS */
-        }
-
-        /* Prevent text selection on interactive elements */
-        .btn-primary, .btn-secondary, .btn-danger, .map-control, .device-item, .student-item {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
     </style>
 </head>
 
 <body class="min-h-screen bg-gray-50">
-    <!-- Voice Guidance Indicator -->
-    <div class="voice-indicator fixed bottom-6 right-6 z-50 touch-friendly">
-        <i data-lucide="volume-2" class="w-5 h-5"></i>
-    </div>
-
     <!-- Notification -->
     <div id="notification" class="notification">
         <div class="flex items-start">
@@ -845,29 +256,71 @@
                             </div>
                             <div>
                                 <h1 class="text-xl font-bold text-white">School Bus Tracker</h1>
-                                <p class="text-yellow-100 text-xs">Single Bus - GPS Tracking</p>
+                                <p class="text-yellow-100 text-xs">Real-Time Location Broadcasting</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <!-- Tracking Status -->
                             <div class="bg-white bg-opacity-10 rounded-lg px-3 py-1 flex items-center">
                                 <span class="status-indicator status-inactive" id="statusIndicator"></span>
-                                <span id="statusText" class="text-xs font-medium text-white">Not Tracking</span>
+                                <span id="statusText" class="text-xs font-medium text-white">Offline</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Emergency Alert Button -->
+            <!-- Broadcast Controls -->
+            <div class="card p-4 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Live Broadcasting</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div class="flex items-center">
+                            <span class="status-indicator status-inactive mr-3" id="broadcastIndicator"></span>
+                            <div>
+                                <div class="text-sm font-medium text-gray-800" id="broadcastStatus">Not Broadcasting</div>
+                                <div class="text-xs text-gray-500" id="listenersCount">0 listeners</div>
+                            </div>
+                        </div>
+                        <button id="toggleBroadcastBtn" class="btn-primary py-2 px-4 text-sm">
+                            Start Broadcast
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                            <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+                            Start GPS
+                        </button>
+                        <button id="shareLinkBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            <i data-lucide="share-2" class="w-4 h-4 mr-2"></i>
+                            Share Link
+                        </button>
+                    </div>
+
+                    <!-- Shareable Link -->
+                    <div id="shareLinkContainer" class="hidden">
+                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-2">Share this link with parents:</label>
+                        <div class="flex space-x-2">
+                            <input type="text" id="shareableLink" readonly 
+                                class="flex-grow form-input p-2 text-sm bg-gray-50" 
+                                value="Generating link...">
+                            <button id="copyLinkBtn" class="btn-secondary px-3 text-sm">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Alert -->
             <div class="mb-4">
-                <button id="emergencyAlertBtn" class="w-full btn-danger py-3 text-sm flex items-center justify-center touch-friendly">
+                <button id="emergencyAlertBtn" class="w-full btn-danger py-3 text-sm flex items-center justify-center">
                     <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>
                     Emergency Alert
                 </button>
             </div>
 
-            <!-- Business Metrics -->
+            <!-- Metrics -->
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <div class="metric-card">
                     <div class="metric-value text-lg" id="distanceTraveled">0 km</div>
@@ -890,266 +343,41 @@
             <!-- Bus Information -->
             <div class="card p-4 mb-4">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Bus Information</h2>
-                <div class="space-y-4">
-                    <div class="flex items-center p-3 bg-amber-50 rounded-lg">
-                        <span class="status-indicator status-active mr-3"></span>
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">School Bus #1245</div>
-                            <div class="text-xs text-gray-500">Active - Using Phone GPS</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="play" class="w-4 h-4 mr-2"></i>
-                            Start Route
-                        </button>
-                        <button id="clearRouteBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                            Clear Route
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Route Information -->
-            <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Route Information</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Route Name</label>
-                        <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="Morning Elementary Route">
-                    </div>
+                <div class="space-y-3">
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Bus Number</label>
-                        <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="Bus #SB-1245" readonly>
+                        <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1" value="Bus #SB-1245">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Driver</label>
-                        <input type="text" id="driverName" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="John Smith">
+                        <input type="text" id="driverName" class="w-full form-input p-2 text-sm mt-1" value="John Smith">
                     </div>
-                    <div class="pt-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Status:</span>
-                            <span id="transitStatus" class="font-medium">Not Started</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-500">Next Stop:</span>
-                            <span id="nextStop" class="font-medium">--</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-500">ETA to School:</span>
-                            <span id="etaToSchool" class="font-medium">--</span>
-                        </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Route</label>
+                        <input type="text" id="routeName" class="w-full form-input p-2 text-sm mt-1" value="Morning Elementary Route">
                     </div>
                 </div>
             </div>
 
             <!-- Student Roster -->
-            <div class="card p-4 mb-4">
+            <div class="card p-4">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Student Roster</h2>
                 <div class="student-list" id="studentList">
                     <!-- Students will be dynamically added here -->
                 </div>
-                <div class="mt-3 flex justify-between">
-                    <button id="markAllPresentBtn" class="btn-secondary py-2 px-3 text-sm flex items-center touch-friendly">
-                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
-                        Mark All
-                    </button>
-                    <button id="generateReportBtn" class="btn-primary py-2 px-3 text-sm flex items-center touch-friendly">
-                        <i data-lucide="file-text" class="w-4 h-4 mr-1"></i>
-                        Report
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tracking Controls -->
-            <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Tracking Controls</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <button id="saveRouteBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                            Save Route
-                        </button>
-                        <button id="exportBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
-                            Export
-                        </button>
-                    </div>
-
-                    <div class="pt-2 border-t border-gray-200">
-                        <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
-                                    checked>
-                                <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
-                                    checked>
-                                <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly">
-                                <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
-                                    checked>
-                                <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Location Details and Route History -->
-            <div class="space-y-4">
-                <!-- Location Details -->
-                <div class="card p-4">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Location Details</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Latitude</div>
-                            <div class="text-sm font-semibold text-gray-800" id="latitude">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Longitude</div>
-                            <div class="text-sm font-semibold text-gray-800" id="longitude">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Accuracy</div>
-                            <div class="text-sm font-semibold text-gray-800" id="accuracy">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Speed</div>
-                            <div class="text-sm font-semibold text-gray-800" id="speed">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Heading</div>
-                            <div class="text-sm font-semibold text-gray-800" id="heading">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Last Update</div>
-                            <div class="text-sm font-semibold text-gray-800" id="lastUpdate">--</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Route History -->
-                <div class="card p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Route History</h2>
-                    </div>
-                    <div id="routeHistory" class="max-h-48 overflow-y-auto">
-                        <div class="text-gray-400 text-center py-8 flex flex-col items-center">
-                            <i data-lucide="map" class="w-8 h-8 mb-3 opacity-50"></i>
-                            <p class="font-medium">No route history yet</p>
-                            <p class="text-sm">Start tracking to record your journey</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Main Content Area -->
+        <!-- Main Content -->
         <div class="main-content">
-            <!-- Sidebar Toggle Button (Mobile) -->
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-            </button>
-
-            <!-- Fullscreen Button -->
-            <button class="fullscreen-btn" id="fullscreenBtn">
-                <i data-lucide="maximize" class="w-4 h-4"></i>
-                <span>Fullscreen</span>
-            </button>
-
-            <!-- Map Container -->
             <div class="map-container">
                 <div id="map"></div>
-
-                <!-- Map Controls -->
-                <div class="map-controls">
-                    <!-- Map Type Selector -->
-                    <div class="map-control">
-                        <i data-lucide="map" class="w-3 h-3"></i>
-                        <select id="mapType">
-                            <option value="standard">Standard</option>
-                            <option value="satellite">Satellite</option>
-                        </select>
-                    </div>
-
-                    <!-- Destination Search -->
-                    <div class="dropdown">
-                        <div class="map-control cursor-pointer touch-friendly">
-                            <i data-lucide="map-pin" class="w-3 h-3"></i>
-                            <span>Destination</span>
-                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                        </div>
-                        <div class="dropdown-content">
-                            <div class="text-sm mb-3 font-medium text-gray-800">Set Destination</div>
-                            <div class="relative mb-3">
-                                <input type="text" id="destinationInput" placeholder="Search destination"
-                                    class="w-full form-input p-2 text-sm touch-friendly-text">
-                            </div>
-                            <div class="flex mb-3">
-                                <button id="setDestinationBtn"
-                                    class="w-full btn-primary py-2 rounded text-sm font-medium touch-friendly">Set
-                                    Destination</button>
-                            </div>
-                            <div class="text-xs text-gray-500 mb-2">School destinations:</div>
-                            <div class="flex flex-wrap gap-2">
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-destination="Elementary School">Elementary</button>
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-destination="Middle School">Middle School</button>
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-destination="High School">High School</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Share Location -->
-                    <div class="dropdown">
-                        <div class="map-control cursor-pointer touch-friendly">
-                            <i data-lucide="share-2" class="w-3 h-3"></i>
-                            <span>Share</span>
-                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                        </div>
-                        <div class="dropdown-content">
-                            <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
-                            <div class="flex mb-3">
-                                <input type="text" id="whatsappNumber" placeholder="Phone number"
-                                    class="flex-grow form-input rounded-l p-2 text-sm touch-friendly-text">
-                                <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm touch-friendly">
-                                    <i data-lucide="send" class="w-3 h-3"></i>
-                                </button>
-                            </div>
-                            <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
-                            <div class="flex flex-wrap gap-2">
-                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-number="+255123456789">School Office</button>
-                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-number="+255987654321">Transport Manager</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet Routing Machine JS -->
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
         // Initialize Lucide icons
@@ -1158,6 +386,7 @@
         // App state
         const state = {
             isTracking: false,
+            isBroadcasting: false,
             watchId: null,
             map: null,
             marker: null,
@@ -1168,70 +397,106 @@
             lastPosition: null,
             totalDistance: 0,
             currentSpeed: 0,
-            topSpeed: 0,
+            averageSpeed: 0,
             startTime: null,
             trackingInterval: null,
-            transitType: 'schoolbus',
-            transitName: 'Morning Elementary Route',
-            destination: null,
-            eta: null,
-            routingControl: null,
-            currentMapType: 'standard',
-            mapLayers: {},
-            destinationMarker: null,
-            suggestions: [],
-            suggestionTimeout: null,
-            speechSynthesis: window.speechSynthesis,
-            savedRoutes: [],
-            averageSpeed: 0,
-            transitStartTime: null,
-            transitTimer: null,
-            lastVoiceGuidance: null,
-            voiceGuidanceInterval: null,
-            // School bus specific state
+            socket: null,
+            busId: null,
+            broadcastId: null,
+            listeners: 0,
             students: [],
-            routeStops: [],
-            currentStopIndex: 0,
-            emergencyAlertActive: false,
-            // Fullscreen state
-            isFullscreen: false
+            // WebSocket server configuration
+            wsServer: 'wss://your-websocket-server.com', // Replace with your WebSocket server
+            // Fallback server (for development)
+            wsServerFallback: 'ws://localhost:8080'
         };
 
-        // Initialize the app when DOM is loaded
+        // Initialize the app
         document.addEventListener('DOMContentLoaded', function () {
             initMap();
             setupEventListeners();
             checkGeolocationSupport();
-            updateTransitInfo();
-            initVoiceGuidance();
-            initFullscreen();
             initializeStudentRoster();
-            initializeRouteStops();
+            generateBusId();
         });
+
+        // Generate unique bus ID
+        function generateBusId() {
+            state.busId = 'bus-' + Math.random().toString(36).substr(2, 9);
+            state.broadcastId = 'broadcast-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Initialize Leaflet Map
+        function initMap() {
+            // Default center (Dar es Salaam, Tanzania)
+            const defaultCenter = [-6.7924, 39.2083];
+
+            // Create map
+            state.map = L.map('map').setView(defaultCenter, 13);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(state.map);
+
+            // Create initial marker
+            updateMarkerIcon();
+
+            // Initialize accuracy circle
+            state.accuracyCircle = L.circle(defaultCenter, {
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
+                fillOpacity: 0.1,
+                radius: 0
+            }).addTo(state.map);
+
+            // Initialize polyline for route tracking
+            state.polyline = L.polyline([], {
+                color: '#f59e0b',
+                weight: 4,
+                opacity: 0.7,
+                lineJoin: 'round'
+            }).addTo(state.map);
+        }
+
+        // Update marker icon
+        function updateMarkerIcon() {
+            const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="bus" style="width: 18px; height: 18px; color: white;"></i></div>`,
+                iconSize: [46, 46],
+                iconAnchor: [23, 23]
+            });
+
+            if (state.marker) {
+                state.marker.setIcon(customIcon);
+            } else {
+                state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
+                state.marker.bindPopup("<b>School Bus Location</b><br>Not tracking").openPopup();
+            }
+
+            // Re-initialize Lucide icons for the new marker
+            setTimeout(() => lucide.createIcons(), 100);
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            document.getElementById('trackBtn').addEventListener('click', toggleTracking);
+            document.getElementById('toggleBroadcastBtn').addEventListener('click', toggleBroadcasting);
+            document.getElementById('shareLinkBtn').addEventListener('click', generateShareableLink);
+            document.getElementById('copyLinkBtn').addEventListener('click', copyShareableLink);
+            document.getElementById('emergencyAlertBtn').addEventListener('click', sendEmergencyAlert);
+        }
 
         // Initialize student roster
         function initializeStudentRoster() {
             state.students = [
                 { id: 'S001', name: 'Emma Johnson', grade: '3rd', status: 'pending', stop: 'Maple Street' },
                 { id: 'S002', name: 'Noah Williams', grade: '3rd', status: 'pending', stop: 'Oak Avenue' },
-                { id: 'S003', name: 'Olivia Brown', grade: '4th', status: 'pending', stop: 'Pine Road' },
-                { id: 'S004', name: 'Liam Jones', grade: '4th', status: 'pending', stop: 'Cedar Lane' },
-                { id: 'S005', name: 'Ava Garcia', grade: '5th', status: 'pending', stop: 'Elm Street' }
+                { id: 'S003', name: 'Olivia Brown', grade: '4th', status: 'pending', stop: 'Pine Road' }
             ];
             renderStudentRoster();
-        }
-
-        // Initialize route stops
-        function initializeRouteStops() {
-            state.routeStops = [
-                { name: 'Maple Street', address: '123 Maple St', students: ['S001'], completed: false },
-                { name: 'Oak Avenue', address: '456 Oak Ave', students: ['S002'], completed: false },
-                { name: 'Pine Road', address: '789 Pine Rd', students: ['S003'], completed: false },
-                { name: 'Cedar Lane', address: '101 Cedar Ln', students: ['S004'], completed: false },
-                { name: 'Elm Street', address: '202 Elm St', students: ['S005'], completed: false },
-                { name: 'Elementary School', address: '500 School Dr', students: [], completed: false }
-            ];
-            updateNextStopDisplay();
         }
 
         // Render student roster
@@ -1239,14 +504,9 @@
             const studentList = document.getElementById('studentList');
             studentList.innerHTML = '';
 
-            if (state.students.length === 0) {
-                studentList.innerHTML = '<div class="text-center py-4 text-gray-500">No students assigned to this route</div>';
-                return;
-            }
-
             state.students.forEach(student => {
                 const studentItem = document.createElement('div');
-                studentItem.className = 'student-item';
+                studentItem.className = 'flex items-center justify-between py-2 border-b border-gray-100';
                 studentItem.innerHTML = `
                     <div class="flex items-center">
                         <span class="student-status student-${student.status}"></span>
@@ -1255,11 +515,11 @@
                             <div class="text-xs text-gray-500">${student.grade} • ${student.stop}</div>
                         </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <button class="mark-present text-green-600 hover:text-green-800 touch-friendly" data-id="${student.id}">
+                    <div class="flex space-x-1">
+                        <button class="mark-present text-green-600 p-1 rounded" data-id="${student.id}">
                             <i data-lucide="check" class="w-4 h-4"></i>
                         </button>
-                        <button class="mark-absent text-red-600 hover:text-red-800 touch-friendly" data-id="${student.id}">
+                        <button class="mark-absent text-red-600 p-1 rounded" data-id="${student.id}">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -1282,10 +542,7 @@
                 });
             });
 
-            // Update students on board count
             updateStudentsOnBoard();
-
-            // Re-initialize Lucide icons
             lucide.createIcons();
         }
 
@@ -1296,12 +553,15 @@
                 student.status = status;
                 renderStudentRoster();
                 
-                const statusText = status === 'present' ? 'present' : 'absent';
-                showNotification('Student Status', `${student.name} marked as ${statusText}`, 'success');
-                
-                // Voice announcement for student boarding
-                if (status === 'present' && document.getElementById('voiceGuidance').checked) {
-                    speak(`${student.name} is now on board`, 'normal');
+                // Broadcast student status update
+                if (state.isBroadcasting && state.socket) {
+                    state.socket.send(JSON.stringify({
+                        type: 'student_status',
+                        broadcastId: state.broadcastId,
+                        studentId: studentId,
+                        status: status,
+                        timestamp: Date.now()
+                    }));
                 }
             }
         }
@@ -1313,822 +573,226 @@
             document.getElementById('studentsOnBoard').textContent = `${presentCount}/${totalCount}`;
         }
 
-        // Update next stop display
-        function updateNextStopDisplay() {
-            const nextStop = state.routeStops.find(stop => !stop.completed);
-            if (nextStop) {
-                document.getElementById('nextStop').textContent = nextStop.name;
-            } else {
-                document.getElementById('nextStop').textContent = 'Route Complete';
-            }
-        }
-
-        // Mark next stop as completed
-        function completeCurrentStop() {
-            if (state.currentStopIndex < state.routeStops.length) {
-                state.routeStops[state.currentStopIndex].completed = true;
-                state.currentStopIndex++;
-                updateNextStopDisplay();
+        // Connect to WebSocket server
+        function connectWebSocket() {
+            try {
+                // Try primary server first, then fallback
+                state.socket = new WebSocket(state.wsServer);
                 
-                const stopName = state.routeStops[state.currentStopIndex - 1].name;
-                showNotification('Stop Completed', `${stopName} completed`, 'success');
-                
-                // Voice announcement for stop completion
-                if (document.getElementById('voiceGuidance').checked) {
-                    speak(`Arrived at ${stopName}`, 'normal');
-                }
-                
-                // If this is a student stop, announce student boarding
-                const stop = state.routeStops[state.currentStopIndex - 1];
-                if (stop.students.length > 0) {
-                    const studentNames = stop.students.map(id => {
-                        const student = state.students.find(s => s.id === id);
-                        return student ? student.name : '';
-                    }).filter(name => name !== '');
+                state.socket.onopen = function() {
+                    console.log('Connected to WebSocket server');
+                    showNotification('Connection', 'Connected to broadcast server', 'success');
                     
-                    if (studentNames.length > 0) {
-                        setTimeout(() => {
-                            speak(`Students to board: ${studentNames.join(', ')}`, 'normal');
-                        }, 2000);
-                    }
-                }
-                
-                // If this is the school, mark all students as present
-                if (stop.name.includes('School')) {
-                    state.students.forEach(student => {
-                        if (student.status === 'pending') {
-                            student.status = 'present';
+                    // Register as a broadcaster
+                    state.socket.send(JSON.stringify({
+                        type: 'register_broadcaster',
+                        busId: state.busId,
+                        broadcastId: state.broadcastId,
+                        busInfo: {
+                            number: document.getElementById('busNumber').value,
+                            driver: document.getElementById('driverName').value,
+                            route: document.getElementById('routeName').value
                         }
-                    });
-                    renderStudentRoster();
-                    speak("All students have arrived at school", 'high');
-                }
+                    }));
+                };
+
+                state.socket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                };
+
+                state.socket.onclose = function() {
+                    console.log('Disconnected from WebSocket server');
+                    if (state.isBroadcasting) {
+                        showNotification('Connection', 'Disconnected from server. Attempting to reconnect...', 'error');
+                        setTimeout(connectWebSocket, 5000);
+                    }
+                };
+
+                state.socket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    // Try fallback server
+                    if (!state.socket || state.socket.readyState === WebSocket.CLOSED) {
+                        state.socket = new WebSocket(state.wsServerFallback);
+                    }
+                };
+
+            } catch (error) {
+                console.error('Failed to connect to WebSocket:', error);
+                showNotification('Connection Error', 'Cannot connect to broadcast server', 'error');
             }
         }
 
-        // Initialize Leaflet Map with OpenStreetMap tiles
-        function initMap() {
-            // Default center (Dar es Salaam, Tanzania)
-            const defaultCenter = [-6.7924, 39.2083];
-
-            // Create map
-            state.map = L.map('map').setView(defaultCenter, 13);
-
-            // Define map layers
-            state.mapLayers = {
-                standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    maxZoom: 19
-                }),
-                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-                    maxZoom: 19
-                })
-            };
-
-            // Add default layer
-            state.mapLayers.standard.addTo(state.map);
-
-            // Create initial marker with custom icon for school bus
-            updateMarkerIcon();
-
-            // Initialize accuracy circle
-            state.accuracyCircle = L.circle(defaultCenter, {
-                color: '#f59e0b',
-                fillColor: '#f59e0b',
-                fillOpacity: 0.1,
-                radius: 0
-            }).addTo(state.map);
-
-            // Initialize polyline for route tracking
-            state.polyline = L.polyline([], {
-                color: '#f59e0b',
-                weight: 4,
-                opacity: 0.7,
-                lineJoin: 'round'
-            }).addTo(state.map);
-
-            // Add route stops to map
-            addRouteStopsToMap();
-        }
-
-        // Add route stops to the map
-        function addRouteStopsToMap() {
-            state.routeStops.forEach((stop, index) => {
-                // Generate a slightly different position for each stop for demonstration
-                const lat = -6.7924 + (index * 0.01);
-                const lng = 39.2083 + (index * 0.01);
-                
-                const stopMarker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        className: 'stop-marker',
-                        html: `<div style="background: ${index === state.currentStopIndex ? '#f59e0b' : '#94a3b8'}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);"><i data-lucide="${index === state.routeStops.length - 1 ? 'school' : 'map-pin'}" style="width: 12px; height: 12px; color: white;"></i></div>`,
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).addTo(state.map);
-                
-                stopMarker.bindPopup(`
-                    <b>${stop.name}</b><br>
-                    ${stop.address}<br>
-                    ${stop.students.length > 0 ? `Students: ${stop.students.length}` : 'School Destination'}
-                `);
-                
-                // Store marker reference
-                stop.marker = stopMarker;
-            });
-            
-            // Re-initialize Lucide icons for markers
-            setTimeout(() => lucide.createIcons(), 100);
-        }
-
-        // Initialize voice guidance
-        function initVoiceGuidance() {
-            if (!state.speechSynthesis) {
-                console.warn('Speech synthesis not supported');
-                document.getElementById('voiceGuidance').disabled = true;
-                document.querySelector('.voice-indicator').style.display = 'none';
-            }
-        }
-
-        // Initialize fullscreen functionality
-        function initFullscreen() {
-            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
-            
-            // Listen for ESC key to exit fullscreen
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && state.isFullscreen) {
-                    toggleFullscreen();
-                }
-            });
-            
-            // Listen for fullscreen change events
-            document.addEventListener('fullscreenchange', handleFullscreenChange);
-            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-        }
-
-        // Toggle fullscreen mode
-        function toggleFullscreen() {
-            if (!state.isFullscreen) {
-                // Enter fullscreen
-                const appContainer = document.querySelector('.app-container');
-                if (appContainer.requestFullscreen) {
-                    appContainer.requestFullscreen();
-                } else if (appContainer.webkitRequestFullscreen) {
-                    appContainer.webkitRequestFullscreen();
-                } else if (appContainer.mozRequestFullScreen) {
-                    appContainer.mozRequestFullScreen();
-                } else if (appContainer.msRequestFullscreen) {
-                    appContainer.msRequestFullscreen();
-                }
-                
-                document.body.classList.add('fullscreen');
-                state.isFullscreen = true;
-                
-                // Update button
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                fullscreenBtn.innerHTML = '<i data-lucide="minimize" class="w-4 h-4"></i><span>Exit Fullscreen</span>';
-                lucide.createIcons();
-                
-                // Update map size
-                setTimeout(() => {
-                    state.map.invalidateSize();
-                }, 300);
-            } else {
-                // Exit fullscreen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                
-                document.body.classList.remove('fullscreen');
-                state.isFullscreen = false;
-                
-                // Update button
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Fullscreen</span>';
-                lucide.createIcons();
-                
-                // Update map size
-                setTimeout(() => {
-                    state.map.invalidateSize();
-                }, 300);
-            }
-        }
-
-        // Handle fullscreen change events
-        function handleFullscreenChange() {
-            const isFullscreen = document.fullscreenElement || 
-                                document.webkitFullscreenElement || 
-                                document.mozFullScreenElement || 
-                                document.msFullscreenElement;
-            
-            if (!isFullscreen && state.isFullscreen) {
-                document.body.classList.remove('fullscreen');
-                state.isFullscreen = false;
-                
-                // Update button
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Fullscreen</span>';
-                lucide.createIcons();
-                
-                // Update map size
-                setTimeout(() => {
-                    state.map.invalidateSize();
-                }, 300);
-            }
-        }
-
-        // Text-to-speech function for voice guidance
-        function speak(text, priority = 'normal') {
-            if (state.speechSynthesis && document.getElementById('voiceGuidance').checked) {
-                // Don't interrupt high priority messages
-                if (priority === 'normal' && state.speechSynthesis.speaking) {
-                    return;
-                }
-
-                // Cancel any ongoing speech
-                state.speechSynthesis.cancel();
-
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.0;
-                state.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Provide real-time voice guidance for navigation
-        function provideVoiceGuidance() {
-            if (!state.routingControl || !state.lastPosition) return;
-
-            // Get route instructions
-            const route = state.routingControl.getRoute();
-            if (!route || !route.instructions) return;
-
-            // Find the next instruction
-            let nextInstruction = null;
-            let distanceToNext = 0;
-
-            for (let i = 0; i < route.instructions.length; i++) {
-                const instruction = route.instructions[i];
-                if (instruction.distance > 0) {
-                    nextInstruction = instruction;
-                    distanceToNext = instruction.distance;
+        // Handle WebSocket messages
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'listeners_update':
+                    state.listeners = data.count;
+                    updateListenersDisplay();
                     break;
-                }
-            }
-
-            if (!nextInstruction) return;
-
-            // Convert distance to appropriate unit
-            let distanceText;
-            if (distanceToNext < 100) {
-                distanceText = `${Math.round(distanceToNext)} meters`;
-            } else {
-                distanceText = `${(distanceToNext / 1000).toFixed(1)} kilometers`;
-            }
-
-            // Create guidance message
-            const guidanceMessage = `In ${distanceText}, ${nextInstruction.text}`;
-
-            // Only speak if it's a new instruction or distance has changed significantly
-            if (state.lastVoiceGuidance !== guidanceMessage) {
-                state.lastVoiceGuidance = guidanceMessage;
-                speak(guidanceMessage, 'normal');
+                    
+                case 'emergency_acknowledged':
+                    showNotification('Emergency Alert', 'Emergency has been acknowledged by admin', 'success');
+                    break;
+                    
+                case 'ping':
+                    // Respond to ping to keep connection alive
+                    state.socket.send(JSON.stringify({ type: 'pong' }));
+                    break;
             }
         }
 
-        // Show notification
-        function showNotification(title, message, type = 'info') {
-            const notification = document.getElementById('notification');
-            const notificationTitle = document.getElementById('notificationTitle');
-            const notificationMessage = document.getElementById('notificationMessage');
-
-            notificationTitle.textContent = title;
-            notificationMessage.textContent = message;
-
-            // Set icon based on type
-            let icon = 'info';
-            if (type === 'success') icon = 'check-circle';
-            if (type === 'error') icon = 'alert-circle';
-            if (type === 'warning') icon = 'alert-triangle';
-
-            notification.innerHTML = `
-                <div class="flex items-start">
-                    <i data-lucide="${icon}" class="w-5 h-5 mr-3 mt-0.5"></i>
-                    <div>
-                        <div class="font-semibold">${title}</div>
-                        <div class="text-sm text-gray-600 mt-1">${message}</div>
-                    </div>
-                </div>
-            `;
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            // Set notification type
-            notification.className = 'notification';
-            notification.classList.add(type);
-            notification.classList.add('show');
-
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 5000);
+        // Update listeners display
+        function updateListenersDisplay() {
+            document.getElementById('listenersCount').textContent = 
+                state.listeners === 1 ? '1 listener' : `${state.listeners} listeners`;
         }
 
-        // Update marker icon based on transit type
-        function updateMarkerIcon() {
-            const customIcon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="bus" style="width: 18px; height: 18px; color: white;"></i></div>`,
-                iconSize: [46, 46],
-                iconAnchor: [23, 23]
-            });
-
-            if (state.marker) {
-                state.marker.setIcon(customIcon);
-            } else {
-                state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
-                state.marker.bindPopup("<b>School Bus Location</b><br>Tracking not started").openPopup();
-            }
-
-            // Re-initialize Lucide icons for the new marker
-            setTimeout(() => lucide.createIcons(), 100);
-        }
-
-        // Set up event listeners
-        function setupEventListeners() {
-            document.getElementById('trackBtn').addEventListener('click', toggleTracking);
-            document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
-            document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-            document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
-            document.getElementById('busNumber').addEventListener('change', updateBusNumber);
-            document.getElementById('driverName').addEventListener('change', updateDriverName);
-            document.getElementById('mapType').addEventListener('change', changeMapType);
-            document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
-            document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
-            document.getElementById('markAllPresentBtn').addEventListener('click', markAllStudentsPresent);
-            document.getElementById('generateReportBtn').addEventListener('click', generateStudentReport);
-            document.getElementById('emergencyAlertBtn').addEventListener('click', toggleEmergencyAlert);
-
-            // Sidebar toggle for mobile
-            document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
-
-            // Add event listeners for destination options
-            document.querySelectorAll('.destination-option').forEach(button => {
-                button.addEventListener('click', function () {
-                    const destination = this.getAttribute('data-destination');
-                    document.getElementById('destinationInput').value = destination;
-                    setDestination();
-                });
-            });
-
-            // Add event listeners for contact options
-            document.querySelectorAll('.contact-option').forEach(button => {
-                button.addEventListener('click', function () {
-                    const number = this.getAttribute('data-number');
-                    document.getElementById('whatsappNumber').value = number;
-                });
-            });
-
-            // Add keyboard shortcut for completing stops (Spacebar)
-            document.addEventListener('keydown', function(e) {
-                if (e.code === 'Space' && state.isTracking) {
-                    e.preventDefault();
-                    completeCurrentStop();
-                }
-            });
-        }
-
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-            
-            const icon = document.querySelector('#sidebarToggle i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.setAttribute('data-lucide', 'menu');
-            } else {
-                icon.setAttribute('data-lucide', 'x');
-            }
-            lucide.createIcons();
-        }
-
-        // Mark all students as present
-        function markAllStudentsPresent() {
-            state.students.forEach(student => {
-                if (student.status === 'pending') {
-                    student.status = 'present';
-                }
-            });
-            renderStudentRoster();
-            showNotification('Student Roster', 'All students marked as present', 'success');
-        }
-
-        // Generate student report
-        function generateStudentReport() {
-            const presentCount = state.students.filter(s => s.status === 'present').length;
-            const absentCount = state.students.filter(s => s.status === 'absent').length;
-            const pendingCount = state.students.filter(s => s.status === 'pending').length;
-            
-            // Create PDF document
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(40, 40, 40);
-            doc.text('School Bus Tracker - Student Report', 20, 30);
-
-            // Add route information
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Route: ${state.transitName}`, 20, 50);
-            doc.text(`Bus: ${document.getElementById('busNumber').value}`, 20, 60);
-            doc.text(`Driver: ${document.getElementById('driverName').value}`, 20, 70);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
-
-            // Add summary
-            doc.setTextColor(40, 40, 40);
-            doc.text('Attendance Summary:', 20, 100);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Present: ${presentCount} students`, 20, 110);
-            doc.text(`Absent: ${absentCount} students`, 20, 120);
-            doc.text(`Pending: ${pendingCount} students`, 20, 130);
-
-            // Add student table
-            const tableColumn = ["Student ID", "Name", "Grade", "Status", "Stop"];
-            const tableRows = [];
-
-            state.students.forEach(student => {
-                const row = [
-                    student.id,
-                    student.name,
-                    student.grade,
-                    student.status.charAt(0).toUpperCase() + student.status.slice(1),
-                    student.stop
-                ];
-                tableRows.push(row);
-            });
-
-            // Add table to PDF
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 150,
-                theme: 'grid',
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [245, 158, 11] }
-            });
-
-            // Save the PDF
-            doc.save(`student-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-
-            showNotification('Student Report', 'PDF report generated successfully', 'success');
-        }
-
-        // Toggle emergency alert
-        function toggleEmergencyAlert() {
-            state.emergencyAlertActive = !state.emergencyAlertActive;
-            
-            const alertBtn = document.getElementById('emergencyAlertBtn');
-            
-            if (state.emergencyAlertActive) {
-                alertBtn.innerHTML = '<i data-lucide="alert-octagon" class="w-4 h-4 mr-2"></i>Cancel Emergency';
-                alertBtn.classList.add('btn-danger');
-                alertBtn.classList.remove('btn-primary');
-                
-                // Show emergency notification
-                showNotification('EMERGENCY ALERT', 'Emergency alert activated. Authorities have been notified.', 'error');
-                
-                // Voice announcement
-                speak("EMERGENCY ALERT ACTIVATED. Authorities have been notified.", 'high');
-                
-                // In a real app, this would send notifications to school officials and emergency contacts
-                
-                // Flash the emergency button
-                let flashCount = 0;
-                const flashInterval = setInterval(() => {
-                    alertBtn.style.opacity = alertBtn.style.opacity === '0.7' ? '1' : '0.7';
-                    flashCount++;
-                    if (flashCount >= 10) {
-                        clearInterval(flashInterval);
-                        alertBtn.style.opacity = '1';
+        // Broadcast location to all listeners
+        function broadcastLocation(position) {
+            if (state.isBroadcasting && state.socket && state.socket.readyState === WebSocket.OPEN) {
+                const locationData = {
+                    type: 'location_update',
+                    broadcastId: state.broadcastId,
+                    location: {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        speed: position.coords.speed,
+                        heading: position.coords.heading,
+                        accuracy: position.coords.accuracy,
+                        timestamp: Date.now()
+                    },
+                    busInfo: {
+                        number: document.getElementById('busNumber').value,
+                        driver: document.getElementById('driverName').value,
+                        route: document.getElementById('routeName').value
+                    },
+                    metrics: {
+                        distance: state.totalDistance,
+                        averageSpeed: state.averageSpeed,
+                        studentsOnBoard: state.students.filter(s => s.status === 'present').length,
+                        totalStudents: state.students.length
                     }
-                }, 500);
+                };
+
+                state.socket.send(JSON.stringify(locationData));
+            }
+        }
+
+        // Toggle broadcasting
+        function toggleBroadcasting() {
+            if (state.isBroadcasting) {
+                stopBroadcasting();
             } else {
-                alertBtn.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>Emergency Alert';
-                alertBtn.classList.remove('btn-danger');
-                alertBtn.classList.add('btn-primary');
-                
-                showNotification('Emergency Canceled', 'Emergency alert has been canceled.', 'success');
-                speak("Emergency alert canceled.", 'high');
+                startBroadcasting();
+            }
+        }
+
+        // Start broadcasting
+        function startBroadcasting() {
+            if (!state.isTracking) {
+                showNotification('Broadcast', 'Please start GPS tracking first', 'error');
+                return;
+            }
+
+            connectWebSocket();
+            
+            state.isBroadcasting = true;
+            updateBroadcastUI();
+            
+            showNotification('Broadcast', 'Live location broadcasting started', 'success');
+        }
+
+        // Stop broadcasting
+        function stopBroadcasting() {
+            state.isBroadcasting = false;
+            
+            if (state.socket) {
+                state.socket.send(JSON.stringify({
+                    type: 'stop_broadcast',
+                    broadcastId: state.broadcastId
+                }));
+                state.socket.close();
             }
             
-            // Re-initialize Lucide icons
-            lucide.createIcons();
+            updateBroadcastUI();
+            showNotification('Broadcast', 'Live broadcasting stopped', 'info');
         }
 
-        // Save route
-        function saveRoute() {
-            if (state.pathCoordinates.length === 0) {
-                showNotification('Save Route', 'No route data to save', 'error');
+        // Update broadcast UI
+        function updateBroadcastUI() {
+            const indicator = document.getElementById('broadcastIndicator');
+            const status = document.getElementById('broadcastStatus');
+            const button = document.getElementById('toggleBroadcastBtn');
+
+            if (state.isBroadcasting) {
+                indicator.className = 'status-indicator status-broadcasting broadcasting-indicator';
+                status.textContent = 'Broadcasting Live';
+                button.textContent = 'Stop Broadcast';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-danger');
+            } else {
+                indicator.className = 'status-indicator status-inactive';
+                status.textContent = 'Not Broadcasting';
+                button.textContent = 'Start Broadcast';
+                button.classList.remove('btn-danger');
+                button.classList.add('btn-primary');
+            }
+        }
+
+        // Generate shareable link
+        function generateShareableLink() {
+            if (!state.isBroadcasting) {
+                showNotification('Share', 'Please start broadcasting first', 'error');
                 return;
             }
 
-            const routeName = prompt('Enter a name for this route:');
-            if (!routeName) return;
-
-            const routeData = {
-                name: routeName,
-                coordinates: state.pathCoordinates,
-                timestamps: state.timestamps,
-                distance: state.totalDistance,
-                duration: state.transitStartTime ? new Date() - state.transitStartTime : 0,
-                date: new Date().toISOString(),
-                students: state.students
-            };
-
-            state.savedRoutes.push(routeData);
-            showNotification('Save Route', `Route "${routeName}" saved successfully`, 'success');
+            const baseUrl = window.location.origin + window.location.pathname;
+            const trackingUrl = `${baseUrl}?tracking=${state.broadcastId}`;
+            
+            document.getElementById('shareableLink').value = trackingUrl;
+            document.getElementById('shareLinkContainer').classList.remove('hidden');
+            
+            showNotification('Share', 'Shareable link generated', 'success');
         }
 
-        // Export data as PDF
-        function exportData() {
-            if (state.pathCoordinates.length === 0) {
-                showNotification('Export Data', 'No data to export', 'error');
+        // Copy shareable link
+        function copyShareableLink() {
+            const linkInput = document.getElementById('shareableLink');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            showNotification('Share', 'Link copied to clipboard', 'success');
+        }
+
+        // Send emergency alert
+        function sendEmergencyAlert() {
+            if (!state.isBroadcasting) {
+                showNotification('Emergency', 'Please start broadcasting first', 'error');
                 return;
             }
 
-            // Create PDF document
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(40, 40, 40);
-            doc.text('School Bus Tracker - Route Report', 20, 30);
-
-            // Add transit information
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Route: ${state.transitName}`, 20, 50);
-            doc.text(`Bus: ${document.getElementById('busNumber').value}`, 20, 60);
-            doc.text(`Driver: ${document.getElementById('driverName').value}`, 20, 70);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
-
-            // Add metrics
-            doc.setTextColor(40, 40, 40);
-            doc.text('Route Metrics:', 20, 100);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 110);
-            doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 120);
-            doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 130);
-            doc.text(`Route Time: ${document.getElementById('transitTime').textContent}`, 20, 140);
-
-            // Add student summary
-            const presentCount = state.students.filter(s => s.status === 'present').length;
-            const totalCount = state.students.length;
-            doc.text(`Students Transported: ${presentCount}/${totalCount}`, 20, 155);
-
-            // Add route coordinates table
-            const tableColumn = ["Time", "Latitude", "Longitude", "Speed (km/h)"];
-            const tableRows = [];
-
-            for (let i = 0; i < state.timestamps.length; i++) {
-                const timestamp = state.timestamps[i];
-                const coord = state.pathCoordinates[i];
-
-                // Calculate speed for this point (simplified)
-                let speed = 0;
-                if (i > 0) {
-                    const prevCoord = state.pathCoordinates[i - 1];
-                    const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
-                    const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
-                    if (timeDiff > 0) {
-                        speed = (distance / timeDiff) * 3.6; // km/h
+            if (state.socket && state.socket.readyState === WebSocket.OPEN) {
+                state.socket.send(JSON.stringify({
+                    type: 'emergency_alert',
+                    broadcastId: state.broadcastId,
+                    location: state.lastPosition ? {
+                        lat: state.lastPosition[0],
+                        lng: state.lastPosition[1]
+                    } : null,
+                    timestamp: Date.now(),
+                    busInfo: {
+                        number: document.getElementById('busNumber').value,
+                        driver: document.getElementById('driverName').value
                     }
-                }
+                }));
 
-                const row = [
-                    timestamp.toLocaleTimeString(),
-                    coord[0].toFixed(6),
-                    coord[1].toFixed(6),
-                    speed.toFixed(2)
-                ];
-                tableRows.push(row);
-            }
-
-            // Add table to PDF
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 170,
-                theme: 'grid',
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [245, 158, 11] }
-            });
-
-            // Save the PDF
-            doc.save(`school-bus-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-
-            showNotification('Export Data', 'PDF report generated successfully', 'success');
-        }
-
-        // Set destination and calculate route
-        function setDestination() {
-            const destinationInput = document.getElementById('destinationInput').value.trim();
-
-            if (!destinationInput) {
-                showNotification('Set Destination', 'Please enter a destination.', 'error');
-                return;
-            }
-
-            if (!state.lastPosition) {
-                showNotification('Set Destination', 'Please start tracking to get your current location first.', 'error');
-                return;
-            }
-
-            // Remove existing routing control if any
-            if (state.routingControl) {
-                state.map.removeControl(state.routingControl);
-            }
-
-            // Remove existing destination marker if any
-            if (state.destinationMarker) {
-                state.map.removeLayer(state.destinationMarker);
-            }
-
-            // Clear previous voice guidance interval
-            if (state.voiceGuidanceInterval) {
-                clearInterval(state.voiceGuidanceInterval);
-            }
-
-            // Create routing control
-            state.routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(state.lastPosition[0], state.lastPosition[1]),
-                    L.latLng(0, 0) // Will be updated after geocoding
-                ],
-                routeWhileDragging: false,
-                showAlternatives: false,
-                lineOptions: {
-                    styles: [{ color: '#f59e0b', weight: 5 }]
-                },
-                createMarker: function (i, waypoint, n) {
-                    if (i === 0) {
-                        // Don't create marker for start point (we already have one)
-                        return null;
-                    }
-                    // Create destination marker
-                    state.destinationMarker = L.marker(waypoint.latLng, {
-                        icon: L.divIcon({
-                            className: 'destination-marker',
-                            html: '<div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"></div>',
-                            iconSize: [38, 38],
-                            iconAnchor: [19, 19]
-                        })
-                    }).addTo(state.map);
-
-                    state.destinationMarker.bindPopup(`<b>Destination</b><br>${destinationInput}`).openPopup();
-
-                    return state.destinationMarker;
-                }
-            }).addTo(state.map);
-
-            // Geocode the destination
-            const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinationInput)}`;
-
-            fetch(geocodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const destination = data[0];
-                        const destLatLng = L.latLng(destination.lat, destination.lon);
-
-                        // Update routing waypoints
-                        state.routingControl.setWaypoints([
-                            L.latLng(state.lastPosition[0], state.lastPosition[1]),
-                            destLatLng
-                        ]);
-
-                        // Store destination
-                        state.destination = {
-                            name: destinationInput,
-                            latLng: destLatLng
-                        };
-
-                        showNotification('Set Destination', `Route to ${destinationInput} calculated.`, 'success');
-
-                        // Start voice guidance
-                        if (document.getElementById('voiceGuidance').checked) {
-                            speak(`Route to ${destinationInput} calculated. Follow the highlighted path.`, 'high');
-
-                            // Set up periodic voice guidance
-                            state.voiceGuidanceInterval = setInterval(provideVoiceGuidance, 10000);
-                        }
-                    } else {
-                        showNotification('Set Destination', 'Destination not found. Please try a different location.', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Geocoding error:', error);
-                    showNotification('Set Destination', 'Error finding destination. Please try again.', 'error');
-                });
-        }
-
-        // Share location via WhatsApp
-        function shareLocationViaWhatsApp() {
-            const phoneNumber = document.getElementById('whatsappNumber').value.trim();
-
-            if (!phoneNumber) {
-                showNotification('Share Location', 'Please enter a phone number.', 'error');
-                return;
-            }
-
-            if (!state.lastPosition) {
-                showNotification('Share Location', 'No location data available. Start tracking first.', 'error');
-                return;
-            }
-
-            // Format phone number (remove any non-digit characters)
-            const formattedNumber = phoneNumber.replace(/\D/g, '');
-
-            // Create message with location
-            const message = `School bus current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
-
-            // Create WhatsApp URL
-            const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
-
-            // Open WhatsApp in a new tab
-            window.open(whatsappUrl, '_blank');
-
-            showNotification('Share Location', 'WhatsApp sharing initiated.', 'success');
-        }
-
-        // Change map type
-        function changeMapType() {
-            const mapType = document.getElementById('mapType').value;
-
-            // Remove current layer
-            if (state.currentMapType && state.mapLayers[state.currentMapType]) {
-                state.map.removeLayer(state.mapLayers[state.currentMapType]);
-            }
-
-            // Add new layer
-            state.mapLayers[mapType].addTo(state.map);
-            state.currentMapType = mapType;
-        }
-
-        // Update transit name
-        function updateTransitName() {
-            state.transitName = document.getElementById('transitNameInput').value;
-            updateTransitInfo();
-        }
-
-        // Update bus number
-        function updateBusNumber() {
-            // In a real app, this would update the bus number in the system
-            showNotification('Bus Number', 'Bus number updated', 'success');
-        }
-
-        // Update driver name
-        function updateDriverName() {
-            // In a real app, this would update the driver name in the system
-            showNotification('Driver', 'Driver information updated', 'success');
-        }
-
-        // Update transit info display
-        function updateTransitInfo() {
-            // Update the marker popup with current transit info
-            if (state.marker) {
-                state.marker.bindPopup(`
-                    <b>${state.transitName}</b><br>
-                    Status: ${state.isTracking ? 'In Transit' : 'Not Tracking'}<br>
-                    Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
-                    Last Update: ${state.lastPosition ? new Date().toLocaleTimeString() : '--'}
-                `);
+                showNotification('EMERGENCY', 'Emergency alert sent to all connected devices', 'error');
             }
         }
 
-        // Check if geolocation is supported
-        function checkGeolocationSupport() {
-            if (!navigator.geolocation) {
-                showNotification('Geolocation', 'Geolocation is not supported by this browser.', 'error');
-                document.getElementById('trackBtn').disabled = true;
-            }
-        }
-
-        // Toggle tracking on/off
+        // Toggle GPS tracking
         function toggleTracking() {
             if (state.isTracking) {
                 stopTracking();
@@ -2137,17 +801,15 @@
             }
         }
 
-        // Start location tracking
+        // Start GPS tracking
         function startTracking() {
             if (!navigator.geolocation) {
-                showNotification('Tracking', 'Geolocation is not supported by this browser.', 'error');
+                showNotification('GPS', 'Geolocation is not supported by this browser', 'error');
                 return;
             }
 
-            const highAccuracy = document.getElementById('highAccuracy').checked;
-
             const options = {
-                enableHighAccuracy: highAccuracy,
+                enableHighAccuracy: true,
                 timeout: 10000,
                 maximumAge: 0
             };
@@ -2160,33 +822,20 @@
 
             state.isTracking = true;
             state.startTime = new Date();
-            state.transitStartTime = new Date();
-
-            // Start tracking timer
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
 
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>End Route';
+            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>Stop GPS';
             trackBtn.classList.remove('btn-primary');
             trackBtn.classList.add('btn-danger');
 
-            // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-active';
-            document.getElementById('statusText').textContent = 'Tracking Active';
-            document.getElementById('transitStatus').textContent = 'In Transit';
+            document.getElementById('statusText').textContent = 'Tracking';
 
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            showNotification('Tracking', 'Route started. School bus is now being tracked.', 'success');
-
-            // Voice guidance
-            if (document.getElementById('voiceGuidance').checked) {
-                speak("Route started. School bus is now being tracked.", 'high');
-            }
+            showNotification('GPS', 'GPS tracking started', 'success');
         }
 
-        // Stop location tracking
+        // Stop GPS tracking
         function stopTracking() {
             if (state.watchId) {
                 navigator.geolocation.clearWatch(state.watchId);
@@ -2198,46 +847,30 @@
                 state.trackingInterval = null;
             }
 
-            if (state.transitTimer) {
-                clearInterval(state.transitTimer);
-                state.transitTimer = null;
-            }
-
-            if (state.voiceGuidanceInterval) {
-                clearInterval(state.voiceGuidanceInterval);
-                state.voiceGuidanceInterval = null;
-            }
-
             state.isTracking = false;
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Route';
+            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start GPS';
             trackBtn.classList.remove('btn-danger');
             trackBtn.classList.add('btn-primary');
 
-            // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-inactive';
-            document.getElementById('statusText').textContent = 'Not Tracking';
-            document.getElementById('transitStatus').textContent = 'Route Ended';
+            document.getElementById('statusText').textContent = 'Offline';
 
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            showNotification('Tracking', 'Route ended.', 'info');
-
-            // Voice guidance
-            if (document.getElementById('voiceGuidance').checked) {
-                speak("Route ended.", 'high');
+            // Also stop broadcasting if active
+            if (state.isBroadcasting) {
+                stopBroadcasting();
             }
+
+            showNotification('GPS', 'GPS tracking stopped', 'info');
         }
 
-        // Update position on the map
+        // Update position from GPS
         function updatePosition(position) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             const accuracy = position.coords.accuracy;
             const speed = position.coords.speed;
             const heading = position.coords.heading;
-            const timestamp = new Date(position.timestamp);
 
             // Update location display
             document.getElementById('latitude').textContent = lat.toFixed(6);
@@ -2245,17 +878,10 @@
             document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)}m`;
             document.getElementById('speed').textContent = speed ? `${(speed * 3.6).toFixed(2)} km/h` : '--';
             document.getElementById('heading').textContent = heading ? `${heading.toFixed(0)}°` : '--';
-            document.getElementById('lastUpdate').textContent = timestamp.toLocaleTimeString();
-            document.getElementById('transitUpdate').textContent = timestamp.toLocaleTimeString();
 
             // Update speed
             if (speed) {
-                state.currentSpeed = speed * 3.6; // Convert to km/h
-
-                // Update top speed
-                if (state.currentSpeed > state.topSpeed) {
-                    state.topSpeed = state.currentSpeed;
-                }
+                state.currentSpeed = speed * 3.6;
             }
 
             // Create new position object
@@ -2270,124 +896,48 @@
 
             // Update marker popup
             state.marker.bindPopup(`
-                <b>${state.transitName}</b><br>
-                Status: In Transit<br>
+                <b>School Bus #SB-1245</b><br>
                 Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
-                Last Update: ${timestamp.toLocaleTimeString()}
+                Last Update: ${new Date().toLocaleTimeString()}
             `);
 
-            // Center map on new position if auto-center is enabled
-            if (state.isTracking && document.getElementById('autoCenter').checked) {
-                state.map.setView(newPosition, state.map.getZoom());
-            }
+            // Center map on new position
+            state.map.setView(newPosition, state.map.getZoom());
 
             // Add to path and update polyline
             if (state.lastPosition) {
-                // Calculate distance between points
                 const distance = calculateDistance(
                     state.lastPosition[0], state.lastPosition[1],
                     lat, lng
                 );
                 state.totalDistance += distance;
-
-                // Update metrics
                 updateMetrics();
-
-                // Calculate ETA to school (simplified calculation)
-                updateETA();
             }
 
             state.pathCoordinates.push(newPosition);
-            state.timestamps.push(timestamp);
+            state.timestamps.push(new Date());
             state.polyline.setLatLngs(state.pathCoordinates);
-
-            // Add to route history
-            addToRouteHistory(newPosition, timestamp);
-
-            // Update routing if destination is set
-            if (state.routingControl && state.lastPosition) {
-                state.routingControl.setWaypoints([
-                    L.latLng(newPosition[0], newPosition[1]),
-                    state.routingControl.getWaypoints()[1]
-                ]);
-
-                // Provide voice guidance if enabled
-                if (document.getElementById('voiceGuidance').checked) {
-                    provideVoiceGuidance();
-                }
-            }
 
             // Store last position
             state.lastPosition = newPosition;
+
+            // Broadcast location if broadcasting is active
+            if (state.isBroadcasting) {
+                broadcastLocation(position);
+            }
         }
 
-        // Update business metrics
+        // Update metrics
         function updateMetrics() {
-            // Update distance traveled
             document.getElementById('distanceTraveled').textContent = `${(state.totalDistance / 1000).toFixed(2)} km`;
 
-            // Update average speed
             if (state.timestamps.length > 1) {
-                const timeDiff = (state.timestamps[state.timestamps.length - 1] - state.timestamps[0]) / 1000; // in seconds
+                const timeDiff = (state.timestamps[state.timestamps.length - 1] - state.timestamps[0]) / 1000;
                 if (timeDiff > 0) {
-                    state.averageSpeed = (state.totalDistance / timeDiff) * 3.6; // km/h
+                    state.averageSpeed = (state.totalDistance / timeDiff) * 3.6;
                     document.getElementById('averageSpeed').textContent = `${state.averageSpeed.toFixed(2)} km/h`;
                 }
             }
-        }
-
-        // Update ETA calculation
-        function updateETA() {
-            // Simplified ETA calculation - in a real app, you would use a routing service
-            if (state.currentSpeed > 5) { // Only calculate if moving
-                const remainingDistance = 10; // Example: 10km to school
-                const timeHours = remainingDistance / state.currentSpeed;
-                const etaTime = new Date(Date.now() + timeHours * 3600000);
-                document.getElementById('etaToSchool').textContent = etaTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            }
-        }
-
-        // Add point to route history
-        function addToRouteHistory(position, timestamp) {
-            const routeHistory = document.getElementById('routeHistory');
-
-            // Clear placeholder if it exists
-            if (routeHistory.querySelector('.text-center')) {
-                routeHistory.innerHTML = '';
-            }
-
-            const historyItem = document.createElement('div');
-            historyItem.className = 'py-3 border-b border-gray-200';
-            historyItem.innerHTML = `
-                <div class="flex justify-between">
-                    <div>
-                        <span class="text-sm font-medium text-gray-800">${timestamp.toLocaleTimeString()}</span>
-                        <span class="text-xs text-gray-500 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
-                    </div>
-                    <div class="text-xs text-gray-500 font-medium">${state.currentSpeed.toFixed(1)} km/h</div>
-                </div>
-            `;
-
-            routeHistory.appendChild(historyItem);
-
-            // Scroll to bottom
-            routeHistory.scrollTop = routeHistory.scrollHeight;
-        }
-
-        // Calculate distance between two coordinates in meters
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // Earth radius in meters
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c;
         }
 
         // Update tracking time
@@ -2405,13 +955,28 @@
             }
         }
 
+        // Calculate distance between coordinates
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c;
+        }
+
         // Handle geolocation errors
         function handleGeolocationError(error) {
             let message = '';
-
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    message = 'Location access denied. Please enable location permissions in your browser settings.';
+                    message = 'Location access denied. Please enable location permissions.';
                     break;
                 case error.POSITION_UNAVAILABLE:
                     message = 'Location information is unavailable.';
@@ -2419,43 +984,53 @@
                 case error.TIMEOUT:
                     message = 'The request to get your location timed out.';
                     break;
-                case error.UNKNOWN_ERROR:
-                    message = 'An unknown error occurred while retrieving your location.';
+                default:
+                    message = 'An unknown error occurred.';
                     break;
             }
-
-            showNotification('Geolocation Error', message, 'error');
+            showNotification('GPS Error', message, 'error');
             stopTracking();
         }
 
-        // Clear the route/path
-        function clearRoute() {
-            state.pathCoordinates = [];
-            state.timestamps = [];
-            state.polyline.setLatLngs(state.pathCoordinates);
-            state.totalDistance = 0;
-            state.currentSpeed = 0;
-            state.topSpeed = 0;
-            refreshRouteHistory();
-            updateMetrics();
-            showNotification('Route', 'Route cleared.', 'info');
+        // Check geolocation support
+        function checkGeolocationSupport() {
+            if (!navigator.geolocation) {
+                showNotification('GPS', 'Geolocation is not supported by this browser.', 'error');
+                document.getElementById('trackBtn').disabled = true;
+            }
         }
 
-        // Refresh route history display
-        function refreshRouteHistory() {
-            const routeHistory = document.getElementById('routeHistory');
-            routeHistory.innerHTML = '';
+        // Show notification
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notificationTitle');
+            const notificationMessage = document.getElementById('notificationMessage');
 
-            if (state.pathCoordinates.length === 0) {
-                routeHistory.innerHTML = `
-                    <div class="text-gray-400 text-center py-8 flex flex-col items-center">
-                        <i data-lucide="map" class="w-8 h-8 mb-3 opacity-50"></i>
-                        <p class="font-medium">No route history yet</p>
-                        <p class="text-sm">Start tracking to record your journey</p>
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+
+            let icon = 'info';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'alert-circle';
+
+            notification.innerHTML = `
+                <div class="flex items-start">
+                    <i data-lucide="${icon}" class="w-5 h-5 mr-3 mt-0.5"></i>
+                    <div>
+                        <div class="font-semibold">${title}</div>
+                        <div class="text-sm text-gray-600 mt-1">${message}</div>
                     </div>
-                `;
-                lucide.createIcons();
-            }
+                </div>
+            `;
+
+            lucide.createIcons();
+
+            notification.className = 'notification';
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
         }
     </script>
 </body>
