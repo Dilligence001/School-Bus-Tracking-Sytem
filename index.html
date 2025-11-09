@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>School Bus Tracker - Real-Time Student Transportation Monitoring</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -512,6 +512,7 @@
                 max-height: 50vh;
                 border-right: none;
                 border-bottom: 1px solid #e2e8f0;
+                padding: 12px;
             }
 
             .sidebar-toggle {
@@ -540,6 +541,7 @@
                 align-items: center;
                 gap: 6px;
                 max-width: 95%;
+                bottom: 10px;
             }
 
             .card {
@@ -550,6 +552,75 @@
             .map-control {
                 padding: 5px 8px;
                 font-size: 11px;
+            }
+
+            .metric-card {
+                padding: 12px;
+            }
+
+            .metric-value {
+                font-size: 18px;
+            }
+
+            .metric-label {
+                font-size: 10px;
+            }
+
+            .notification {
+                max-width: 90%;
+                right: 5%;
+                top: 10px;
+            }
+
+            .voice-indicator {
+                width: 40px;
+                height: 40px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .fullscreen-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .sidebar-toggle {
+                top: 10px;
+                left: 10px;
+            }
+
+            .header-gradient {
+                padding: 12px;
+            }
+
+            .header-gradient h1 {
+                font-size: 18px;
+            }
+
+            .header-gradient p {
+                font-size: 10px;
+            }
+
+            .btn-primary, .btn-secondary, .btn-danger {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .form-input, .form-select {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .table th, .table td {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .dropdown-content {
+                min-width: 180px;
+                padding: 10px;
             }
         }
 
@@ -719,12 +790,89 @@
             align-items: center;
             justify-content: space-between;
         }
+
+        /* Mobile-specific improvements */
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 8px;
+            }
+
+            .card {
+                margin: 0 -4px;
+                padding: 12px;
+            }
+
+            .grid-cols-2 {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .metric-card {
+                padding: 8px;
+            }
+
+            .metric-value {
+                font-size: 16px;
+            }
+
+            .map-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+                max-width: 90%;
+            }
+
+            .map-control {
+                justify-content: space-between;
+                padding: 8px;
+            }
+
+            .fullscreen-btn span {
+                display: none;
+            }
+
+            .fullscreen-btn {
+                padding: 8px;
+            }
+
+            .dropdown-content {
+                width: 90vw;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .add-device-card {
+                width: 90vw;
+                left: 5vw;
+                right: 5vw;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        .touch-friendly {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .touch-friendly-text {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+
+        /* Prevent text selection on interactive elements */
+        .btn-primary, .btn-secondary, .btn-danger, .map-control, .device-item, .student-item {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 
 <body class="min-h-screen bg-gray-50">
     <!-- Voice Guidance Indicator -->
-    <div class="voice-indicator fixed bottom-6 right-6 z-50">
+    <div class="voice-indicator fixed bottom-6 right-6 z-50 touch-friendly">
         <i data-lucide="volume-2" class="w-5 h-5"></i>
     </div>
 
@@ -743,7 +891,7 @@
     <div id="addDeviceCard" class="add-device-card">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-800">Add School Bus</h3>
-            <button id="closeAddDeviceCard" class="text-gray-500 hover:text-gray-700">
+            <button id="closeAddDeviceCard" class="text-gray-500 hover:text-gray-700 touch-friendly">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
@@ -751,7 +899,7 @@
             <div>
                 <label class="text-sm text-gray-700 font-medium mb-2 block">Search for Available Buses</label>
                 <div class="flex space-x-2">
-                    <button id="searchDevicesBtn" class="w-full btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                    <button id="searchDevicesBtn" class="w-full btn-primary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                         <i data-lucide="search" class="w-4 h-4 mr-2"></i>
                         Search for Buses
                     </button>
@@ -766,9 +914,9 @@
             <div class="border-t pt-4">
                 <label class="text-sm text-gray-700 font-medium mb-2 block">Add Bus Manually</label>
                 <div class="flex space-x-2">
-                    <input type="text" id="manualDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm">
-                    <input type="text" id="manualDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm">
-                    <button id="addManualDeviceBtn" class="btn-primary px-3 text-sm">
+                    <input type="text" id="manualDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm touch-friendly-text">
+                    <input type="text" id="manualDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm touch-friendly-text">
+                    <button id="addManualDeviceBtn" class="btn-primary px-3 text-sm touch-friendly">
                         <i data-lucide="plus" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -806,7 +954,7 @@
 
             <!-- Emergency Alert Button -->
             <div class="mb-4">
-                <button id="emergencyAlertBtn" class="w-full btn-danger py-3 text-sm flex items-center justify-center">
+                <button id="emergencyAlertBtn" class="w-full btn-danger py-3 text-sm flex items-center justify-center touch-friendly">
                     <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>
                     Emergency Alert
                 </button>
@@ -840,11 +988,11 @@
                         <!-- Buses will be dynamically added here -->
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                        <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                             <i data-lucide="play" class="w-4 h-4 mr-2"></i>
                             Start Route
                         </button>
-                        <button id="addDeviceBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                        <button id="addDeviceBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                             <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
                             Add Bus
                         </button>
@@ -858,17 +1006,17 @@
                 <div class="space-y-4">
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Route Name</label>
-                        <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1"
+                        <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
                             value="Morning Elementary Route">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Bus Number</label>
-                        <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1"
+                        <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
                             value="Bus #SB-1245">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Driver</label>
-                        <input type="text" id="driverName" class="w-full form-input p-2 text-sm mt-1"
+                        <input type="text" id="driverName" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
                             value="John Smith">
                     </div>
                     <div class="pt-2">
@@ -895,11 +1043,11 @@
                     <!-- Students will be dynamically added here -->
                 </div>
                 <div class="mt-3 flex justify-between">
-                    <button id="markAllPresentBtn" class="btn-secondary py-2 px-3 text-sm flex items-center">
+                    <button id="markAllPresentBtn" class="btn-secondary py-2 px-3 text-sm flex items-center touch-friendly">
                         <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
                         Mark All
                     </button>
-                    <button id="generateReportBtn" class="btn-primary py-2 px-3 text-sm flex items-center">
+                    <button id="generateReportBtn" class="btn-primary py-2 px-3 text-sm flex items-center touch-friendly">
                         <i data-lucide="file-text" class="w-4 h-4 mr-1"></i>
                         Report
                     </button>
@@ -912,12 +1060,12 @@
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <button id="clearRouteBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
                             Clear Route
                         </button>
                         <button id="saveRouteBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
                             <i data-lucide="save" class="w-4 h-4 mr-2"></i>
                             Save Route
                         </button>
@@ -927,21 +1075,21 @@
                         <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
                         <div class="space-y-3">
                             <div class="flex items-center">
-                                <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-yellow-600 rounded"
+                                <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
                                     checked>
                                 <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
                             </div>
                             <div class="flex items-center">
-                                <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-yellow-600 rounded"
+                                <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
                                     checked>
                                 <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
                             </div>
                             <div class="flex items-center">
-                                <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-yellow-600 rounded">
+                                <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly">
                                 <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
                             </div>
                             <div class="flex items-center">
-                                <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-yellow-600 rounded"
+                                <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
                                     checked>
                                 <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
                             </div>
@@ -987,7 +1135,7 @@
                 <div class="card p-4">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold text-gray-800">Route History</h2>
-                        <button id="exportBtn" class="btn-secondary py-2 px-3 text-sm flex items-center">
+                        <button id="exportBtn" class="btn-secondary py-2 px-3 text-sm flex items-center touch-friendly">
                             <i data-lucide="download" class="w-4 h-4 mr-1"></i>
                             Export
                         </button>
@@ -1033,7 +1181,7 @@
 
                     <!-- Destination Search -->
                     <div class="dropdown">
-                        <div class="map-control cursor-pointer">
+                        <div class="map-control cursor-pointer touch-friendly">
                             <i data-lucide="map-pin" class="w-3 h-3"></i>
                             <span>Destination</span>
                             <i data-lucide="chevron-down" class="w-2 h-2"></i>
@@ -1042,20 +1190,20 @@
                             <div class="text-sm mb-3 font-medium text-gray-800">Set Destination</div>
                             <div class="relative mb-3">
                                 <input type="text" id="destinationInput" placeholder="Search destination"
-                                    class="w-full form-input p-2 text-sm">
+                                    class="w-full form-input p-2 text-sm touch-friendly-text">
                             </div>
                             <div class="flex mb-3">
                                 <button id="setDestinationBtn"
-                                    class="w-full btn-primary py-2 rounded text-sm font-medium">Set
+                                    class="w-full btn-primary py-2 rounded text-sm font-medium touch-friendly">Set
                                     Destination</button>
                             </div>
                             <div class="text-xs text-gray-500 mb-2">School destinations:</div>
                             <div class="flex flex-wrap gap-2">
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
                                     data-destination="Elementary School">Elementary</button>
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
                                     data-destination="Middle School">Middle School</button>
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
                                     data-destination="High School">High School</button>
                             </div>
                         </div>
@@ -1063,7 +1211,7 @@
 
                     <!-- Share Location -->
                     <div class="dropdown">
-                        <div class="map-control cursor-pointer">
+                        <div class="map-control cursor-pointer touch-friendly">
                             <i data-lucide="share-2" class="w-3 h-3"></i>
                             <span>Share</span>
                             <i data-lucide="chevron-down" class="w-2 h-2"></i>
@@ -1072,16 +1220,16 @@
                             <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
                             <div class="flex mb-3">
                                 <input type="text" id="whatsappNumber" placeholder="Phone number"
-                                    class="flex-grow form-input rounded-l p-2 text-sm">
-                                <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
+                                    class="flex-grow form-input rounded-l p-2 text-sm touch-friendly-text">
+                                <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm touch-friendly">
                                     <i data-lucide="send" class="w-3 h-3"></i>
                                 </button>
                             </div>
                             <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
                             <div class="flex flex-wrap gap-2">
-                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
                                     data-number="+255123456789">School Office</button>
-                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
                                     data-number="+255987654321">Transport Manager</button>
                             </div>
                         </div>
@@ -1096,7 +1244,7 @@
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Manage School Buses</h3>
-                <button id="closeDeviceModal" class="text-gray-500 hover:text-gray-700">
+                <button id="closeDeviceModal" class="text-gray-500 hover:text-gray-700 touch-friendly">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -1104,9 +1252,9 @@
                 <div>
                     <label class="text-sm text-gray-700 font-medium mb-2 block">Add New Bus</label>
                     <div class="flex space-x-2">
-                        <input type="text" id="newDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm">
-                        <input type="text" id="newDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm">
-                        <button id="addNewDeviceBtn" class="btn-primary px-3 text-sm">
+                        <input type="text" id="newDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm touch-friendly-text">
+                        <input type="text" id="newDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm touch-friendly-text">
+                        <button id="addNewDeviceBtn" class="btn-primary px-3 text-sm touch-friendly">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -1240,10 +1388,10 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <button class="mark-present text-green-600 hover:text-green-800" data-id="${student.id}">
+                        <button class="mark-present text-green-600 hover:text-green-800 touch-friendly" data-id="${student.id}">
                             <i data-lucide="check" class="w-4 h-4"></i>
                         </button>
-                        <button class="mark-absent text-red-600 hover:text-red-800" data-id="${student.id}">
+                        <button class="mark-absent text-red-600 hover:text-red-800 touch-friendly" data-id="${student.id}">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
