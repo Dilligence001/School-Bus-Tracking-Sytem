@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transit Tracker Pro - Enterprise GPS Tracking Solution</title>
+    <title>School Bus Tracker - Real-Time Student Transportation Monitoring</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Leaflet Routing Machine CSS -->
@@ -27,11 +27,14 @@
             background-color: #f8fafc;
             color: #334155;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
         /* Professional header styling */
         .header-gradient {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
         }
 
@@ -50,7 +53,7 @@
 
         /* Button styling */
         .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
             border: none;
             border-radius: 6px;
@@ -59,9 +62,9 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
         }
 
         .btn-secondary {
@@ -110,9 +113,13 @@
             background-color: #ef4444;
         }
 
+        .status-warning {
+            background-color: #f59e0b;
+        }
+
         /* Map styling */
         #map {
-            height: 65vh;
+            height: 100%;
             width: 100%;
             border-radius: 8px;
             overflow: hidden;
@@ -130,8 +137,8 @@
 
         .form-input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
         }
 
         .form-select {
@@ -264,7 +271,7 @@
         }
 
         .map-control button {
-            background: #3b82f6;
+            background: #f59e0b;
             color: white;
             border: none;
             border-radius: 4px;
@@ -275,7 +282,7 @@
         }
 
         .map-control button:hover {
-            background: #2563eb;
+            background: #eab308;
         }
 
         /* Dropdown styles */
@@ -345,7 +352,7 @@
             background: white;
             border-radius: 6px;
             padding: 16px 20px;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #f59e0b;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             z-index: 2001;
             transform: translateX(120%);
@@ -386,10 +393,138 @@
             }
         }
 
+        /* Device list styling */
+        .device-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .device-item {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .device-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .device-item.active {
+            background-color: #fef7e5;
+            border-left: 3px solid #f59e0b;
+        }
+
+        /* NEW STYLES FOR SIDEBAR AND FULLSCREEN */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            min-width: 300px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            padding: 16px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            padding: 16px;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .fullscreen-btn:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Fullscreen mode styles */
+        .fullscreen .sidebar {
+            transform: translateX(-100%);
+            width: 0;
+            min-width: 0;
+            padding: 0;
+        }
+
+        .fullscreen .map-container {
+            padding: 0;
+        }
+
+        .fullscreen #map {
+            border-radius: 0;
+        }
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
-            #map {
-                height: 60vh;
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar.collapsed {
+                max-height: 60px;
+                overflow: hidden;
+            }
+
+            .main-content {
+                height: 100%;
             }
 
             .mobile-hidden {
@@ -459,17 +594,130 @@
         .leaflet-routing-geocoders input:focus {
             background: white;
             color: #334155;
-            border-color: #3b82f6;
+            border-color: #f59e0b;
         }
 
         .leaflet-routing-geocoders button {
-            background: #3b82f6;
+            background: #f59e0b;
             color: white;
             border-radius: 4px;
         }
 
         .leaflet-routing-geocoders button:hover {
-            background: #2563eb;
+            background: #eab308;
+        }
+
+        /* NEW STYLES FOR ADD DEVICE CARD */
+        .add-device-card {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 320px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            display: none;
+        }
+
+        .add-device-card.show {
+            display: block;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .device-search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .device-search-item {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .device-search-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .device-search-item:last-child {
+            border-bottom: none;
+        }
+
+        .searching-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            color: #64748b;
+        }
+
+        /* School-specific styles */
+        .student-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .student-item {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .student-present {
+            background-color: #10b981;
+        }
+
+        .student-absent {
+            background-color: #ef4444;
+        }
+
+        .student-pending {
+            background-color: #f59e0b;
+        }
+
+        .route-stop {
+            padding: 8px 12px;
+            border-left: 3px solid #f59e0b;
+            margin-bottom: 8px;
+            background: #fef7e5;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .route-stop.active {
+            background: #fef3c7;
+            border-left-color: #d97706;
+        }
+
+        .emergency-alert {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
     </style>
 </head>
@@ -491,279 +739,384 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
-        <!-- Header -->
-        <header class="mb-6">
-            <div class="header-gradient rounded-lg p-6">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 rounded-lg bg-white bg-opacity-10 flex items-center justify-center mr-4">
-                            <i data-lucide="truck" class="w-6 h-6 text-white"></i>
+    <!-- Add Device Card -->
+    <div id="addDeviceCard" class="add-device-card">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Add School Bus</h3>
+            <button id="closeAddDeviceCard" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-sm text-gray-700 font-medium mb-2 block">Search for Available Buses</label>
+                <div class="flex space-x-2">
+                    <button id="searchDevicesBtn" class="w-full btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                        <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                        Search for Buses
+                    </button>
+                </div>
+            </div>
+            <div id="deviceSearchResults" class="device-search-results hidden">
+                <div class="searching-indicator">
+                    <div class="loading mr-2"></div>
+                    <span>Searching for buses...</span>
+                </div>
+            </div>
+            <div class="border-t pt-4">
+                <label class="text-sm text-gray-700 font-medium mb-2 block">Add Bus Manually</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="manualDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm">
+                    <input type="text" id="manualDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm">
+                    <button id="addManualDeviceBtn" class="btn-primary px-3 text-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <!-- Header -->
+            <header class="mb-6">
+                <div class="header-gradient rounded-lg p-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-lg bg-white bg-opacity-10 flex items-center justify-center mr-3">
+                                <i data-lucide="bus" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-white">School Bus Tracker</h1>
+                                <p class="text-yellow-100 text-xs">Real-Time Student Transportation Monitoring</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Transit Tracker Pro</h1>
-                            <p class="text-blue-100 text-sm">Enterprise GPS Tracking & Analytics</p>
+                        <div class="flex items-center space-x-2">
+                            <!-- Tracking Status -->
+                            <div class="bg-white bg-opacity-10 rounded-lg px-3 py-1 flex items-center">
+                                <span class="status-indicator status-inactive" id="statusIndicator"></span>
+                                <span id="statusText" class="text-xs font-medium text-white">Not Tracking</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <!-- Tracking Status -->
-                        <div class="bg-white bg-opacity-10 rounded-lg px-4 py-2 flex items-center">
-                            <span class="status-indicator status-inactive" id="statusIndicator"></span>
-                            <span id="statusText" class="text-sm font-medium text-white">Not Tracking</span>
+                </div>
+            </header>
+
+            <!-- Emergency Alert Button -->
+            <div class="mb-4">
+                <button id="emergencyAlertBtn" class="w-full btn-danger py-3 text-sm flex items-center justify-center">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>
+                    Emergency Alert
+                </button>
+            </div>
+
+            <!-- Business Metrics -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="metric-card">
+                    <div class="metric-value text-lg" id="distanceTraveled">0 km</div>
+                    <div class="metric-label">Distance</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value text-lg" id="averageSpeed">0 km/h</div>
+                    <div class="metric-label">Avg Speed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value text-lg" id="transitTime">00:00:00</div>
+                    <div class="metric-label">Route Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value text-lg" id="studentsOnBoard">0/0</div>
+                    <div class="metric-label">Students</div>
+                </div>
+            </div>
+
+            <!-- Bus Management -->
+            <div class="card p-4 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Bus Management</h2>
+                <div class="space-y-4">
+                    <div class="device-list" id="deviceList">
+                        <!-- Buses will be dynamically added here -->
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                            <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+                            Start Route
+                        </button>
+                        <button id="addDeviceBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                            Add Bus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Route Information -->
+            <div class="card p-4 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Route Information</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Route Name</label>
+                        <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1"
+                            value="Morning Elementary Route">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Bus Number</label>
+                        <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1"
+                            value="Bus #SB-1245">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Driver</label>
+                        <input type="text" id="driverName" class="w-full form-input p-2 text-sm mt-1"
+                            value="John Smith">
+                    </div>
+                    <div class="pt-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Status:</span>
+                            <span id="transitStatus" class="font-medium">Not Started</span>
+                        </div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span class="text-gray-500">Next Stop:</span>
+                            <span id="nextStop" class="font-medium">--</span>
+                        </div>
+                        <div class="flex justify-between text-sm mt-1">
+                            <span class="text-gray-500">ETA to School:</span>
+                            <span id="etaToSchool" class="font-medium">--</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </header>
 
-        <!-- Business Metrics -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="metric-card">
-                <div class="metric-value" id="distanceTraveled">0 km</div>
-                <div class="metric-label">Distance Traveled</div>
+            <!-- Student Roster -->
+            <div class="card p-4 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Student Roster</h2>
+                <div class="student-list" id="studentList">
+                    <!-- Students will be dynamically added here -->
+                </div>
+                <div class="mt-3 flex justify-between">
+                    <button id="markAllPresentBtn" class="btn-secondary py-2 px-3 text-sm flex items-center">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
+                        Mark All
+                    </button>
+                    <button id="generateReportBtn" class="btn-primary py-2 px-3 text-sm flex items-center">
+                        <i data-lucide="file-text" class="w-4 h-4 mr-1"></i>
+                        Report
+                    </button>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="averageSpeed">0 km/h</div>
-                <div class="metric-label">Average Speed</div>
+
+            <!-- Tracking Controls -->
+            <div class="card p-4 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Tracking Controls</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="clearRouteBtn"
+                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                            Clear Route
+                        </button>
+                        <button id="saveRouteBtn"
+                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                            Save Route
+                        </button>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-200">
+                        <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-yellow-600 rounded"
+                                    checked>
+                                <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-yellow-600 rounded"
+                                    checked>
+                                <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-yellow-600 rounded">
+                                <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-yellow-600 rounded"
+                                    checked>
+                                <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value" id="transitTime">00:00:00</div>
-                <div class="metric-label">Transit Time</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value" id="fuelEfficiency">--</div>
-                <div class="metric-label">Fuel Efficiency</div>
+
+            <!-- Location Details and Route History -->
+            <div class="space-y-4">
+                <!-- Location Details -->
+                <div class="card p-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Location Details</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Latitude</div>
+                            <div class="text-sm font-semibold text-gray-800" id="latitude">--</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Longitude</div>
+                            <div class="text-sm font-semibold text-gray-800" id="longitude">--</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Accuracy</div>
+                            <div class="text-sm font-semibold text-gray-800" id="accuracy">--</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Speed</div>
+                            <div class="text-sm font-semibold text-gray-800" id="speed">--</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Heading</div>
+                            <div class="text-sm font-semibold text-gray-800" id="heading">--</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Last Update</div>
+                            <div class="text-sm font-semibold text-gray-800" id="lastUpdate">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route History -->
+                <div class="card p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">Route History</h2>
+                        <button id="exportBtn" class="btn-secondary py-2 px-3 text-sm flex items-center">
+                            <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                            Export
+                        </button>
+                    </div>
+                    <div id="routeHistory" class="max-h-48 overflow-y-auto">
+                        <div class="text-gray-400 text-center py-8 flex flex-col items-center">
+                            <i data-lucide="map" class="w-8 h-8 mb-3 opacity-50"></i>
+                            <p class="font-medium">No route history yet</p>
+                            <p class="text-sm">Start tracking to record your journey</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Main Content Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="main-content">
+            <!-- Sidebar Toggle Button (Mobile) -->
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Fullscreen Button -->
+            <button class="fullscreen-btn" id="fullscreenBtn">
+                <i data-lucide="maximize" class="w-4 h-4"></i>
+                <span>Fullscreen</span>
+            </button>
+
             <!-- Map Container -->
-            <div class="lg:col-span-2">
-                <div class="card p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Live Tracking Map</h2>
-                        <div class="flex space-x-2">
-                            <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center">
-                                <i data-lucide="play" class="w-4 h-4 mr-2"></i>
-                                Start Tracking
-                            </button>
-                        </div>
+            <div class="map-container">
+                <div id="map"></div>
+
+                <!-- Map Controls -->
+                <div class="map-controls">
+                    <!-- Map Type Selector -->
+                    <div class="map-control">
+                        <i data-lucide="map" class="w-3 h-3"></i>
+                        <select id="mapType">
+                            <option value="standard">Standard</option>
+                            <option value="satellite">Satellite</option>
+                        </select>
                     </div>
-                    <div class="relative">
-                        <div id="map"></div>
 
-                        <!-- Map Controls -->
-                        <div class="map-controls">
-                            <!-- Map Type Selector -->
-                            <div class="map-control">
-                                <i data-lucide="map" class="w-3 h-3"></i>
-                                <select id="mapType">
-                                    <option value="standard">Standard</option>
-                                    <option value="satellite">Satellite</option>
-                                </select>
+                    <!-- Destination Search -->
+                    <div class="dropdown">
+                        <div class="map-control cursor-pointer">
+                            <i data-lucide="map-pin" class="w-3 h-3"></i>
+                            <span>Destination</span>
+                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
+                        </div>
+                        <div class="dropdown-content">
+                            <div class="text-sm mb-3 font-medium text-gray-800">Set Destination</div>
+                            <div class="relative mb-3">
+                                <input type="text" id="destinationInput" placeholder="Search destination"
+                                    class="w-full form-input p-2 text-sm">
                             </div>
-
-                            <!-- Destination Search -->
-                            <div class="dropdown">
-                                <div class="map-control cursor-pointer">
-                                    <i data-lucide="map-pin" class="w-3 h-3"></i>
-                                    <span>Destination</span>
-                                    <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                                </div>
-                                <div class="dropdown-content">
-                                    <div class="text-sm mb-3 font-medium text-gray-800">Set Destination</div>
-                                    <div class="relative mb-3">
-                                        <input type="text" id="destinationInput" placeholder="Search destination"
-                                            class="w-full form-input p-2 text-sm">
-                                    </div>
-                                    <div class="flex mb-3">
-                                        <button id="setDestinationBtn"
-                                            class="w-full btn-primary py-2 rounded text-sm font-medium">Set
-                                            Destination</button>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mb-2">Popular destinations:</div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
-                                            data-destination="Airport">Airport</button>
-                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
-                                            data-destination="City Center">City Center</button>
-                                        <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
-                                            data-destination="Warehouse">Warehouse</button>
-                                    </div>
-                                </div>
+                            <div class="flex mb-3">
+                                <button id="setDestinationBtn"
+                                    class="w-full btn-primary py-2 rounded text-sm font-medium">Set
+                                    Destination</button>
                             </div>
-
-                            <!-- Share Location -->
-                            <div class="dropdown">
-                                <div class="map-control cursor-pointer">
-                                    <i data-lucide="share-2" class="w-3 h-3"></i>
-                                    <span>Share</span>
-                                    <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                                </div>
-                                <div class="dropdown-content">
-                                    <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
-                                    <div class="flex mb-3">
-                                        <input type="text" id="whatsappNumber" placeholder="Phone number"
-                                            class="flex-grow form-input rounded-l p-2 text-sm">
-                                        <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
-                                            <i data-lucide="send" class="w-3 h-3"></i>
-                                        </button>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
-                                            data-number="+255123456789">Manager</button>
-                                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
-                                            data-number="+255987654321">Dispatch</button>
-                                    </div>
-                                </div>
+                            <div class="text-xs text-gray-500 mb-2">School destinations:</div>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                    data-destination="Elementary School">Elementary</button>
+                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                    data-destination="Middle School">Middle School</button>
+                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs"
+                                    data-destination="High School">High School</button>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Controls Panel -->
-            <div class="space-y-6">
-                <!-- Transit Info -->
-                <div class="card p-4">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Transit Information</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit
-                                Name</label>
-                            <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1"
-                                value="Delivery Truck #1245">
+                    <!-- Share Location -->
+                    <div class="dropdown">
+                        <div class="map-control cursor-pointer">
+                            <i data-lucide="share-2" class="w-3 h-3"></i>
+                            <span>Share</span>
+                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
                         </div>
-                        <div>
-                            <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit
-                                Type</label>
-                            <select id="transitType" class="w-full form-select p-2 text-sm mt-1">
-                                <option value="truck">Delivery Truck</option>
-                                <option value="van">Delivery Van</option>
-                                <option value="car">Car</option>
-                                <option value="motorcycle">Motorcycle</option>
-                                <option value="person">Person</option>
-                                <option value="package">Package</option>
-                            </select>
-                        </div>
-                        <div class="pt-2">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Status:</span>
-                                <span id="transitStatus" class="font-medium">In Transit</span>
+                        <div class="dropdown-content">
+                            <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
+                            <div class="flex mb-3">
+                                <input type="text" id="whatsappNumber" placeholder="Phone number"
+                                    class="flex-grow form-input rounded-l p-2 text-sm">
+                                <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
+                                    <i data-lucide="send" class="w-3 h-3"></i>
+                                </button>
                             </div>
-                            <div class="flex justify-between text-sm mt-1">
-                                <span class="text-gray-500">Last Update:</span>
-                                <span id="transitUpdate" class="font-medium">--</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tracking Controls -->
-                <div class="card p-4">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Tracking Controls</h2>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-3">
-                            <button id="clearRouteBtn"
-                                class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
-                                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                                Clear Route
-                            </button>
-                            <button id="saveRouteBtn"
-                                class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
-                                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                                Save Route
-                            </button>
-                        </div>
-
-                        <div class="pt-2 border-t border-gray-200">
-                            <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
-                            <div class="space-y-3">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                                        checked>
-                                    <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                                        checked>
-                                    <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-blue-600 rounded">
-                                    <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                                        checked>
-                                    <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
-                                </div>
+                            <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                    data-number="+255123456789">School Office</button>
+                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                    data-number="+255987654321">Transport Manager</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Location Details and Route History -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Location Details -->
-            <div class="card p-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Location Details</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Latitude</div>
-                        <div class="text-sm font-semibold text-gray-800" id="latitude">--</div>
+    <!-- Device Management Modal -->
+    <div id="deviceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Manage School Buses</h3>
+                <button id="closeDeviceModal" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-700 font-medium mb-2 block">Add New Bus</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="newDeviceName" placeholder="Bus Name" class="flex-grow form-input p-2 text-sm">
+                        <input type="text" id="newDeviceId" placeholder="Bus ID" class="flex-grow form-input p-2 text-sm">
+                        <button id="addNewDeviceBtn" class="btn-primary px-3 text-sm">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
                     </div>
-                    <div>
-                        <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Longitude</div>
-                        <div class="text-sm font-semibold text-gray-800" id="longitude">--</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Accuracy</div>
-                        <div class="text-sm font-semibold text-gray-800" id="accuracy">--</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Altitude</div>
-                        <div class="text-sm font-semibold text-gray-800" id="altitude">--</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Heading</div>
-                        <div class="text-sm font-semibold text-gray-800" id="heading">--</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Last Update</div>
-                        <div class="text-sm font-semibold text-gray-800" id="lastUpdate">--</div>
+                </div>
+                <div class="max-h-64 overflow-y-auto">
+                    <div id="deviceManagementList" class="space-y-2">
+                        <!-- Buses will be dynamically added here -->
                     </div>
                 </div>
             </div>
-
-            <!-- Route History -->
-            <div class="card p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">Route History</h2>
-                    <button id="exportBtn" class="btn-secondary py-2 px-4 text-sm flex items-center">
-                        <i data-lucide="download" class="w-4 h-4 mr-2"></i>
-                        Export Data
-                    </button>
-                </div>
-                <div id="routeHistory" class="max-h-48 overflow-y-auto">
-                    <div class="text-gray-400 text-center py-8 flex flex-col items-center">
-                        <i data-lucide="map" class="w-8 h-8 mb-3 opacity-50"></i>
-                        <p class="font-medium">No route history yet</p>
-                        <p class="text-sm">Start tracking to record your journey</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Map Attribution -->
-        <div class="mt-6 text-center text-gray-500 text-xs">
-            Map data © <a href="https://www.openstreetmap.org/"
-                class="text-blue-600 hover:text-blue-800 transition-colors" target="_blank">OpenStreetMap</a>
-            contributors
         </div>
     </div>
 
@@ -792,8 +1145,8 @@
             topSpeed: 0,
             startTime: null,
             trackingInterval: null,
-            transitType: 'truck',
-            transitName: 'Delivery Truck #1245',
+            transitType: 'schoolbus',
+            transitName: 'Morning Elementary Route',
             destination: null,
             eta: null,
             routingControl: null,
@@ -808,7 +1161,22 @@
             transitStartTime: null,
             transitTimer: null,
             lastVoiceGuidance: null,
-            voiceGuidanceInterval: null
+            voiceGuidanceInterval: null,
+            devices: [],
+            activeDeviceId: null,
+            deviceMarkers: {},
+            devicePolylines: {},
+            deviceData: {},
+            // School bus specific state
+            students: [],
+            routeStops: [],
+            currentStopIndex: 0,
+            emergencyAlertActive: false,
+            // Device search state
+            deviceSearchInProgress: false,
+            availableDevices: [],
+            // Fullscreen state
+            isFullscreen: false
         };
 
         // Initialize the app when DOM is loaded
@@ -818,7 +1186,169 @@
             checkGeolocationSupport();
             updateTransitInfo();
             initVoiceGuidance();
+            loadDevices();
+            renderDeviceList();
+            initFullscreen();
+            initializeStudentRoster();
+            initializeRouteStops();
         });
+
+        // Initialize student roster
+        function initializeStudentRoster() {
+            state.students = [
+                { id: 'S001', name: 'Emma Johnson', grade: '3rd', status: 'pending', stop: 'Maple Street' },
+                { id: 'S002', name: 'Noah Williams', grade: '3rd', status: 'pending', stop: 'Oak Avenue' },
+                { id: 'S003', name: 'Olivia Brown', grade: '4th', status: 'pending', stop: 'Pine Road' },
+                { id: 'S004', name: 'Liam Jones', grade: '4th', status: 'pending', stop: 'Cedar Lane' },
+                { id: 'S005', name: 'Ava Garcia', grade: '5th', status: 'pending', stop: 'Elm Street' }
+            ];
+            renderStudentRoster();
+        }
+
+        // Initialize route stops
+        function initializeRouteStops() {
+            state.routeStops = [
+                { name: 'Maple Street', address: '123 Maple St', students: ['S001'], completed: false },
+                { name: 'Oak Avenue', address: '456 Oak Ave', students: ['S002'], completed: false },
+                { name: 'Pine Road', address: '789 Pine Rd', students: ['S003'], completed: false },
+                { name: 'Cedar Lane', address: '101 Cedar Ln', students: ['S004'], completed: false },
+                { name: 'Elm Street', address: '202 Elm St', students: ['S005'], completed: false },
+                { name: 'Elementary School', address: '500 School Dr', students: [], completed: false }
+            ];
+            updateNextStopDisplay();
+        }
+
+        // Render student roster
+        function renderStudentRoster() {
+            const studentList = document.getElementById('studentList');
+            studentList.innerHTML = '';
+
+            if (state.students.length === 0) {
+                studentList.innerHTML = '<div class="text-center py-4 text-gray-500">No students assigned to this route</div>';
+                return;
+            }
+
+            state.students.forEach(student => {
+                const studentItem = document.createElement('div');
+                studentItem.className = 'student-item';
+                studentItem.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="student-status student-${student.status}"></span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">${student.name}</div>
+                            <div class="text-xs text-gray-500">${student.grade} • ${student.stop}</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="mark-present text-green-600 hover:text-green-800" data-id="${student.id}">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                        </button>
+                        <button class="mark-absent text-red-600 hover:text-red-800" data-id="${student.id}">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                studentList.appendChild(studentItem);
+            });
+
+            // Add event listeners for student status buttons
+            document.querySelectorAll('.mark-present').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    updateStudentStatus(studentId, 'present');
+                });
+            });
+
+            document.querySelectorAll('.mark-absent').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    updateStudentStatus(studentId, 'absent');
+                });
+            });
+
+            // Update students on board count
+            updateStudentsOnBoard();
+
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        // Update student status
+        function updateStudentStatus(studentId, status) {
+            const student = state.students.find(s => s.id === studentId);
+            if (student) {
+                student.status = status;
+                renderStudentRoster();
+                
+                const statusText = status === 'present' ? 'present' : 'absent';
+                showNotification('Student Status', `${student.name} marked as ${statusText}`, 'success');
+                
+                // Voice announcement for student boarding
+                if (status === 'present' && document.getElementById('voiceGuidance').checked) {
+                    speak(`${student.name} is now on board`, 'normal');
+                }
+            }
+        }
+
+        // Update students on board count
+        function updateStudentsOnBoard() {
+            const presentCount = state.students.filter(s => s.status === 'present').length;
+            const totalCount = state.students.length;
+            document.getElementById('studentsOnBoard').textContent = `${presentCount}/${totalCount}`;
+        }
+
+        // Update next stop display
+        function updateNextStopDisplay() {
+            const nextStop = state.routeStops.find(stop => !stop.completed);
+            if (nextStop) {
+                document.getElementById('nextStop').textContent = nextStop.name;
+            } else {
+                document.getElementById('nextStop').textContent = 'Route Complete';
+            }
+        }
+
+        // Mark next stop as completed
+        function completeCurrentStop() {
+            if (state.currentStopIndex < state.routeStops.length) {
+                state.routeStops[state.currentStopIndex].completed = true;
+                state.currentStopIndex++;
+                updateNextStopDisplay();
+                
+                const stopName = state.routeStops[state.currentStopIndex - 1].name;
+                showNotification('Stop Completed', `${stopName} completed`, 'success');
+                
+                // Voice announcement for stop completion
+                if (document.getElementById('voiceGuidance').checked) {
+                    speak(`Arrived at ${stopName}`, 'normal');
+                }
+                
+                // If this is a student stop, announce student boarding
+                const stop = state.routeStops[state.currentStopIndex - 1];
+                if (stop.students.length > 0) {
+                    const studentNames = stop.students.map(id => {
+                        const student = state.students.find(s => s.id === id);
+                        return student ? student.name : '';
+                    }).filter(name => name !== '');
+                    
+                    if (studentNames.length > 0) {
+                        setTimeout(() => {
+                            speak(`Students to board: ${studentNames.join(', ')}`, 'normal');
+                        }, 2000);
+                    }
+                }
+                
+                // If this is the school, mark all students as present
+                if (stop.name.includes('School')) {
+                    state.students.forEach(student => {
+                        if (student.status === 'pending') {
+                            student.status = 'present';
+                        }
+                    });
+                    renderStudentRoster();
+                    speak("All students have arrived at school", 'high');
+                }
+            }
+        }
 
         // Initialize Leaflet Map with OpenStreetMap tiles
         function initMap() {
@@ -843,24 +1373,57 @@
             // Add default layer
             state.mapLayers.standard.addTo(state.map);
 
-            // Create initial marker with custom icon based on transit type
+            // Create initial marker with custom icon for school bus
             updateMarkerIcon();
 
             // Initialize accuracy circle
             state.accuracyCircle = L.circle(defaultCenter, {
-                color: '#3b82f6',
-                fillColor: '#3b82f6',
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
                 fillOpacity: 0.1,
                 radius: 0
             }).addTo(state.map);
 
             // Initialize polyline for route tracking
             state.polyline = L.polyline([], {
-                color: '#3b82f6',
+                color: '#f59e0b',
                 weight: 4,
                 opacity: 0.7,
                 lineJoin: 'round'
             }).addTo(state.map);
+
+            // Add route stops to map
+            addRouteStopsToMap();
+        }
+
+        // Add route stops to the map
+        function addRouteStopsToMap() {
+            state.routeStops.forEach((stop, index) => {
+                // Generate a slightly different position for each stop for demonstration
+                const lat = -6.7924 + (index * 0.01);
+                const lng = 39.2083 + (index * 0.01);
+                
+                const stopMarker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'stop-marker',
+                        html: `<div style="background: ${index === state.currentStopIndex ? '#f59e0b' : '#94a3b8'}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);"><i data-lucide="${index === state.routeStops.length - 1 ? 'school' : 'map-pin'}" style="width: 12px; height: 12px; color: white;"></i></div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    })
+                }).addTo(state.map);
+                
+                stopMarker.bindPopup(`
+                    <b>${stop.name}</b><br>
+                    ${stop.address}<br>
+                    ${stop.students.length > 0 ? `Students: ${stop.students.length}` : 'School Destination'}
+                `);
+                
+                // Store marker reference
+                stop.marker = stopMarker;
+            });
+            
+            // Re-initialize Lucide icons for markers
+            setTimeout(() => lucide.createIcons(), 100);
         }
 
         // Initialize voice guidance
@@ -869,6 +1432,101 @@
                 console.warn('Speech synthesis not supported');
                 document.getElementById('voiceGuidance').disabled = true;
                 document.querySelector('.voice-indicator').style.display = 'none';
+            }
+        }
+
+        // Initialize fullscreen functionality
+        function initFullscreen() {
+            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+            
+            // Listen for ESC key to exit fullscreen
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && state.isFullscreen) {
+                    toggleFullscreen();
+                }
+            });
+            
+            // Listen for fullscreen change events
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        }
+
+        // Toggle fullscreen mode
+        function toggleFullscreen() {
+            if (!state.isFullscreen) {
+                // Enter fullscreen
+                const appContainer = document.querySelector('.app-container');
+                if (appContainer.requestFullscreen) {
+                    appContainer.requestFullscreen();
+                } else if (appContainer.webkitRequestFullscreen) {
+                    appContainer.webkitRequestFullscreen();
+                } else if (appContainer.mozRequestFullScreen) {
+                    appContainer.mozRequestFullScreen();
+                } else if (appContainer.msRequestFullscreen) {
+                    appContainer.msRequestFullscreen();
+                }
+                
+                document.body.classList.add('fullscreen');
+                state.isFullscreen = true;
+                
+                // Update button
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                fullscreenBtn.innerHTML = '<i data-lucide="minimize" class="w-4 h-4"></i><span>Exit Fullscreen</span>';
+                lucide.createIcons();
+                
+                // Update map size
+                setTimeout(() => {
+                    state.map.invalidateSize();
+                }, 300);
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+                document.body.classList.remove('fullscreen');
+                state.isFullscreen = false;
+                
+                // Update button
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Fullscreen</span>';
+                lucide.createIcons();
+                
+                // Update map size
+                setTimeout(() => {
+                    state.map.invalidateSize();
+                }, 300);
+            }
+        }
+
+        // Handle fullscreen change events
+        function handleFullscreenChange() {
+            const isFullscreen = document.fullscreenElement || 
+                                document.webkitFullscreenElement || 
+                                document.mozFullScreenElement || 
+                                document.msFullscreenElement;
+            
+            if (!isFullscreen && state.isFullscreen) {
+                document.body.classList.remove('fullscreen');
+                state.isFullscreen = false;
+                
+                // Update button
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Fullscreen</span>';
+                lucide.createIcons();
+                
+                // Update map size
+                setTimeout(() => {
+                    state.map.invalidateSize();
+                }, 300);
             }
         }
 
@@ -972,34 +1630,9 @@
 
         // Update marker icon based on transit type
         function updateMarkerIcon() {
-            let iconName = '';
-
-            switch (state.transitType) {
-                case 'truck':
-                    iconName = 'truck';
-                    break;
-                case 'van':
-                    iconName = 'car';
-                    break;
-                case 'car':
-                    iconName = 'car';
-                    break;
-                case 'motorcycle':
-                    iconName = 'bike';
-                    break;
-                case 'person':
-                    iconName = 'user';
-                    break;
-                case 'package':
-                    iconName = 'package';
-                    break;
-                default:
-                    iconName = 'map-pin';
-            }
-
             const customIcon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="${iconName}" style="width: 18px; height: 18px; color: white;"></i></div>`,
+                html: `<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="bus" style="width: 18px; height: 18px; color: white;"></i></div>`,
                 iconSize: [46, 46],
                 iconAnchor: [23, 23]
             });
@@ -1008,7 +1641,7 @@
                 state.marker.setIcon(customIcon);
             } else {
                 state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
-                state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
+                state.marker.bindPopup("<b>School Bus Location</b><br>Tracking not started").openPopup();
             }
 
             // Re-initialize Lucide icons for the new marker
@@ -1021,11 +1654,22 @@
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
             document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
             document.getElementById('exportBtn').addEventListener('click', exportData);
-            document.getElementById('transitType').addEventListener('change', updateTransitType);
             document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
+            document.getElementById('busNumber').addEventListener('change', updateBusNumber);
+            document.getElementById('driverName').addEventListener('change', updateDriverName);
             document.getElementById('mapType').addEventListener('change', changeMapType);
             document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
             document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
+            document.getElementById('addDeviceBtn').addEventListener('click', showAddDeviceCard);
+            document.getElementById('closeAddDeviceCard').addEventListener('click', hideAddDeviceCard);
+            document.getElementById('searchDevicesBtn').addEventListener('click', searchForDevices);
+            document.getElementById('addManualDeviceBtn').addEventListener('click', addManualDevice);
+            document.getElementById('markAllPresentBtn').addEventListener('click', markAllStudentsPresent);
+            document.getElementById('generateReportBtn').addEventListener('click', generateStudentReport);
+            document.getElementById('emergencyAlertBtn').addEventListener('click', toggleEmergencyAlert);
+
+            // Sidebar toggle for mobile
+            document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
 
             // Add event listeners for destination options
             document.querySelectorAll('.destination-option').forEach(button => {
@@ -1043,6 +1687,383 @@
                     document.getElementById('whatsappNumber').value = number;
                 });
             });
+
+            // Add keyboard shortcut for completing stops (Spacebar)
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && state.isTracking) {
+                    e.preventDefault();
+                    completeCurrentStop();
+                }
+            });
+        }
+
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            
+            const icon = document.querySelector('#sidebarToggle i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.setAttribute('data-lucide', 'menu');
+            } else {
+                icon.setAttribute('data-lucide', 'x');
+            }
+            lucide.createIcons();
+        }
+
+        // Show Add Device Card
+        function showAddDeviceCard() {
+            document.getElementById('addDeviceCard').classList.add('show');
+        }
+
+        // Hide Add Device Card
+        function hideAddDeviceCard() {
+            document.getElementById('addDeviceCard').classList.remove('show');
+        }
+
+        // Search for available GPS devices
+        function searchForDevices() {
+            if (state.deviceSearchInProgress) return;
+            
+            state.deviceSearchInProgress = true;
+            const resultsContainer = document.getElementById('deviceSearchResults');
+            resultsContainer.classList.remove('hidden');
+            
+            // Show searching indicator
+            resultsContainer.innerHTML = `
+                <div class="searching-indicator">
+                    <div class="loading mr-2"></div>
+                    <span>Searching for buses...</span>
+                </div>
+            `;
+            
+            // Simulate device discovery (in a real app, this would use Bluetooth, WiFi, or other discovery methods)
+            setTimeout(() => {
+                // Simulate finding some devices
+                state.availableDevices = [
+                    { id: 'BUS-001', name: 'School Bus #001', type: 'schoolbus', signalStrength: 'Strong', distance: '15m' },
+                    { id: 'BUS-002', name: 'School Bus #002', type: 'schoolbus', signalStrength: 'Medium', distance: '25m' },
+                    { id: 'BUS-003', name: 'School Bus #003', type: 'schoolbus', signalStrength: 'Weak', distance: '45m' }
+                ];
+                
+                // Display found devices
+                displayAvailableDevices();
+                state.deviceSearchInProgress = false;
+                
+                showNotification('Bus Search', `Found ${state.availableDevices.length} available buses`, 'success');
+            }, 3000);
+        }
+
+        // Display available devices in search results
+        function displayAvailableDevices() {
+            const resultsContainer = document.getElementById('deviceSearchResults');
+            
+            if (state.availableDevices.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="searching-indicator">
+                        <span>No buses found nearby</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsContainer.innerHTML = '';
+            
+            state.availableDevices.forEach(device => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'device-search-item';
+                deviceItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">${device.name}</div>
+                            <div class="text-xs text-gray-500">ID: ${device.id} | Type: ${device.type}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500">${device.distance}</div>
+                            <div class="text-xs ${device.signalStrength === 'Strong' ? 'text-green-600' : device.signalStrength === 'Medium' ? 'text-yellow-600' : 'text-red-600'}">
+                                ${device.signalStrength}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                deviceItem.addEventListener('click', () => {
+                    addDeviceFromSearch(device);
+                });
+                
+                resultsContainer.appendChild(deviceItem);
+            });
+        }
+
+        // Add device from search results
+        function addDeviceFromSearch(device) {
+            // Check if device already exists
+            if (state.devices.some(d => d.id === device.id)) {
+                showNotification('Add Bus', `Bus ${device.name} is already added`, 'error');
+                return;
+            }
+            
+            // Add the device
+            state.devices.push({
+                id: device.id,
+                name: device.name,
+                type: device.type,
+                active: false
+            });
+            
+            saveDevices();
+            renderDeviceList();
+            hideAddDeviceCard();
+            
+            showNotification('Add Bus', `Bus ${device.name} added successfully`, 'success');
+        }
+
+        // Add device manually
+        function addManualDevice() {
+            const name = document.getElementById('manualDeviceName').value.trim();
+            const id = document.getElementById('manualDeviceId').value.trim();
+
+            if (!name || !id) {
+                showNotification('Add Bus', 'Please enter both bus name and ID', 'error');
+                return;
+            }
+
+            // Check if device ID already exists
+            if (state.devices.some(device => device.id === id)) {
+                showNotification('Add Bus', 'Bus ID already exists', 'error');
+                return;
+            }
+
+            // Add new device
+            state.devices.push({
+                id: id,
+                name: name,
+                type: 'schoolbus',
+                active: false
+            });
+
+            saveDevices();
+            renderDeviceList();
+            
+            // Clear input fields
+            document.getElementById('manualDeviceName').value = '';
+            document.getElementById('manualDeviceId').value = '';
+            hideAddDeviceCard();
+
+            showNotification('Add Bus', `Bus ${name} added successfully`, 'success');
+        }
+
+        // Mark all students as present
+        function markAllStudentsPresent() {
+            state.students.forEach(student => {
+                if (student.status === 'pending') {
+                    student.status = 'present';
+                }
+            });
+            renderStudentRoster();
+            showNotification('Student Roster', 'All students marked as present', 'success');
+        }
+
+        // Generate student report
+        function generateStudentReport() {
+            const presentCount = state.students.filter(s => s.status === 'present').length;
+            const absentCount = state.students.filter(s => s.status === 'absent').length;
+            const pendingCount = state.students.filter(s => s.status === 'pending').length;
+            
+            // Create PDF document
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add title
+            doc.setFontSize(20);
+            doc.setTextColor(40, 40, 40);
+            doc.text('School Bus Tracker - Student Report', 20, 30);
+
+            // Add route information
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Route: ${state.transitName}`, 20, 50);
+            doc.text(`Bus: ${document.getElementById('busNumber').value}`, 20, 60);
+            doc.text(`Driver: ${document.getElementById('driverName').value}`, 20, 70);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
+
+            // Add summary
+            doc.setTextColor(40, 40, 40);
+            doc.text('Attendance Summary:', 20, 100);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Present: ${presentCount} students`, 20, 110);
+            doc.text(`Absent: ${absentCount} students`, 20, 120);
+            doc.text(`Pending: ${pendingCount} students`, 20, 130);
+
+            // Add student table
+            const tableColumn = ["Student ID", "Name", "Grade", "Status", "Stop"];
+            const tableRows = [];
+
+            state.students.forEach(student => {
+                const row = [
+                    student.id,
+                    student.name,
+                    student.grade,
+                    student.status.charAt(0).toUpperCase() + student.status.slice(1),
+                    student.stop
+                ];
+                tableRows.push(row);
+            });
+
+            // Add table to PDF
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 150,
+                theme: 'grid',
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [245, 158, 11] }
+            });
+
+            // Save the PDF
+            doc.save(`student-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+
+            showNotification('Student Report', 'PDF report generated successfully', 'success');
+        }
+
+        // Toggle emergency alert
+        function toggleEmergencyAlert() {
+            state.emergencyAlertActive = !state.emergencyAlertActive;
+            
+            const alertBtn = document.getElementById('emergencyAlertBtn');
+            
+            if (state.emergencyAlertActive) {
+                alertBtn.innerHTML = '<i data-lucide="alert-octagon" class="w-4 h-4 mr-2"></i>Cancel Emergency';
+                alertBtn.classList.add('btn-danger');
+                alertBtn.classList.remove('btn-primary');
+                
+                // Show emergency notification
+                showNotification('EMERGENCY ALERT', 'Emergency alert activated. Authorities have been notified.', 'error');
+                
+                // Voice announcement
+                speak("EMERGENCY ALERT ACTIVATED. Authorities have been notified.", 'high');
+                
+                // In a real app, this would send notifications to school officials and emergency contacts
+                
+                // Flash the emergency button
+                let flashCount = 0;
+                const flashInterval = setInterval(() => {
+                    alertBtn.style.opacity = alertBtn.style.opacity === '0.7' ? '1' : '0.7';
+                    flashCount++;
+                    if (flashCount >= 10) {
+                        clearInterval(flashInterval);
+                        alertBtn.style.opacity = '1';
+                    }
+                }, 500);
+            } else {
+                alertBtn.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>Emergency Alert';
+                alertBtn.classList.remove('btn-danger');
+                alertBtn.classList.add('btn-primary');
+                
+                showNotification('Emergency Canceled', 'Emergency alert has been canceled.', 'success');
+                speak("Emergency alert canceled.", 'high');
+            }
+            
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        // Device Management Functions
+        function loadDevices() {
+            // Load devices from localStorage or use default devices
+            const savedDevices = localStorage.getItem('schoolBusTrackerDevices');
+            if (savedDevices) {
+                state.devices = JSON.parse(savedDevices);
+            } else {
+                // Add some default devices
+                state.devices = [
+                    { id: 'bus-001', name: 'School Bus #1245', type: 'schoolbus', active: true },
+                    { id: 'bus-002', name: 'School Bus #5678', type: 'schoolbus', active: false },
+                    { id: 'bus-003', name: 'Activity Bus #9012', type: 'schoolbus', active: false }
+                ];
+                saveDevices();
+            }
+
+            // Set the first device as active by default
+            if (state.devices.length > 0) {
+                state.activeDeviceId = state.devices[0].id;
+                initializeDeviceData(state.activeDeviceId);
+            }
+        }
+
+        function saveDevices() {
+            localStorage.setItem('schoolBusTrackerDevices', JSON.stringify(state.devices));
+        }
+
+        function renderDeviceList() {
+            const deviceList = document.getElementById('deviceList');
+            deviceList.innerHTML = '';
+
+            state.devices.forEach(device => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = `device-item ${device.id === state.activeDeviceId ? 'active' : ''}`;
+                deviceItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <span class="status-indicator ${device.active ? 'status-active' : 'status-inactive'}"></span>
+                            <div>
+                                <div class="text-sm font-medium text-gray-800">${device.name}</div>
+                                <div class="text-xs text-gray-500">${device.id}</div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500">${device.type}</div>
+                    </div>
+                `;
+                deviceItem.addEventListener('click', () => switchActiveDevice(device.id));
+                deviceList.appendChild(deviceItem);
+            });
+        }
+
+        function switchActiveDevice(deviceId) {
+            state.activeDeviceId = deviceId;
+            renderDeviceList();
+            
+            // Update the transit info based on the active device
+            const device = state.devices.find(d => d.id === deviceId);
+            if (device) {
+                document.getElementById('transitNameInput').value = device.name;
+                updateTransitName();
+            }
+
+            // Initialize device data if not already done
+            if (!state.deviceData[deviceId]) {
+                initializeDeviceData(deviceId);
+            }
+
+            // Update the map with the active device's data
+            updateMapForActiveDevice();
+
+            showNotification('Bus Switched', `Now tracking ${device.name}`, 'info');
+        }
+
+        function initializeDeviceData(deviceId) {
+            if (!state.deviceData[deviceId]) {
+                state.deviceData[deviceId] = {
+                    pathCoordinates: [],
+                    timestamps: [],
+                    totalDistance: 0,
+                    currentSpeed: 0,
+                    topSpeed: 0,
+                    averageSpeed: 0,
+                    startTime: null,
+                    polyline: null,
+                    marker: null
+                };
+            }
+        }
+
+        function updateMapForActiveDevice() {
+            // In a real app, this would update the map to show the selected bus's location and route
+            // For this demo, we'll just show a notification
+            const device = state.devices.find(d => d.id === state.activeDeviceId);
+            if (device) {
+                showNotification('Bus Selected', `Now viewing ${device.name}`, 'info');
+            }
         }
 
         // Save route
@@ -1061,7 +2082,8 @@
                 timestamps: state.timestamps,
                 distance: state.totalDistance,
                 duration: state.transitStartTime ? new Date() - state.transitStartTime : 0,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                students: state.students
             };
 
             state.savedRoutes.push(routeData);
@@ -1082,23 +2104,29 @@
             // Add title
             doc.setFontSize(20);
             doc.setTextColor(40, 40, 40);
-            doc.text('Transit Tracker Pro - Route Report', 20, 30);
+            doc.text('School Bus Tracker - Route Report', 20, 30);
 
             // Add transit information
             doc.setFontSize(12);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Transit Name: ${state.transitName}`, 20, 50);
-            doc.text(`Transit Type: ${state.transitType}`, 20, 60);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
+            doc.text(`Route: ${state.transitName}`, 20, 50);
+            doc.text(`Bus: ${document.getElementById('busNumber').value}`, 20, 60);
+            doc.text(`Driver: ${document.getElementById('driverName').value}`, 20, 70);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
 
             // Add metrics
             doc.setTextColor(40, 40, 40);
-            doc.text('Route Metrics:', 20, 90);
+            doc.text('Route Metrics:', 20, 100);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 100);
-            doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 110);
-            doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 120);
-            doc.text(`Transit Time: ${document.getElementById('transitTime').textContent}`, 20, 130);
+            doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 110);
+            doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 120);
+            doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 130);
+            doc.text(`Route Time: ${document.getElementById('transitTime').textContent}`, 20, 140);
+
+            // Add student summary
+            const presentCount = state.students.filter(s => s.status === 'present').length;
+            const totalCount = state.students.length;
+            doc.text(`Students Transported: ${presentCount}/${totalCount}`, 20, 155);
 
             // Add route coordinates table
             const tableColumn = ["Time", "Latitude", "Longitude", "Speed (km/h)"];
@@ -1132,14 +2160,14 @@
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
-                startY: 150,
+                startY: 170,
                 theme: 'grid',
                 styles: { fontSize: 8 },
-                headStyles: { fillColor: [59, 130, 246] }
+                headStyles: { fillColor: [245, 158, 11] }
             });
 
             // Save the PDF
-            doc.save(`transit-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+            doc.save(`school-bus-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 
             showNotification('Export Data', 'PDF report generated successfully', 'success');
         }
@@ -1182,7 +2210,7 @@
                 routeWhileDragging: false,
                 showAlternatives: false,
                 lineOptions: {
-                    styles: [{ color: '#3b82f6', weight: 5 }]
+                    styles: [{ color: '#f59e0b', weight: 5 }]
                 },
                 createMarker: function (i, waypoint, n) {
                     if (i === 0) {
@@ -1264,7 +2292,7 @@
             const formattedNumber = phoneNumber.replace(/\D/g, '');
 
             // Create message with location
-            const message = `My current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
+            const message = `School bus current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
 
             // Create WhatsApp URL
             const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
@@ -1289,49 +2317,34 @@
             state.currentMapType = mapType;
         }
 
-        // Update transit type
-        function updateTransitType() {
-            state.transitType = document.getElementById('transitType').value;
-            updateMarkerIcon();
-            updateTransitInfo();
-        }
-
         // Update transit name
         function updateTransitName() {
             state.transitName = document.getElementById('transitNameInput').value;
             updateTransitInfo();
         }
 
+        // Update bus number
+        function updateBusNumber() {
+            // In a real app, this would update the bus number in the system
+            showNotification('Bus Number', 'Bus number updated', 'success');
+        }
+
+        // Update driver name
+        function updateDriverName() {
+            // In a real app, this would update the driver name in the system
+            showNotification('Driver', 'Driver information updated', 'success');
+        }
+
         // Update transit info display
         function updateTransitInfo() {
-            let description = '';
-            let iconName = '';
-
-            switch (state.transitType) {
-                case 'truck':
-                    description = 'Delivery Truck Service';
-                    iconName = 'truck';
-                    break;
-                case 'van':
-                    description = 'Delivery Van Service';
-                    iconName = 'car';
-                    break;
-                case 'car':
-                    description = 'Personal Vehicle';
-                    iconName = 'car';
-                    break;
-                case 'motorcycle':
-                    description = 'Motorcycle Courier';
-                    iconName = 'bike';
-                    break;
-                case 'person':
-                    description = 'Person in Transit';
-                    iconName = 'user';
-                    break;
-                case 'package':
-                    description = 'Package Tracking';
-                    iconName = 'package';
-                    break;
+            // Update the marker popup with current transit info
+            if (state.marker) {
+                state.marker.bindPopup(`
+                    <b>${state.transitName}</b><br>
+                    Status: ${state.isTracking ? 'In Transit' : 'Not Tracking'}<br>
+                    Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
+                    Last Update: ${state.lastPosition ? new Date().toLocaleTimeString() : '--'}
+                `);
             }
         }
 
@@ -1381,7 +2394,7 @@
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
 
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>Stop Tracking';
+            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>End Route';
             trackBtn.classList.remove('btn-primary');
             trackBtn.classList.add('btn-danger');
 
@@ -1393,11 +2406,11 @@
             // Re-initialize Lucide icons
             lucide.createIcons();
 
-            showNotification('Tracking', 'Tracking started. Your transit is now being monitored.', 'success');
+            showNotification('Tracking', 'Route started. School bus is now being tracked.', 'success');
 
             // Voice guidance
             if (document.getElementById('voiceGuidance').checked) {
-                speak("Tracking started. Your transit is now being monitored.", 'high');
+                speak("Route started. School bus is now being tracked.", 'high');
             }
         }
 
@@ -1425,23 +2438,23 @@
 
             state.isTracking = false;
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Tracking';
+            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Route';
             trackBtn.classList.remove('btn-danger');
             trackBtn.classList.add('btn-primary');
 
             // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-inactive';
             document.getElementById('statusText').textContent = 'Not Tracking';
-            document.getElementById('transitStatus').textContent = 'Stopped';
+            document.getElementById('transitStatus').textContent = 'Route Ended';
 
             // Re-initialize Lucide icons
             lucide.createIcons();
 
-            showNotification('Tracking', 'Tracking stopped.', 'info');
+            showNotification('Tracking', 'Route ended.', 'info');
 
             // Voice guidance
             if (document.getElementById('voiceGuidance').checked) {
-                speak("Tracking stopped.", 'high');
+                speak("Route ended.", 'high');
             }
         }
 
@@ -1452,14 +2465,13 @@
             const accuracy = position.coords.accuracy;
             const speed = position.coords.speed;
             const heading = position.coords.heading;
-            const altitude = position.coords.altitude;
             const timestamp = new Date(position.timestamp);
 
             // Update location display
             document.getElementById('latitude').textContent = lat.toFixed(6);
             document.getElementById('longitude').textContent = lng.toFixed(6);
             document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)}m`;
-            document.getElementById('altitude').textContent = altitude ? `${altitude.toFixed(2)}m` : '--';
+            document.getElementById('speed').textContent = speed ? `${(speed * 3.6).toFixed(2)} km/h` : '--';
             document.getElementById('heading').textContent = heading ? `${heading.toFixed(0)}°` : '--';
             document.getElementById('lastUpdate').textContent = timestamp.toLocaleTimeString();
             document.getElementById('transitUpdate').textContent = timestamp.toLocaleTimeString();
@@ -1509,7 +2521,7 @@
                 // Update metrics
                 updateMetrics();
 
-                // Calculate ETA (simplified calculation)
+                // Calculate ETA to school (simplified calculation)
                 updateETA();
             }
 
@@ -1550,21 +2562,16 @@
                     document.getElementById('averageSpeed').textContent = `${state.averageSpeed.toFixed(2)} km/h`;
                 }
             }
-
-            // Update fuel efficiency (simplified calculation)
-            if (state.transitType === 'truck' || state.transitType === 'van' || state.transitType === 'car') {
-                const fuelEfficiency = state.totalDistance > 0 ? (state.totalDistance / 1000) / (state.totalDistance / 100000) * 0.1 : 0;
-                document.getElementById('fuelEfficiency').textContent = `${fuelEfficiency.toFixed(2)} L/km`;
-            }
         }
 
         // Update ETA calculation
         function updateETA() {
             // Simplified ETA calculation - in a real app, you would use a routing service
             if (state.currentSpeed > 5) { // Only calculate if moving
-                const remainingDistance = 10; // Example: 10km to destination
+                const remainingDistance = 10; // Example: 10km to school
                 const timeHours = remainingDistance / state.currentSpeed;
                 const etaTime = new Date(Date.now() + timeHours * 3600000);
+                document.getElementById('etaToSchool').textContent = etaTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
         }
 
