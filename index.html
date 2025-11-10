@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>School Bus Tracker - Single Bus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transit Tracker Pro - Multi-Device GPS Tracking</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Leaflet Routing Machine CSS -->
@@ -32,9 +32,99 @@
             overflow: hidden;
         }
 
+        /* Loading screen styles */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .loading-logo i {
+            width: 60px;
+            height: 60px;
+            color: white;
+        }
+
+        .loading-text {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .loading-subtext {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .loading-features {
+            display: flex;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .loading-feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 120px;
+        }
+
+        .loading-feature i {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 8px;
+            color: #60a5fa;
+        }
+
+        .loading-feature span {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
         /* Professional header styling */
         .header-gradient {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             color: white;
         }
 
@@ -53,7 +143,7 @@
 
         /* Button styling */
         .btn-primary {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: white;
             border: none;
             border-radius: 6px;
@@ -62,9 +152,9 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
         }
 
         .btn-secondary {
@@ -113,17 +203,12 @@
             background-color: #ef4444;
         }
 
-        .status-warning {
-            background-color: #f59e0b;
-        }
-
         /* Map styling */
         #map {
-            height: 100%;
+            height: 100vh;
             width: 100%;
-            border-radius: 8px;
+            border-radius: 0;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         /* Form controls */
@@ -137,8 +222,8 @@
 
         .form-input:focus {
             outline: none;
-            border-color: #f59e0b;
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .form-select {
@@ -271,7 +356,7 @@
         }
 
         .map-control button {
-            background: #f59e0b;
+            background: #3b82f6;
             color: white;
             border: none;
             border-radius: 4px;
@@ -282,7 +367,64 @@
         }
 
         .map-control button:hover {
-            background: #eab308;
+            background: #2563eb;
+        }
+
+        /* Full screen button */
+        .fullscreen-btn {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            z-index: 1000;
+            background: white;
+            color: #334155;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .fullscreen-btn:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        /* Zoom buttons */
+        .zoom-controls {
+            position: absolute;
+            bottom: 60px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .zoom-btn {
+            background: white;
+            color: #334155;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+
+        .zoom-btn:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
         }
 
         /* Dropdown styles */
@@ -309,6 +451,26 @@
         .dropdown:hover .dropdown-content {
             display: block;
             animation: fadeInUp 0.2s ease;
+        }
+
+        .dropdown-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropdown-close:hover {
+            background: #f1f5f9;
+            color: #334155;
         }
 
         @keyframes fadeInUp {
@@ -352,7 +514,7 @@
             background: white;
             border-radius: 6px;
             padding: 16px 20px;
-            border-left: 4px solid #f59e0b;
+            border-left: 4px solid #3b82f6;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             z-index: 2001;
             transform: translateX(120%);
@@ -411,121 +573,38 @@
         }
 
         .device-item.active {
-            background-color: #fef7e5;
-            border-left: 3px solid #f59e0b;
+            background-color: #eff6ff;
+            border-left: 3px solid #3b82f6;
         }
 
-        /* NEW STYLES FOR SIDEBAR AND FULLSCREEN */
-        .app-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
-
+        /* Sidebar layout */
         .sidebar {
-            width: 350px;
-            min-width: 300px;
-            background: #f8fafc;
-            border-right: 1px solid #e2e8f0;
+            width: 400px;
+            height: 100vh;
             overflow-y: auto;
-            padding: 16px;
-            transition: all 0.3s ease;
-            z-index: 1000;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            z-index: 100;
         }
 
         .main-content {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            height: 100vh;
             position: relative;
-        }
-
-        .map-container {
-            flex: 1;
-            position: relative;
-            padding: 16px;
-        }
-
-        .fullscreen-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-
-        .fullscreen-btn:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-        }
-
-        .sidebar-toggle {
-            display: none;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px;
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Fullscreen mode styles */
-        .fullscreen .sidebar {
-            transform: translateX(-100%);
-            width: 0;
-            min-width: 0;
-            padding: 0;
-        }
-
-        .fullscreen .map-container {
-            padding: 0;
-        }
-
-        .fullscreen #map {
-            border-radius: 0;
         }
 
         /* Mobile optimizations */
         @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-
             .sidebar {
                 width: 100%;
                 height: auto;
                 max-height: 50vh;
-                border-right: none;
-                border-bottom: 1px solid #e2e8f0;
-                padding: 12px;
-            }
-
-            .sidebar-toggle {
-                display: block;
-            }
-
-            .sidebar.collapsed {
-                max-height: 60px;
-                overflow: hidden;
+                overflow-y: auto;
             }
 
             .main-content {
-                height: 100%;
+                height: 50vh;
             }
 
             .mobile-hidden {
@@ -554,73 +633,61 @@
                 font-size: 11px;
             }
 
-            .metric-card {
-                padding: 12px;
-            }
-
-            .metric-value {
-                font-size: 18px;
-            }
-
-            .metric-label {
-                font-size: 10px;
-            }
-
-            .notification {
-                max-width: 90%;
-                right: 5%;
-                top: 10px;
-            }
-
-            .voice-indicator {
-                width: 40px;
-                height: 40px;
+            .fullscreen-btn {
                 bottom: 10px;
                 right: 10px;
-            }
-
-            .fullscreen-btn {
-                top: 10px;
-                right: 10px;
                 padding: 6px 10px;
-                font-size: 12px;
+                font-size: 11px;
             }
 
-            .sidebar-toggle {
-                top: 10px;
-                left: 10px;
+            .zoom-controls {
+                bottom: 50px;
+                right: 10px;
             }
 
-            .header-gradient {
-                padding: 12px;
-            }
-
-            .header-gradient h1 {
-                font-size: 18px;
-            }
-
-            .header-gradient p {
-                font-size: 10px;
-            }
-
-            .btn-primary, .btn-secondary, .btn-danger {
-                padding: 10px 12px;
-                font-size: 12px;
-            }
-
-            .form-input, .form-select {
-                padding: 10px;
+            .zoom-btn {
+                width: 32px;
+                height: 32px;
                 font-size: 14px;
             }
 
-            .table th, .table td {
+            .control-panel, .route-planning {
+                width: 90%;
+                max-width: 320px;
+                left: 5%;
+                right: 5%;
+            }
+
+            .dropdown-toggle {
+                left: 10px;
                 padding: 8px 12px;
                 font-size: 12px;
             }
 
-            .dropdown-content {
-                min-width: 180px;
-                padding: 10px;
+            .emergency-btn {
+                bottom: 70px;
+                right: 10px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .geofence-controls {
+                bottom: 130px;
+                right: 10px;
+                width: 180px;
+            }
+
+            .voice-indicator {
+                bottom: 10px;
+                right: 70px;
+                width: 40px;
+                height: 40px;
+            }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
             }
         }
 
@@ -665,157 +732,448 @@
         .leaflet-routing-geocoders input:focus {
             background: white;
             color: #334155;
-            border-color: #f59e0b;
+            border-color: #3b82f6;
         }
 
         .leaflet-routing-geocoders button {
-            background: #f59e0b;
+            background: #3b82f6;
             color: white;
             border-radius: 4px;
         }
 
         .leaflet-routing-geocoders button:hover {
-            background: #eab308;
+            background: #2563eb;
         }
 
-        /* School-specific styles */
-        .student-list {
+        /* NEW STYLES FOR ADD DEVICE CARD */
+        .add-device-card {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 320px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            display: none;
+        }
+
+        .add-device-card.show {
+            display: block;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .device-search-results {
             max-height: 200px;
             overflow-y: auto;
+            margin-top: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
         }
 
-        .student-item {
+        .device-search-item {
             padding: 10px;
             border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .student-item:last-child {
+        .device-search-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .device-search-item:last-child {
             border-bottom: none;
         }
 
-        .student-status {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .student-present {
-            background-color: #10b981;
-        }
-
-        .student-absent {
-            background-color: #ef4444;
-        }
-
-        .student-pending {
-            background-color: #f59e0b;
-        }
-
-        .route-stop {
-            padding: 8px 12px;
-            border-left: 3px solid #f59e0b;
-            margin-bottom: 8px;
-            background: #fef7e5;
-            border-radius: 0 4px 4px 0;
-        }
-
-        .route-stop.active {
-            background: #fef3c7;
-            border-left-color: #d97706;
-        }
-
-        .emergency-alert {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
+        .searching-indicator {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            padding: 16px;
+            color: #64748b;
         }
 
-        /* Mobile-specific improvements */
-        @media (max-width: 480px) {
-            .sidebar {
-                padding: 8px;
-            }
-
-            .card {
-                margin: 0 -4px;
-                padding: 12px;
-            }
-
-            .grid-cols-2 {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-
-            .metric-card {
-                padding: 8px;
-            }
-
-            .metric-value {
-                font-size: 16px;
-            }
-
-            .map-controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 4px;
-                max-width: 90%;
-            }
-
-            .map-control {
-                justify-content: space-between;
-                padding: 8px;
-            }
-
-            .fullscreen-btn span {
-                display: none;
-            }
-
-            .fullscreen-btn {
-                padding: 8px;
-            }
-
-            .dropdown-content {
-                width: 90vw;
-                left: 50%;
-                transform: translateX(-50%);
-            }
+        /* NEW: Control panel styles */
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            width: 320px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            display: none; /* Initially hidden */
         }
 
-        /* Touch-friendly improvements */
-        .touch-friendly {
-            min-height: 44px;
-            min-width: 44px;
+        .control-panel.show {
+            display: block;
+            animation: fadeInUp 0.3s ease;
         }
 
-        .touch-friendly-text {
-            font-size: 16px; /* Prevents zoom on iOS */
+        /* NEW: Route planning styles */
+        .route-planning {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 320px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            display: none; /* Initially hidden */
         }
 
-        /* Prevent text selection on interactive elements */
-        .btn-primary, .btn-secondary, .btn-danger, .map-control, .device-item, .student-item {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+        .route-planning.show {
+            display: block;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        /* NEW: Dropdown toggle button */
+        .dropdown-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            color: #334155;
+            padding: 10px 16px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+
+        .dropdown-toggle:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .dropdown-toggle.active {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        /* NEW: Emergency button styles */
+        .emergency-btn {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s ease;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .emergency-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 10px rgba(239, 68, 68, 0.4);
+        }
+
+        /* NEW: Geofence styles */
+        .geofence-controls {
+            position: absolute;
+            bottom: 150px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            width: 200px;
         }
     </style>
 </head>
 
-<body class="min-h-screen bg-gray-50">
+<body class="min-h-screen bg-gray-50 flex">
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-logo">
+            <i data-lucide="map-pin"></i>
+        </div>
+        <div class="loading-text">Transit Tracker Pro</div>
+        <div class="loading-subtext">Multi-Device GPS Tracking System</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+        <div class="loading-features">
+            <div class="loading-feature">
+                <i data-lucide="navigation"></i>
+                <span>Real-time Tracking</span>
+            </div>
+            <div class="loading-feature">
+                <i data-lucide="route"></i>
+                <span>Route Planning</span>
+            </div>
+            <div class="loading-feature">
+                <i data-lucide="users"></i>
+                <span>Multi-Device</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dropdown Toggle Button -->
+    <div class="dropdown-toggle" id="controlsToggle">
+        <i data-lucide="map-pin" class="w-4 h-4"></i>
+        <span>Transit Controls</span>
+        <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="toggleIcon"></i>
+    </div>
+
+    <!-- Control Panel (NEW) -->
+    <div class="control-panel" id="controlPanel">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Transit Controls</h2>
+            <div class="flex items-center">
+                <span class="status-indicator status-inactive" id="statusIndicator"></span>
+                <span id="statusText" class="text-sm font-medium text-gray-600">Not Tracking</span>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- Transit Info -->
+            <div>
+                <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit Name</label>
+                <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1"
+                    value="Delivery Truck #1245">
+            </div>
+            <div>
+                <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit Type</label>
+                <select id="transitType" class="w-full form-select p-2 text-sm mt-1">
+                    <option value="truck">Delivery Truck</option>
+                    <option value="van">Delivery Van</option>
+                    <option value="car">Car</option>
+                    <option value="motorcycle">Motorcycle</option>
+                    <option value="person">Person</option>
+                    <option value="package">Package</option>
+                </select>
+            </div>
+            
+            <!-- Tracking Controls -->
+            <div class="grid grid-cols-2 gap-3">
+                <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                    <i data-lucide="play" class="w-4 h-4 mr-2"></i>
+                    Start Tracking
+                </button>
+                <button id="addDeviceBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                    Add Device
+                </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="clearRouteBtn"
+                    class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                    Clear Route
+                </button>
+                <button id="saveRouteBtn"
+                    class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                    Save Route
+                </button>
+            </div>
+
+            <!-- Tracking Settings -->
+            <div class="pt-2 border-t border-gray-200">
+                <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                            checked>
+                        <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                            checked>
+                        <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-blue-600 rounded">
+                        <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                            checked>
+                        <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Planning Panel (NEW) -->
+    <div class="route-planning" id="routePlanningPanel">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Route Planning</h2>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Destination</label>
+                <input type="text" id="destinationInput" class="w-full form-input p-2 text-sm mt-1"
+                    placeholder="Enter destination">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button id="planRouteBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                    <i data-lucide="navigation" class="w-4 h-4 mr-2"></i>
+                    Plan Route
+                </button>
+                <button id="clearRoutePlanBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
+                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
+                    Clear Route
+                </button>
+            </div>
+            
+            <div id="routeInfo" class="hidden">
+                <div class="text-sm text-gray-700">
+                    <div class="flex justify-between">
+                        <span>Distance:</span>
+                        <span id="routeDistance">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Estimated Time:</span>
+                        <span id="routeTime">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Full Screen Button -->
+        <button id="fullScreenBtn" class="fullscreen-btn">
+            <i data-lucide="maximize" class="w-4 h-4"></i>
+            <span>Full Screen</span>
+        </button>
+
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button id="zoomInBtn" class="zoom-btn">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+            <button id="zoomOutBtn" class="zoom-btn">
+                <i data-lucide="minus" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <!-- Map Type Selector -->
+            <div class="map-control">
+                <i data-lucide="map" class="w-3 h-3"></i>
+                <select id="mapType">
+                    <option value="standard">Standard</option>
+                    <option value="satellite">Satellite</option>
+                </select>
+            </div>
+
+            <!-- Share Location -->
+            <div class="dropdown">
+                <div class="map-control cursor-pointer">
+                    <i data-lucide="share-2" class="w-3 h-3"></i>
+                    <span>Share</span>
+                    <i data-lucide="chevron-down" class="w-2 h-2"></i>
+                </div>
+                <div class="dropdown-content">
+                    <button class="dropdown-close">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                    <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
+                    <div class="flex mb-3">
+                        <input type="text" id="whatsappNumber" placeholder="Phone number"
+                            class="flex-grow form-input rounded-l p-2 text-sm">
+                        <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
+                            <i data-lucide="send" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                            data-number="+255123456789">Manager</button>
+                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                            data-number="+255987654321">Dispatch</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Export Data -->
+            <div class="dropdown">
+                <div class="map-control cursor-pointer">
+                    <i data-lucide="download" class="w-3 h-3"></i>
+                    <span>Export</span>
+                    <i data-lucide="chevron-down" class="w-2 h-2"></i>
+                </div>
+                <div class="dropdown-content">
+                    <button class="dropdown-close">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                    <div class="text-sm mb-3 font-medium text-gray-800">Export Data</div>
+                    <div class="flex flex-col gap-2">
+                        <button class="export-option btn-secondary py-2 px-4 text-sm flex items-center justify-center" data-format="pdf">
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>
+                            Export as PDF
+                        </button>
+                        <button class="export-option btn-secondary py-2 px-4 text-sm flex items-center justify-center" data-format="csv">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i>
+                            Export as CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emergency Button (NEW) -->
+        <button id="emergencyBtn" class="emergency-btn">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </button>
+        
+        <!-- Geofence Controls (NEW) -->
+        <div class="geofence-controls">
+            <div class="text-sm font-medium text-gray-800 mb-2">Geofence</div>
+            <div class="flex space-x-2">
+                <button id="addGeofenceBtn" class="btn-primary py-1 px-2 text-xs flex items-center">
+                    <i data-lucide="circle" class="w-3 h-3 mr-1"></i>
+                    Add
+                </button>
+                <button id="clearGeofenceBtn" class="btn-secondary py-1 px-2 text-xs flex items-center">
+                    <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i>
+                    Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Voice Guidance Indicator -->
-    <div class="voice-indicator fixed bottom-6 right-6 z-50 touch-friendly">
+    <div class="voice-indicator fixed bottom-6 right-6 z-50" id="voiceIndicator">
         <i data-lucide="volume-2" class="w-5 h-5"></i>
     </div>
 
@@ -830,315 +1188,66 @@
         </div>
     </div>
 
-    <!-- Main App Container -->
-    <div class="app-container">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <!-- Header -->
-            <header class="mb-6">
-                <div class="header-gradient rounded-lg p-4">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-white bg-opacity-10 flex items-center justify-center mr-3">
-                                <i data-lucide="bus" class="w-5 h-5 text-white"></i>
-                            </div>
-                            <div>
-                                <h1 class="text-xl font-bold text-white">School Bus Tracker</h1>
-                                <p class="text-yellow-100 text-xs">Single Bus - GPS Tracking</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <!-- Tracking Status -->
-                            <div class="bg-white bg-opacity-10 rounded-lg px-3 py-1 flex items-center">
-                                <span class="status-indicator status-inactive" id="statusIndicator"></span>
-                                <span id="statusText" class="text-xs font-medium text-white">Not Tracking</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Emergency Alert Button -->
-            <div class="mb-4">
-                <button id="emergencyAlertBtn" class="w-full btn-danger py-3 text-sm flex items-center justify-center touch-friendly">
-                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>
-                    Emergency Alert
-                </button>
-            </div>
-
-            <!-- Business Metrics -->
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="metric-card">
-                    <div class="metric-value text-lg" id="distanceTraveled">0 km</div>
-                    <div class="metric-label">Distance</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value text-lg" id="averageSpeed">0 km/h</div>
-                    <div class="metric-label">Avg Speed</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value text-lg" id="transitTime">00:00:00</div>
-                    <div class="metric-label">Route Time</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value text-lg" id="studentsOnBoard">0/0</div>
-                    <div class="metric-label">Students</div>
-                </div>
-            </div>
-
-            <!-- Bus Information -->
-            <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Bus Information</h2>
-                <div class="space-y-4">
-                    <div class="flex items-center p-3 bg-amber-50 rounded-lg">
-                        <span class="status-indicator status-active mr-3"></span>
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">School Bus #1245</div>
-                            <div class="text-xs text-gray-500">Active - Using Phone GPS</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="play" class="w-4 h-4 mr-2"></i>
-                            Start Route
-                        </button>
-                        <button id="clearRouteBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                            Clear Route
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Route Information -->
-            <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Route Information</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Route Name</label>
-                        <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="Morning Elementary Route">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Bus Number</label>
-                        <input type="text" id="busNumber" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="Bus #SB-1245" readonly>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Driver</label>
-                        <input type="text" id="driverName" class="w-full form-input p-2 text-sm mt-1 touch-friendly-text"
-                            value="John Smith">
-                    </div>
-                    <div class="pt-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Status:</span>
-                            <span id="transitStatus" class="font-medium">Not Started</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-500">Next Stop:</span>
-                            <span id="nextStop" class="font-medium">--</span>
-                        </div>
-                        <div class="flex justify-between text-sm mt-1">
-                            <span class="text-gray-500">ETA to School:</span>
-                            <span id="etaToSchool" class="font-medium">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Student Roster -->
-            <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Student Roster</h2>
-                <div class="student-list" id="studentList">
-                    <!-- Students will be dynamically added here -->
-                </div>
-                <div class="mt-3 flex justify-between">
-                    <button id="markAllPresentBtn" class="btn-secondary py-2 px-3 text-sm flex items-center touch-friendly">
-                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
-                        Mark All
-                    </button>
-                    <button id="generateReportBtn" class="btn-primary py-2 px-3 text-sm flex items-center touch-friendly">
-                        <i data-lucide="file-text" class="w-4 h-4 mr-1"></i>
-                        Report
+    <!-- Add Device Card -->
+    <div id="addDeviceCard" class="add-device-card">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Add GPS Device</h3>
+            <button id="closeAddDeviceCard" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-sm text-gray-700 font-medium mb-2 block">Search for Available Devices</label>
+                <div class="flex space-x-2">
+                    <button id="searchDevicesBtn" class="w-full btn-primary py-2 px-4 text-sm flex items-center justify-center">
+                        <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                        Search for Devices
                     </button>
                 </div>
             </div>
-
-            <!-- Tracking Controls -->
-            <div class="card p-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Tracking Controls</h2>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <button id="saveRouteBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                            Save Route
-                        </button>
-                        <button id="exportBtn"
-                            class="btn-secondary py-2 px-4 text-sm flex items-center justify-center touch-friendly">
-                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
-                            Export
-                        </button>
-                    </div>
-
-                    <div class="pt-2 border-t border-gray-200">
-                        <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
-                                    checked>
-                                <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
-                                    checked>
-                                <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly">
-                                <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-yellow-600 rounded touch-friendly"
-                                    checked>
-                                <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
-                            </div>
-                        </div>
-                    </div>
+            <div id="deviceSearchResults" class="device-search-results hidden">
+                <div class="searching-indicator">
+                    <div class="loading mr-2"></div>
+                    <span>Searching for devices...</span>
                 </div>
             </div>
-
-            <!-- Location Details and Route History -->
-            <div class="space-y-4">
-                <!-- Location Details -->
-                <div class="card p-4">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Location Details</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Latitude</div>
-                            <div class="text-sm font-semibold text-gray-800" id="latitude">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Longitude</div>
-                            <div class="text-sm font-semibold text-gray-800" id="longitude">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Accuracy</div>
-                            <div class="text-sm font-semibold text-gray-800" id="accuracy">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Speed</div>
-                            <div class="text-sm font-semibold text-gray-800" id="speed">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Heading</div>
-                            <div class="text-sm font-semibold text-gray-800" id="heading">--</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Last Update</div>
-                            <div class="text-sm font-semibold text-gray-800" id="lastUpdate">--</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Route History -->
-                <div class="card p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Route History</h2>
-                    </div>
-                    <div id="routeHistory" class="max-h-48 overflow-y-auto">
-                        <div class="text-gray-400 text-center py-8 flex flex-col items-center">
-                            <i data-lucide="map" class="w-8 h-8 mb-3 opacity-50"></i>
-                            <p class="font-medium">No route history yet</p>
-                            <p class="text-sm">Start tracking to record your journey</p>
-                        </div>
-                    </div>
+            <div class="border-t pt-4">
+                <label class="text-sm text-gray-700 font-medium mb-2 block">Add Device Manually</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="manualDeviceName" placeholder="Device Name" class="flex-grow form-input p-2 text-sm">
+                    <input type="text" id="manualDeviceId" placeholder="Device ID" class="flex-grow form-input p-2 text-sm">
+                    <button id="addManualDeviceBtn" class="btn-primary px-3 text-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Sidebar Toggle Button (Mobile) -->
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-            </button>
-
-            <!-- Fullscreen Button -->
-            <button class="fullscreen-btn" id="fullscreenBtn">
-                <i data-lucide="maximize" class="w-4 h-4"></i>
-                <span>Fullscreen</span>
-            </button>
-
-            <!-- Map Container -->
-            <div class="map-container">
-                <div id="map"></div>
-
-                <!-- Map Controls -->
-                <div class="map-controls">
-                    <!-- Map Type Selector -->
-                    <div class="map-control">
-                        <i data-lucide="map" class="w-3 h-3"></i>
-                        <select id="mapType">
-                            <option value="standard">Standard</option>
-                            <option value="satellite">Satellite</option>
-                        </select>
+    <!-- Device Management Modal -->
+    <div id="deviceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Manage GPS Devices</h3>
+                <button id="closeDeviceModal" class="text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-700 font-medium mb-2 block">Add New Device</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="newDeviceName" placeholder="Device Name" class="flex-grow form-input p-2 text-sm">
+                        <input type="text" id="newDeviceId" placeholder="Device ID" class="flex-grow form-input p-2 text-sm">
+                        <button id="addNewDeviceBtn" class="btn-primary px-3 text-sm">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
                     </div>
-
-                    <!-- Destination Search -->
-                    <div class="dropdown">
-                        <div class="map-control cursor-pointer touch-friendly">
-                            <i data-lucide="map-pin" class="w-3 h-3"></i>
-                            <span>Destination</span>
-                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                        </div>
-                        <div class="dropdown-content">
-                            <div class="text-sm mb-3 font-medium text-gray-800">Set Destination</div>
-                            <div class="relative mb-3">
-                                <input type="text" id="destinationInput" placeholder="Search destination"
-                                    class="w-full form-input p-2 text-sm touch-friendly-text">
-                            </div>
-                            <div class="flex mb-3">
-                                <button id="setDestinationBtn"
-                                    class="w-full btn-primary py-2 rounded text-sm font-medium touch-friendly">Set
-                                    Destination</button>
-                            </div>
-                            <div class="text-xs text-gray-500 mb-2">School destinations:</div>
-                            <div class="flex flex-wrap gap-2">
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-destination="Elementary School">Elementary</button>
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-destination="Middle School">Middle School</button>
-                                <button class="destination-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-destination="High School">High School</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Share Location -->
-                    <div class="dropdown">
-                        <div class="map-control cursor-pointer touch-friendly">
-                            <i data-lucide="share-2" class="w-3 h-3"></i>
-                            <span>Share</span>
-                            <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                        </div>
-                        <div class="dropdown-content">
-                            <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
-                            <div class="flex mb-3">
-                                <input type="text" id="whatsappNumber" placeholder="Phone number"
-                                    class="flex-grow form-input rounded-l p-2 text-sm touch-friendly-text">
-                                <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm touch-friendly">
-                                    <i data-lucide="send" class="w-3 h-3"></i>
-                                </button>
-                            </div>
-                            <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
-                            <div class="flex flex-wrap gap-2">
-                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-number="+255123456789">School Office</button>
-                                <button class="contact-option btn-secondary py-1 px-2 rounded text-xs touch-friendly"
-                                    data-number="+255987654321">Transport Manager</button>
-                            </div>
-                        </div>
+                </div>
+                <div class="max-h-64 overflow-y-auto">
+                    <div id="deviceManagementList" class="space-y-2">
+                        <!-- Devices will be dynamically added here -->
                     </div>
                 </div>
             </div>
@@ -1170,8 +1279,8 @@
             topSpeed: 0,
             startTime: null,
             trackingInterval: null,
-            transitType: 'schoolbus',
-            transitName: 'Morning Elementary Route',
+            transitType: 'truck',
+            transitName: 'Delivery Truck #1245',
             destination: null,
             eta: null,
             routingControl: null,
@@ -1187,182 +1296,73 @@
             transitTimer: null,
             lastVoiceGuidance: null,
             voiceGuidanceInterval: null,
-            // School bus specific state
-            students: [],
-            routeStops: [],
-            currentStopIndex: 0,
-            emergencyAlertActive: false,
-            // Fullscreen state
-            isFullscreen: false
+            devices: [],
+            activeDeviceId: null,
+            deviceMarkers: {},
+            devicePolylines: {},
+            deviceData: {},
+            // NEW: Device search state
+            deviceSearchInProgress: false,
+            availableDevices: [],
+            isFullScreen: false,
+            // NEW: Geofence state
+            geofences: [],
+            currentGeofence: null,
+            // NEW: Emergency state
+            emergencyContacts: ['+255123456789', '+255987654321'],
+            // NEW: Route planning state
+            routePlan: null,
+            // NEW: Controls visibility state
+            controlsVisible: false,
+            // NEW: Metrics state
+            metrics: {
+                distance: 0,
+                time: '00:00:00',
+                speed: 0,
+                topSpeed: 0
+            }
         };
+
+        // Show loading screen for 5 seconds
+        function showLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingProgress = document.getElementById('loadingProgress');
+            
+            // Animate progress bar
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                loadingProgress.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    // Hide loading screen after 5 seconds
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            // Initialize the app after loading screen
+                            initApp();
+                        }, 500);
+                    }, 500);
+                }
+            }, 50);
+        }
 
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', function () {
+            showLoadingScreen();
+        });
+
+        // Initialize the app after loading screen
+        function initApp() {
             initMap();
             setupEventListeners();
             checkGeolocationSupport();
             updateTransitInfo();
             initVoiceGuidance();
-            initFullscreen();
-            initializeStudentRoster();
-            initializeRouteStops();
-        });
-
-        // Initialize student roster
-        function initializeStudentRoster() {
-            state.students = [
-                { id: 'S001', name: 'Emma Johnson', grade: '3rd', status: 'pending', stop: 'Maple Street' },
-                { id: 'S002', name: 'Noah Williams', grade: '3rd', status: 'pending', stop: 'Oak Avenue' },
-                { id: 'S003', name: 'Olivia Brown', grade: '4th', status: 'pending', stop: 'Pine Road' },
-                { id: 'S004', name: 'Liam Jones', grade: '4th', status: 'pending', stop: 'Cedar Lane' },
-                { id: 'S005', name: 'Ava Garcia', grade: '5th', status: 'pending', stop: 'Elm Street' }
-            ];
-            renderStudentRoster();
-        }
-
-        // Initialize route stops
-        function initializeRouteStops() {
-            state.routeStops = [
-                { name: 'Maple Street', address: '123 Maple St', students: ['S001'], completed: false },
-                { name: 'Oak Avenue', address: '456 Oak Ave', students: ['S002'], completed: false },
-                { name: 'Pine Road', address: '789 Pine Rd', students: ['S003'], completed: false },
-                { name: 'Cedar Lane', address: '101 Cedar Ln', students: ['S004'], completed: false },
-                { name: 'Elm Street', address: '202 Elm St', students: ['S005'], completed: false },
-                { name: 'Elementary School', address: '500 School Dr', students: [], completed: false }
-            ];
-            updateNextStopDisplay();
-        }
-
-        // Render student roster
-        function renderStudentRoster() {
-            const studentList = document.getElementById('studentList');
-            studentList.innerHTML = '';
-
-            if (state.students.length === 0) {
-                studentList.innerHTML = '<div class="text-center py-4 text-gray-500">No students assigned to this route</div>';
-                return;
-            }
-
-            state.students.forEach(student => {
-                const studentItem = document.createElement('div');
-                studentItem.className = 'student-item';
-                studentItem.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="student-status student-${student.status}"></span>
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">${student.name}</div>
-                            <div class="text-xs text-gray-500">${student.grade} • ${student.stop}</div>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="mark-present text-green-600 hover:text-green-800 touch-friendly" data-id="${student.id}">
-                            <i data-lucide="check" class="w-4 h-4"></i>
-                        </button>
-                        <button class="mark-absent text-red-600 hover:text-red-800 touch-friendly" data-id="${student.id}">
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `;
-                studentList.appendChild(studentItem);
-            });
-
-            // Add event listeners for student status buttons
-            document.querySelectorAll('.mark-present').forEach(button => {
-                button.addEventListener('click', function() {
-                    const studentId = this.getAttribute('data-id');
-                    updateStudentStatus(studentId, 'present');
-                });
-            });
-
-            document.querySelectorAll('.mark-absent').forEach(button => {
-                button.addEventListener('click', function() {
-                    const studentId = this.getAttribute('data-id');
-                    updateStudentStatus(studentId, 'absent');
-                });
-            });
-
-            // Update students on board count
-            updateStudentsOnBoard();
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-        }
-
-        // Update student status
-        function updateStudentStatus(studentId, status) {
-            const student = state.students.find(s => s.id === studentId);
-            if (student) {
-                student.status = status;
-                renderStudentRoster();
-                
-                const statusText = status === 'present' ? 'present' : 'absent';
-                showNotification('Student Status', `${student.name} marked as ${statusText}`, 'success');
-                
-                // Voice announcement for student boarding
-                if (status === 'present' && document.getElementById('voiceGuidance').checked) {
-                    speak(`${student.name} is now on board`, 'normal');
-                }
-            }
-        }
-
-        // Update students on board count
-        function updateStudentsOnBoard() {
-            const presentCount = state.students.filter(s => s.status === 'present').length;
-            const totalCount = state.students.length;
-            document.getElementById('studentsOnBoard').textContent = `${presentCount}/${totalCount}`;
-        }
-
-        // Update next stop display
-        function updateNextStopDisplay() {
-            const nextStop = state.routeStops.find(stop => !stop.completed);
-            if (nextStop) {
-                document.getElementById('nextStop').textContent = nextStop.name;
-            } else {
-                document.getElementById('nextStop').textContent = 'Route Complete';
-            }
-        }
-
-        // Mark next stop as completed
-        function completeCurrentStop() {
-            if (state.currentStopIndex < state.routeStops.length) {
-                state.routeStops[state.currentStopIndex].completed = true;
-                state.currentStopIndex++;
-                updateNextStopDisplay();
-                
-                const stopName = state.routeStops[state.currentStopIndex - 1].name;
-                showNotification('Stop Completed', `${stopName} completed`, 'success');
-                
-                // Voice announcement for stop completion
-                if (document.getElementById('voiceGuidance').checked) {
-                    speak(`Arrived at ${stopName}`, 'normal');
-                }
-                
-                // If this is a student stop, announce student boarding
-                const stop = state.routeStops[state.currentStopIndex - 1];
-                if (stop.students.length > 0) {
-                    const studentNames = stop.students.map(id => {
-                        const student = state.students.find(s => s.id === id);
-                        return student ? student.name : '';
-                    }).filter(name => name !== '');
-                    
-                    if (studentNames.length > 0) {
-                        setTimeout(() => {
-                            speak(`Students to board: ${studentNames.join(', ')}`, 'normal');
-                        }, 2000);
-                    }
-                }
-                
-                // If this is the school, mark all students as present
-                if (stop.name.includes('School')) {
-                    state.students.forEach(student => {
-                        if (student.status === 'pending') {
-                            student.status = 'present';
-                        }
-                    });
-                    renderStudentRoster();
-                    speak("All students have arrived at school", 'high');
-                }
-            }
+            loadDevices();
+            renderDeviceList();
         }
 
         // Initialize Leaflet Map with OpenStreetMap tiles
@@ -1371,16 +1371,16 @@
             const defaultCenter = [-6.7924, 39.2083];
 
             // Create map
-            state.map = L.map('map').setView(defaultCenter, 13);
+            state.map = L.map('map', {
+                attributionControl: false // Remove default attribution
+            }).setView(defaultCenter, 13);
 
             // Define map layers
             state.mapLayers = {
                 standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19
                 }),
                 satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
                     maxZoom: 19
                 })
             };
@@ -1388,57 +1388,24 @@
             // Add default layer
             state.mapLayers.standard.addTo(state.map);
 
-            // Create initial marker with custom icon for school bus
+            // Create initial marker with custom icon based on transit type
             updateMarkerIcon();
 
             // Initialize accuracy circle
             state.accuracyCircle = L.circle(defaultCenter, {
-                color: '#f59e0b',
-                fillColor: '#f59e0b',
+                color: '#3b82f6',
+                fillColor: '#3b82f6',
                 fillOpacity: 0.1,
                 radius: 0
             }).addTo(state.map);
 
             // Initialize polyline for route tracking
             state.polyline = L.polyline([], {
-                color: '#f59e0b',
+                color: '#3b82f6',
                 weight: 4,
                 opacity: 0.7,
                 lineJoin: 'round'
             }).addTo(state.map);
-
-            // Add route stops to map
-            addRouteStopsToMap();
-        }
-
-        // Add route stops to the map
-        function addRouteStopsToMap() {
-            state.routeStops.forEach((stop, index) => {
-                // Generate a slightly different position for each stop for demonstration
-                const lat = -6.7924 + (index * 0.01);
-                const lng = 39.2083 + (index * 0.01);
-                
-                const stopMarker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        className: 'stop-marker',
-                        html: `<div style="background: ${index === state.currentStopIndex ? '#f59e0b' : '#94a3b8'}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);"><i data-lucide="${index === state.routeStops.length - 1 ? 'school' : 'map-pin'}" style="width: 12px; height: 12px; color: white;"></i></div>`,
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).addTo(state.map);
-                
-                stopMarker.bindPopup(`
-                    <b>${stop.name}</b><br>
-                    ${stop.address}<br>
-                    ${stop.students.length > 0 ? `Students: ${stop.students.length}` : 'School Destination'}
-                `);
-                
-                // Store marker reference
-                stop.marker = stopMarker;
-            });
-            
-            // Re-initialize Lucide icons for markers
-            setTimeout(() => lucide.createIcons(), 100);
         }
 
         // Initialize voice guidance
@@ -1447,101 +1414,6 @@
                 console.warn('Speech synthesis not supported');
                 document.getElementById('voiceGuidance').disabled = true;
                 document.querySelector('.voice-indicator').style.display = 'none';
-            }
-        }
-
-        // Initialize fullscreen functionality
-        function initFullscreen() {
-            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
-            
-            // Listen for ESC key to exit fullscreen
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && state.isFullscreen) {
-                    toggleFullscreen();
-                }
-            });
-            
-            // Listen for fullscreen change events
-            document.addEventListener('fullscreenchange', handleFullscreenChange);
-            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-        }
-
-        // Toggle fullscreen mode
-        function toggleFullscreen() {
-            if (!state.isFullscreen) {
-                // Enter fullscreen
-                const appContainer = document.querySelector('.app-container');
-                if (appContainer.requestFullscreen) {
-                    appContainer.requestFullscreen();
-                } else if (appContainer.webkitRequestFullscreen) {
-                    appContainer.webkitRequestFullscreen();
-                } else if (appContainer.mozRequestFullScreen) {
-                    appContainer.mozRequestFullScreen();
-                } else if (appContainer.msRequestFullscreen) {
-                    appContainer.msRequestFullscreen();
-                }
-                
-                document.body.classList.add('fullscreen');
-                state.isFullscreen = true;
-                
-                // Update button
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                fullscreenBtn.innerHTML = '<i data-lucide="minimize" class="w-4 h-4"></i><span>Exit Fullscreen</span>';
-                lucide.createIcons();
-                
-                // Update map size
-                setTimeout(() => {
-                    state.map.invalidateSize();
-                }, 300);
-            } else {
-                // Exit fullscreen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                
-                document.body.classList.remove('fullscreen');
-                state.isFullscreen = false;
-                
-                // Update button
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Fullscreen</span>';
-                lucide.createIcons();
-                
-                // Update map size
-                setTimeout(() => {
-                    state.map.invalidateSize();
-                }, 300);
-            }
-        }
-
-        // Handle fullscreen change events
-        function handleFullscreenChange() {
-            const isFullscreen = document.fullscreenElement || 
-                                document.webkitFullscreenElement || 
-                                document.mozFullScreenElement || 
-                                document.msFullscreenElement;
-            
-            if (!isFullscreen && state.isFullscreen) {
-                document.body.classList.remove('fullscreen');
-                state.isFullscreen = false;
-                
-                // Update button
-                const fullscreenBtn = document.getElementById('fullscreenBtn');
-                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Fullscreen</span>';
-                lucide.createIcons();
-                
-                // Update map size
-                setTimeout(() => {
-                    state.map.invalidateSize();
-                }, 300);
             }
         }
 
@@ -1645,9 +1517,34 @@
 
         // Update marker icon based on transit type
         function updateMarkerIcon() {
+            let iconName = '';
+
+            switch (state.transitType) {
+                case 'truck':
+                    iconName = 'truck';
+                    break;
+                case 'van':
+                    iconName = 'car';
+                    break;
+                case 'car':
+                    iconName = 'car';
+                    break;
+                case 'motorcycle':
+                    iconName = 'bike';
+                    break;
+                case 'person':
+                    iconName = 'user';
+                    break;
+                case 'package':
+                    iconName = 'package';
+                    break;
+                default:
+                    iconName = 'map-pin';
+            }
+
             const customIcon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="bus" style="width: 18px; height: 18px; color: white;"></i></div>`,
+                html: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="${iconName}" style="width: 18px; height: 18px; color: white;"></i></div>`,
                 iconSize: [46, 46],
                 iconAnchor: [23, 23]
             });
@@ -1656,7 +1553,7 @@
                 state.marker.setIcon(customIcon);
             } else {
                 state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
-                state.marker.bindPopup("<b>School Bus Location</b><br>Tracking not started").openPopup();
+                state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
             }
 
             // Re-initialize Lucide icons for the new marker
@@ -1668,26 +1565,42 @@
             document.getElementById('trackBtn').addEventListener('click', toggleTracking);
             document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
             document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
-            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('transitType').addEventListener('change', updateTransitType);
             document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
-            document.getElementById('busNumber').addEventListener('change', updateBusNumber);
-            document.getElementById('driverName').addEventListener('change', updateDriverName);
             document.getElementById('mapType').addEventListener('change', changeMapType);
-            document.getElementById('setDestinationBtn').addEventListener('click', setDestination);
             document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
-            document.getElementById('markAllPresentBtn').addEventListener('click', markAllStudentsPresent);
-            document.getElementById('generateReportBtn').addEventListener('click', generateStudentReport);
-            document.getElementById('emergencyAlertBtn').addEventListener('click', toggleEmergencyAlert);
+            document.getElementById('addDeviceBtn').addEventListener('click', showAddDeviceCard);
+            document.getElementById('closeAddDeviceCard').addEventListener('click', hideAddDeviceCard);
+            document.getElementById('searchDevicesBtn').addEventListener('click', searchForDevices);
+            document.getElementById('addManualDeviceBtn').addEventListener('click', addManualDevice);
+            document.getElementById('fullScreenBtn').addEventListener('click', toggleFullScreen);
+            
+            // NEW: Zoom controls
+            document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+            document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+            
+            // NEW: Route planning events
+            document.getElementById('planRouteBtn').addEventListener('click', planRoute);
+            document.getElementById('clearRoutePlanBtn').addEventListener('click', clearRoutePlan);
+            
+            // NEW: Emergency button event
+            document.getElementById('emergencyBtn').addEventListener('click', triggerEmergency);
+            
+            // NEW: Geofence events
+            document.getElementById('addGeofenceBtn').addEventListener('click', addGeofence);
+            document.getElementById('clearGeofenceBtn').addEventListener('click', clearGeofences);
 
-            // Sidebar toggle for mobile
-            document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+            // NEW: Controls toggle event
+            document.getElementById('controlsToggle').addEventListener('click', toggleControls);
 
-            // Add event listeners for destination options
-            document.querySelectorAll('.destination-option').forEach(button => {
-                button.addEventListener('click', function () {
-                    const destination = this.getAttribute('data-destination');
-                    document.getElementById('destinationInput').value = destination;
-                    setDestination();
+            // NEW: Voice indicator event
+            document.getElementById('voiceIndicator').addEventListener('click', toggleVoiceGuidance);
+
+            // NEW: Export options
+            document.querySelectorAll('.export-option').forEach(button => {
+                button.addEventListener('click', function() {
+                    const exportType = this.getAttribute('data-format');
+                    exportData(exportType);
                 });
             });
 
@@ -1699,142 +1612,739 @@
                 });
             });
 
-            // Add keyboard shortcut for completing stops (Spacebar)
-            document.addEventListener('keydown', function(e) {
-                if (e.code === 'Space' && state.isTracking) {
+            // NEW: Settings checkboxes
+            document.getElementById('highAccuracy').addEventListener('change', updateTrackingSettings);
+            document.getElementById('autoCenter').addEventListener('change', updateTrackingSettings);
+            document.getElementById('shareLive').addEventListener('change', updateTrackingSettings);
+            document.getElementById('voiceGuidance').addEventListener('change', updateTrackingSettings);
+
+            // NEW: Close dropdown buttons
+            document.querySelectorAll('.dropdown-close').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.dropdown-content').style.display = 'none';
+                });
+            });
+
+            // NEW: Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                        dropdown.style.display = 'none';
+                    });
+                }
+            });
+
+            // NEW: Mobile-specific event listeners
+            setupMobileEvents();
+        }
+
+        // NEW: Setup mobile-specific events
+        function setupMobileEvents() {
+            // Handle touch events for better mobile interaction
+            document.addEventListener('touchstart', function() {
+                // Add any mobile-specific touch handling here
+            }, { passive: true });
+
+            // Prevent zoom on double tap for map controls
+            document.querySelectorAll('.map-control, .fullscreen-btn, .zoom-btn').forEach(element => {
+                element.addEventListener('touchend', function(e) {
                     e.preventDefault();
-                    completeCurrentStop();
-                }
+                    this.click();
+                });
             });
         }
 
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
+        // NEW: Zoom in function
+        function zoomIn() {
+            state.map.zoomIn();
+        }
+
+        // NEW: Zoom out function
+        function zoomOut() {
+            state.map.zoomOut();
+        }
+
+        // NEW: Toggle controls visibility
+        function toggleControls() {
+            const controlPanel = document.getElementById('controlPanel');
+            const routePlanningPanel = document.getElementById('routePlanningPanel');
+            const toggleButton = document.getElementById('controlsToggle');
+            const toggleIcon = document.getElementById('toggleIcon');
             
-            const icon = document.querySelector('#sidebarToggle i');
-            if (sidebar.classList.contains('collapsed')) {
-                icon.setAttribute('data-lucide', 'menu');
+            if (state.controlsVisible) {
+                // Hide controls
+                controlPanel.classList.remove('show');
+                routePlanningPanel.classList.remove('show');
+                toggleButton.classList.remove('active');
+                toggleIcon.style.transform = 'rotate(0deg)';
+                state.controlsVisible = false;
             } else {
-                icon.setAttribute('data-lucide', 'x');
+                // Show controls
+                controlPanel.classList.add('show');
+                routePlanningPanel.classList.add('show');
+                toggleButton.classList.add('active');
+                toggleIcon.style.transform = 'rotate(180deg)';
+                state.controlsVisible = true;
             }
-            lucide.createIcons();
+            
+            // Trigger map resize to adjust for panel visibility
+            setTimeout(() => {
+                state.map.invalidateSize();
+            }, 300);
         }
 
-        // Mark all students as present
-        function markAllStudentsPresent() {
-            state.students.forEach(student => {
-                if (student.status === 'pending') {
-                    student.status = 'present';
-                }
-            });
-            renderStudentRoster();
-            showNotification('Student Roster', 'All students marked as present', 'success');
-        }
-
-        // Generate student report
-        function generateStudentReport() {
-            const presentCount = state.students.filter(s => s.status === 'present').length;
-            const absentCount = state.students.filter(s => s.status === 'absent').length;
-            const pendingCount = state.students.filter(s => s.status === 'pending').length;
+        // NEW: Toggle voice guidance
+        function toggleVoiceGuidance() {
+            const voiceGuidanceCheckbox = document.getElementById('voiceGuidance');
+            voiceGuidanceCheckbox.checked = !voiceGuidanceCheckbox.checked;
+            updateTrackingSettings();
             
-            // Create PDF document
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(40, 40, 40);
-            doc.text('School Bus Tracker - Student Report', 20, 30);
-
-            // Add route information
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Route: ${state.transitName}`, 20, 50);
-            doc.text(`Bus: ${document.getElementById('busNumber').value}`, 20, 60);
-            doc.text(`Driver: ${document.getElementById('driverName').value}`, 20, 70);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
-
-            // Add summary
-            doc.setTextColor(40, 40, 40);
-            doc.text('Attendance Summary:', 20, 100);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Present: ${presentCount} students`, 20, 110);
-            doc.text(`Absent: ${absentCount} students`, 20, 120);
-            doc.text(`Pending: ${pendingCount} students`, 20, 130);
-
-            // Add student table
-            const tableColumn = ["Student ID", "Name", "Grade", "Status", "Stop"];
-            const tableRows = [];
-
-            state.students.forEach(student => {
-                const row = [
-                    student.id,
-                    student.name,
-                    student.grade,
-                    student.status.charAt(0).toUpperCase() + student.status.slice(1),
-                    student.stop
-                ];
-                tableRows.push(row);
-            });
-
-            // Add table to PDF
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 150,
-                theme: 'grid',
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [245, 158, 11] }
-            });
-
-            // Save the PDF
-            doc.save(`student-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-
-            showNotification('Student Report', 'PDF report generated successfully', 'success');
-        }
-
-        // Toggle emergency alert
-        function toggleEmergencyAlert() {
-            state.emergencyAlertActive = !state.emergencyAlertActive;
-            
-            const alertBtn = document.getElementById('emergencyAlertBtn');
-            
-            if (state.emergencyAlertActive) {
-                alertBtn.innerHTML = '<i data-lucide="alert-octagon" class="w-4 h-4 mr-2"></i>Cancel Emergency';
-                alertBtn.classList.add('btn-danger');
-                alertBtn.classList.remove('btn-primary');
-                
-                // Show emergency notification
-                showNotification('EMERGENCY ALERT', 'Emergency alert activated. Authorities have been notified.', 'error');
-                
-                // Voice announcement
-                speak("EMERGENCY ALERT ACTIVATED. Authorities have been notified.", 'high');
-                
-                // In a real app, this would send notifications to school officials and emergency contacts
-                
-                // Flash the emergency button
-                let flashCount = 0;
-                const flashInterval = setInterval(() => {
-                    alertBtn.style.opacity = alertBtn.style.opacity === '0.7' ? '1' : '0.7';
-                    flashCount++;
-                    if (flashCount >= 10) {
-                        clearInterval(flashInterval);
-                        alertBtn.style.opacity = '1';
-                    }
-                }, 500);
+            if (voiceGuidanceCheckbox.checked) {
+                showNotification('Voice Guidance', 'Voice guidance enabled', 'success');
+                speak("Voice guidance activated");
             } else {
-                alertBtn.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>Emergency Alert';
-                alertBtn.classList.remove('btn-danger');
-                alertBtn.classList.add('btn-primary');
+                showNotification('Voice Guidance', 'Voice guidance disabled', 'info');
+            }
+        }
+
+        // NEW: Update tracking settings
+        function updateTrackingSettings() {
+            const highAccuracy = document.getElementById('highAccuracy').checked;
+            const autoCenter = document.getElementById('autoCenter').checked;
+            const shareLive = document.getElementById('shareLive').checked;
+            const voiceGuidance = document.getElementById('voiceGuidance').checked;
+            
+            // Update voice indicator appearance
+            const voiceIndicator = document.getElementById('voiceIndicator');
+            if (voiceGuidance) {
+                voiceIndicator.style.background = '#10b981';
+            } else {
+                voiceIndicator.style.background = '#6b7280';
+            }
+            
+            // Restart tracking with new accuracy setting if currently tracking
+            if (state.isTracking) {
+                stopTracking();
+                startTracking();
+            }
+        }
+
+        // NEW: Plan route to destination
+        function planRoute() {
+            const destination = document.getElementById('destinationInput').value.trim();
+            
+            if (!destination) {
+                showNotification('Route Planning', 'Please enter a destination', 'error');
+                return;
+            }
+            
+            if (!state.lastPosition) {
+                showNotification('Route Planning', 'Current location not available. Start tracking first.', 'error');
+                return;
+            }
+            
+            // Clear any existing routing control
+            if (state.routingControl) {
+                state.map.removeControl(state.routingControl);
+            }
+            
+            // Create routing control
+            state.routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(state.lastPosition[0], state.lastPosition[1]),
+                    L.latLng(state.lastPosition[0] + 0.01, state.lastPosition[1] + 0.01) // Placeholder, would use geocoding in real app
+                ],
+                routeWhileDragging: true,
+                showAlternatives: true,
+                altLineOptions: {
+                    styles: [
+                        {color: 'black', opacity: 0.15, weight: 9},
+                        {color: 'white', opacity: 0.8, weight: 6},
+                        {color: '#3b82f6', opacity: 0.5, weight: 4}
+                    ]
+                },
+                lineOptions: {
+                    styles: [
+                        {color: 'black', opacity: 0.15, weight: 9},
+                        {color: 'white', opacity: 0.8, weight: 6},
+                        {color: '#3b82f6', opacity: 1, weight: 4}
+                    ]
+                }
+            }).addTo(state.map);
+            
+            // Show route info
+            document.getElementById('routeInfo').classList.remove('hidden');
+            document.getElementById('routeDistance').textContent = '12.5 km'; // Placeholder
+            document.getElementById('routeTime').textContent = '25 min'; // Placeholder
+            
+            showNotification('Route Planning', 'Route planned successfully', 'success');
+            
+            // Voice guidance for route
+            if (document.getElementById('voiceGuidance').checked) {
+                speak("Route planned. Distance 12.5 kilometers. Estimated travel time 25 minutes.");
+            }
+        }
+
+        // NEW: Clear route plan
+        function clearRoutePlan() {
+            if (state.routingControl) {
+                state.map.removeControl(state.routingControl);
+                state.routingControl = null;
+            }
+            
+            document.getElementById('routeInfo').classList.add('hidden');
+            document.getElementById('destinationInput').value = '';
+            
+            showNotification('Route Planning', 'Route cleared', 'info');
+        }
+
+        // NEW: Trigger emergency alert
+        function triggerEmergency() {
+            if (!state.lastPosition) {
+                showNotification('Emergency', 'Location not available', 'error');
+                return;
+            }
+            
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to send an emergency alert?')) {
+                // Send emergency alerts to all contacts
+                state.emergencyContacts.forEach(contact => {
+                    const message = `EMERGENCY ALERT! ${state.transitName} needs assistance. Location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
+                    const whatsappUrl = `https://wa.me/${contact}?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
+                });
                 
-                showNotification('Emergency Canceled', 'Emergency alert has been canceled.', 'success');
-                speak("Emergency alert canceled.", 'high');
+                // Show notification
+                showNotification('Emergency', 'Emergency alert sent to all contacts', 'error');
+                
+                // Voice alert
+                speak("Emergency alert activated. Help has been notified.", 'high');
+                
+                // Flash emergency button
+                const emergencyBtn = document.getElementById('emergencyBtn');
+                emergencyBtn.style.animation = 'pulse 1s infinite';
+                setTimeout(() => {
+                    emergencyBtn.style.animation = '';
+                }, 5000);
+            }
+        }
+
+        // NEW: Add geofence
+        function addGeofence() {
+            if (!state.lastPosition) {
+                showNotification('Geofence', 'Location not available', 'error');
+                return;
+            }
+            
+            // Create a circular geofence around current location
+            const geofence = L.circle(state.lastPosition, {
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
+                fillOpacity: 0.1,
+                radius: 500 // 500 meters
+            }).addTo(state.map);
+            
+            // Add popup
+            geofence.bindPopup(`<b>Geofence</b><br>Radius: 500m<br><button onclick="removeGeofence(${state.geofences.length})" class="btn-danger py-1 px-2 text-xs mt-2">Remove</button>`).openPopup();
+            
+            // Store geofence
+            state.geofences.push(geofence);
+            state.currentGeofence = geofence;
+            
+            showNotification('Geofence', 'Geofence added at current location', 'success');
+        }
+
+        // NEW: Remove specific geofence
+        function removeGeofence(index) {
+            if (state.geofences[index]) {
+                state.map.removeLayer(state.geofences[index]);
+                state.geofences.splice(index, 1);
+                showNotification('Geofence', 'Geofence removed', 'info');
+            }
+        }
+
+        // NEW: Clear all geofences
+        function clearGeofences() {
+            if (state.geofences.length === 0) {
+                showNotification('Geofence', 'No geofences to clear', 'info');
+                return;
+            }
+            
+            state.geofences.forEach(geofence => {
+                state.map.removeLayer(geofence);
+            });
+            
+            state.geofences = [];
+            state.currentGeofence = null;
+            
+            showNotification('Geofence', 'All geofences cleared', 'info');
+        }
+
+        // Toggle full screen mode
+        function toggleFullScreen() {
+            const elem = document.documentElement;
+            
+            if (!state.isFullScreen) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+                state.isFullScreen = true;
+                document.getElementById('fullScreenBtn').innerHTML = '<i data-lucide="minimize" class="w-4 h-4"></i><span>Exit Full Screen</span>';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                state.isFullScreen = false;
+                document.getElementById('fullScreenBtn').innerHTML = '<i data-lucide="maximize" class="w-4 h-4"></i><span>Full Screen</span>';
             }
             
             // Re-initialize Lucide icons
             lucide.createIcons();
+            
+            // Trigger map resize
+            setTimeout(() => {
+                state.map.invalidateSize();
+            }, 300);
+        }
+
+        // Show Add Device Card
+        function showAddDeviceCard() {
+            document.getElementById('addDeviceCard').classList.add('show');
+        }
+
+        // Hide Add Device Card
+        function hideAddDeviceCard() {
+            document.getElementById('addDeviceCard').classList.remove('show');
+        }
+
+        // Search for available GPS devices
+        function searchForDevices() {
+            if (state.deviceSearchInProgress) return;
+            
+            state.deviceSearchInProgress = true;
+            const resultsContainer = document.getElementById('deviceSearchResults');
+            resultsContainer.classList.remove('hidden');
+            
+            // Show searching indicator
+            resultsContainer.innerHTML = `
+                <div class="searching-indicator">
+                    <div class="loading mr-2"></div>
+                    <span>Searching for devices...</span>
+                </div>
+            `;
+            
+            // Simulate device discovery (in a real app, this would use Bluetooth, WiFi, or other discovery methods)
+            setTimeout(() => {
+                // Simulate finding some devices
+                state.availableDevices = [
+                    { id: 'GPS-001', name: 'GPS Tracker #001', type: 'truck', signalStrength: 'Strong', distance: '15m' },
+                    { id: 'GPS-002', name: 'GPS Tracker #002', type: 'van', signalStrength: 'Medium', distance: '25m' },
+                    { id: 'GPS-003', name: 'GPS Tracker #003', type: 'motorcycle', signalStrength: 'Weak', distance: '45m' }
+                ];
+                
+                // Display found devices
+                displayAvailableDevices();
+                state.deviceSearchInProgress = false;
+                
+                showNotification('Device Search', `Found ${state.availableDevices.length} available devices`, 'success');
+            }, 3000);
+        }
+
+        // Display available devices in search results
+        function displayAvailableDevices() {
+            const resultsContainer = document.getElementById('deviceSearchResults');
+            
+            if (state.availableDevices.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="searching-indicator">
+                        <span>No devices found nearby</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsContainer.innerHTML = '';
+            
+            state.availableDevices.forEach(device => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'device-search-item';
+                deviceItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">${device.name}</div>
+                            <div class="text-xs text-gray-500">ID: ${device.id} | Type: ${device.type}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500">${device.distance}</div>
+                            <div class="text-xs ${device.signalStrength === 'Strong' ? 'text-green-600' : device.signalStrength === 'Medium' ? 'text-yellow-600' : 'text-red-600'}">
+                                ${device.signalStrength}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                deviceItem.addEventListener('click', () => {
+                    addDeviceFromSearch(device);
+                });
+                
+                resultsContainer.appendChild(deviceItem);
+            });
+        }
+
+        // Add device from search results
+        function addDeviceFromSearch(device) {
+            // Check if device already exists
+            if (state.devices.some(d => d.id === device.id)) {
+                showNotification('Add Device', `Device ${device.name} is already added`, 'error');
+                return;
+            }
+            
+            // Add the device
+            state.devices.push({
+                id: device.id,
+                name: device.name,
+                type: device.type,
+                active: false
+            });
+            
+            saveDevices();
+            renderDeviceList();
+            hideAddDeviceCard();
+            
+            showNotification('Add Device', `Device ${device.name} added successfully`, 'success');
+        }
+
+        // Add device manually
+        function addManualDevice() {
+            const name = document.getElementById('manualDeviceName').value.trim();
+            const id = document.getElementById('manualDeviceId').value.trim();
+
+            if (!name || !id) {
+                showNotification('Add Device', 'Please enter both device name and ID', 'error');
+                return;
+            }
+
+            // Check if device ID already exists
+            if (state.devices.some(device => device.id === id)) {
+                showNotification('Add Device', 'Device ID already exists', 'error');
+                return;
+            }
+
+            // Add new device
+            state.devices.push({
+                id: id,
+                name: name,
+                type: 'truck', // Default type
+                active: false
+            });
+
+            saveDevices();
+            renderDeviceList();
+            
+            // Clear input fields
+            document.getElementById('manualDeviceName').value = '';
+            document.getElementById('manualDeviceId').value = '';
+            hideAddDeviceCard();
+
+            showNotification('Add Device', `Device ${name} added successfully`, 'success');
+        }
+
+        // Device Management Functions
+        function loadDevices() {
+            // Load devices from localStorage or use default devices
+            const savedDevices = localStorage.getItem('transitTrackerDevices');
+            if (savedDevices) {
+                state.devices = JSON.parse(savedDevices);
+            } else {
+                // Add some default devices
+                state.devices = [
+                    { id: 'device-001', name: 'Delivery Truck #1245', type: 'truck', active: true },
+                    { id: 'device-002', name: 'Service Van #5678', type: 'van', active: false },
+                    { id: 'device-003', name: 'Motorcycle Courier', type: 'motorcycle', active: false }
+                ];
+                saveDevices();
+            }
+
+            // Set the first device as active by default
+            if (state.devices.length > 0) {
+                state.activeDeviceId = state.devices[0].id;
+                initializeDeviceData(state.activeDeviceId);
+            }
+        }
+
+        function saveDevices() {
+            localStorage.setItem('transitTrackerDevices', JSON.stringify(state.devices));
+        }
+
+        function renderDeviceList() {
+            const deviceList = document.getElementById('deviceList');
+            if (!deviceList) return;
+            
+            deviceList.innerHTML = '';
+
+            state.devices.forEach(device => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = `device-item ${device.id === state.activeDeviceId ? 'active' : ''}`;
+                deviceItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <span class="status-indicator ${device.active ? 'status-active' : 'status-inactive'}"></span>
+                            <div>
+                                <div class="text-sm font-medium text-gray-800">${device.name}</div>
+                                <div class="text-xs text-gray-500">${device.id}</div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500">${device.type}</div>
+                    </div>
+                `;
+                deviceItem.addEventListener('click', () => switchActiveDevice(device.id));
+                deviceList.appendChild(deviceItem);
+            });
+
+            // Also update the device management list
+            renderDeviceManagementList();
+        }
+
+        function renderDeviceManagementList() {
+            const deviceManagementList = document.getElementById('deviceManagementList');
+            if (!deviceManagementList) return;
+            
+            deviceManagementList.innerHTML = '';
+
+            state.devices.forEach(device => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'flex justify-between items-center p-2 border border-gray-200 rounded';
+                deviceItem.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="status-indicator ${device.active ? 'status-active' : 'status-inactive'} mr-2"></span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">${device.name}</div>
+                            <div class="text-xs text-gray-500">${device.id}</div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="text-blue-600 hover:text-blue-800 edit-device" data-id="${device.id}">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800 delete-device" data-id="${device.id}">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                deviceManagementList.appendChild(deviceItem);
+            });
+
+            // Add event listeners for edit and delete buttons
+            document.querySelectorAll('.edit-device').forEach(button => {
+                button.addEventListener('click', function() {
+                    const deviceId = this.getAttribute('data-id');
+                    editDevice(deviceId);
+                });
+            });
+
+            document.querySelectorAll('.delete-device').forEach(button => {
+                button.addEventListener('click', function() {
+                    const deviceId = this.getAttribute('data-id');
+                    deleteDevice(deviceId);
+                });
+            });
+
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        function switchActiveDevice(deviceId) {
+            state.activeDeviceId = deviceId;
+            renderDeviceList();
+            
+            // Update the transit info based on the active device
+            const device = state.devices.find(d => d.id === deviceId);
+            if (device) {
+                document.getElementById('transitNameInput').value = device.name;
+                document.getElementById('transitType').value = device.type;
+                updateTransitType();
+                updateTransitName();
+            }
+
+            // Initialize device data if not already done
+            if (!state.deviceData[deviceId]) {
+                initializeDeviceData(deviceId);
+            }
+
+            // Update the map with the active device's data
+            updateMapForActiveDevice();
+
+            showNotification('Device Switched', `Now tracking ${device.name}`, 'info');
+        }
+
+        function initializeDeviceData(deviceId) {
+            if (!state.deviceData[deviceId]) {
+                state.deviceData[deviceId] = {
+                    pathCoordinates: [],
+                    timestamps: [],
+                    totalDistance: 0,
+                    currentSpeed: 0,
+                    topSpeed: 0,
+                    averageSpeed: 0,
+                    startTime: null,
+                    polyline: null,
+                    marker: null
+                };
+            }
+
+            // Create marker for this device if it doesn't exist
+            if (!state.deviceMarkers[deviceId]) {
+                const device = state.devices.find(d => d.id === deviceId);
+                const customIcon = createDeviceIcon(device.type, deviceId);
+                
+                state.deviceMarkers[deviceId] = L.marker([-6.7924, 39.2083], { 
+                    icon: customIcon 
+                }).addTo(state.map);
+                
+                state.deviceMarkers[deviceId].bindPopup(`<b>${device.name}</b><br>Status: Inactive`).openPopup();
+            }
+
+            // Create polyline for this device if it doesn't exist
+            if (!state.devicePolylines[deviceId]) {
+                const color = getDeviceColor(deviceId);
+                state.devicePolylines[deviceId] = L.polyline([], {
+                    color: color,
+                    weight: 4,
+                    opacity: 0.7,
+                    lineJoin: 'round'
+                }).addTo(state.map);
+            }
+        }
+
+        function createDeviceIcon(deviceType, deviceId) {
+            let iconName = '';
+
+            switch (deviceType) {
+                case 'truck':
+                    iconName = 'truck';
+                    break;
+                case 'van':
+                    iconName = 'car';
+                    break;
+                case 'car':
+                    iconName = 'car';
+                    break;
+                case 'motorcycle':
+                    iconName = 'bike';
+                    break;
+                case 'person':
+                    iconName = 'user';
+                    break;
+                case 'package':
+                    iconName = 'package';
+                    break;
+                default:
+                    iconName = 'map-pin';
+            }
+
+            const color = getDeviceColor(deviceId);
+            
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background: ${color}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="${iconName}" style="width: 18px; height: 18px; color: white;"></i></div>`,
+                iconSize: [46, 46],
+                iconAnchor: [23, 23]
+            });
+        }
+
+        function getDeviceColor(deviceId) {
+            // Generate a consistent color for each device
+            const colors = [
+                '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', 
+                '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+            ];
+            
+            const index = state.devices.findIndex(d => d.id === deviceId);
+            return colors[index % colors.length];
+        }
+
+        function updateMapForActiveDevice() {
+            // Hide all device markers and polylines
+            Object.values(state.deviceMarkers).forEach(marker => {
+                state.map.removeLayer(marker);
+            });
+            
+            Object.values(state.devicePolylines).forEach(polyline => {
+                state.map.removeLayer(polyline);
+            });
+            
+            // Show only the active device's marker and polyline
+            if (state.deviceMarkers[state.activeDeviceId]) {
+                state.map.addLayer(state.deviceMarkers[state.activeDeviceId]);
+            }
+            
+            if (state.devicePolylines[state.activeDeviceId]) {
+                state.map.addLayer(state.devicePolylines[state.activeDeviceId]);
+            }
+            
+            // If we have position data for the active device, center the map on it
+            const deviceData = state.deviceData[state.activeDeviceId];
+            if (deviceData && deviceData.pathCoordinates.length > 0) {
+                const lastPosition = deviceData.pathCoordinates[deviceData.pathCoordinates.length - 1];
+                state.map.setView(lastPosition, state.map.getZoom());
+            }
+        }
+
+        function editDevice(deviceId) {
+            const device = state.devices.find(d => d.id === deviceId);
+            if (!device) return;
+
+            const newName = prompt('Enter new name for device:', device.name);
+            if (newName && newName.trim() !== '') {
+                device.name = newName.trim();
+                saveDevices();
+                renderDeviceList();
+                showNotification('Edit Device', `Device renamed to ${newName}`, 'success');
+            }
+        }
+
+        function deleteDevice(deviceId) {
+            if (state.devices.length <= 1) {
+                showNotification('Delete Device', 'Cannot delete the only device', 'error');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete this device?')) {
+                // Remove device from state
+                state.devices = state.devices.filter(d => d.id !== deviceId);
+                
+                // If the active device was deleted, switch to another device
+                if (state.activeDeviceId === deviceId) {
+                    state.activeDeviceId = state.devices[0].id;
+                    switchActiveDevice(state.activeDeviceId);
+                }
+                
+                // Remove device data
+                delete state.deviceData[deviceId];
+                
+                // Remove device marker and polyline from map
+                if (state.deviceMarkers[deviceId]) {
+                    state.map.removeLayer(state.deviceMarkers[deviceId]);
+                    delete state.deviceMarkers[deviceId];
+                }
+                
+                if (state.devicePolylines[deviceId]) {
+                    state.map.removeLayer(state.devicePolylines[deviceId]);
+                    delete state.devicePolylines[deviceId];
+                }
+                
+                saveDevices();
+                renderDeviceList();
+                showNotification('Delete Device', 'Device deleted successfully', 'success');
+            }
         }
 
         // Save route
@@ -1853,196 +2363,124 @@
                 timestamps: state.timestamps,
                 distance: state.totalDistance,
                 duration: state.transitStartTime ? new Date() - state.transitStartTime : 0,
-                date: new Date().toISOString(),
-                students: state.students
+                date: new Date().toISOString()
             };
 
             state.savedRoutes.push(routeData);
+            
+            // Save to localStorage
+            localStorage.setItem('transitTrackerRoutes', JSON.stringify(state.savedRoutes));
+            
             showNotification('Save Route', `Route "${routeName}" saved successfully`, 'success');
         }
 
         // Export data as PDF
-        function exportData() {
+        function exportData(format = 'pdf') {
             if (state.pathCoordinates.length === 0) {
                 showNotification('Export Data', 'No data to export', 'error');
                 return;
             }
 
-            // Create PDF document
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            if (format === 'pdf') {
+                // Create PDF document
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(40, 40, 40);
-            doc.text('School Bus Tracker - Route Report', 20, 30);
+                // Add title
+                doc.setFontSize(20);
+                doc.setTextColor(40, 40, 40);
+                doc.text('Transit Tracker Pro - Route Report', 20, 30);
 
-            // Add transit information
-            doc.setFontSize(12);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Route: ${state.transitName}`, 20, 50);
-            doc.text(`Bus: ${document.getElementById('busNumber').value}`, 20, 60);
-            doc.text(`Driver: ${document.getElementById('driverName').value}`, 20, 70);
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 80);
+                // Add transit information
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Transit Name: ${state.transitName}`, 20, 50);
+                doc.text(`Transit Type: ${state.transitType}`, 20, 60);
+                doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
 
-            // Add metrics
-            doc.setTextColor(40, 40, 40);
-            doc.text('Route Metrics:', 20, 100);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 110);
-            doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 120);
-            doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 130);
-            doc.text(`Route Time: ${document.getElementById('transitTime').textContent}`, 20, 140);
+                // Add metrics
+                doc.setTextColor(40, 40, 40);
+                doc.text('Route Metrics:', 20, 90);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 100);
+                doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 110);
+                doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 120);
 
-            // Add student summary
-            const presentCount = state.students.filter(s => s.status === 'present').length;
-            const totalCount = state.students.length;
-            doc.text(`Students Transported: ${presentCount}/${totalCount}`, 20, 155);
+                // Add route coordinates table
+                const tableColumn = ["Time", "Latitude", "Longitude", "Speed (km/h)"];
+                const tableRows = [];
 
-            // Add route coordinates table
-            const tableColumn = ["Time", "Latitude", "Longitude", "Speed (km/h)"];
-            const tableRows = [];
+                for (let i = 0; i < state.timestamps.length; i++) {
+                    const timestamp = state.timestamps[i];
+                    const coord = state.pathCoordinates[i];
 
-            for (let i = 0; i < state.timestamps.length; i++) {
-                const timestamp = state.timestamps[i];
-                const coord = state.pathCoordinates[i];
-
-                // Calculate speed for this point (simplified)
-                let speed = 0;
-                if (i > 0) {
-                    const prevCoord = state.pathCoordinates[i - 1];
-                    const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
-                    const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
-                    if (timeDiff > 0) {
-                        speed = (distance / timeDiff) * 3.6; // km/h
-                    }
-                }
-
-                const row = [
-                    timestamp.toLocaleTimeString(),
-                    coord[0].toFixed(6),
-                    coord[1].toFixed(6),
-                    speed.toFixed(2)
-                ];
-                tableRows.push(row);
-            }
-
-            // Add table to PDF
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 170,
-                theme: 'grid',
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [245, 158, 11] }
-            });
-
-            // Save the PDF
-            doc.save(`school-bus-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-
-            showNotification('Export Data', 'PDF report generated successfully', 'success');
-        }
-
-        // Set destination and calculate route
-        function setDestination() {
-            const destinationInput = document.getElementById('destinationInput').value.trim();
-
-            if (!destinationInput) {
-                showNotification('Set Destination', 'Please enter a destination.', 'error');
-                return;
-            }
-
-            if (!state.lastPosition) {
-                showNotification('Set Destination', 'Please start tracking to get your current location first.', 'error');
-                return;
-            }
-
-            // Remove existing routing control if any
-            if (state.routingControl) {
-                state.map.removeControl(state.routingControl);
-            }
-
-            // Remove existing destination marker if any
-            if (state.destinationMarker) {
-                state.map.removeLayer(state.destinationMarker);
-            }
-
-            // Clear previous voice guidance interval
-            if (state.voiceGuidanceInterval) {
-                clearInterval(state.voiceGuidanceInterval);
-            }
-
-            // Create routing control
-            state.routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(state.lastPosition[0], state.lastPosition[1]),
-                    L.latLng(0, 0) // Will be updated after geocoding
-                ],
-                routeWhileDragging: false,
-                showAlternatives: false,
-                lineOptions: {
-                    styles: [{ color: '#f59e0b', weight: 5 }]
-                },
-                createMarker: function (i, waypoint, n) {
-                    if (i === 0) {
-                        // Don't create marker for start point (we already have one)
-                        return null;
-                    }
-                    // Create destination marker
-                    state.destinationMarker = L.marker(waypoint.latLng, {
-                        icon: L.divIcon({
-                            className: 'destination-marker',
-                            html: '<div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"></div>',
-                            iconSize: [38, 38],
-                            iconAnchor: [19, 19]
-                        })
-                    }).addTo(state.map);
-
-                    state.destinationMarker.bindPopup(`<b>Destination</b><br>${destinationInput}`).openPopup();
-
-                    return state.destinationMarker;
-                }
-            }).addTo(state.map);
-
-            // Geocode the destination
-            const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destinationInput)}`;
-
-            fetch(geocodeUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const destination = data[0];
-                        const destLatLng = L.latLng(destination.lat, destination.lon);
-
-                        // Update routing waypoints
-                        state.routingControl.setWaypoints([
-                            L.latLng(state.lastPosition[0], state.lastPosition[1]),
-                            destLatLng
-                        ]);
-
-                        // Store destination
-                        state.destination = {
-                            name: destinationInput,
-                            latLng: destLatLng
-                        };
-
-                        showNotification('Set Destination', `Route to ${destinationInput} calculated.`, 'success');
-
-                        // Start voice guidance
-                        if (document.getElementById('voiceGuidance').checked) {
-                            speak(`Route to ${destinationInput} calculated. Follow the highlighted path.`, 'high');
-
-                            // Set up periodic voice guidance
-                            state.voiceGuidanceInterval = setInterval(provideVoiceGuidance, 10000);
+                    // Calculate speed for this point (simplified)
+                    let speed = 0;
+                    if (i > 0) {
+                        const prevCoord = state.pathCoordinates[i - 1];
+                        const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
+                        const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
+                        if (timeDiff > 0) {
+                            speed = (distance / timeDiff) * 3.6; // km/h
                         }
-                    } else {
-                        showNotification('Set Destination', 'Destination not found. Please try a different location.', 'error');
                     }
-                })
-                .catch(error => {
-                    console.error('Geocoding error:', error);
-                    showNotification('Set Destination', 'Error finding destination. Please try again.', 'error');
+
+                    const row = [
+                        timestamp.toLocaleTimeString(),
+                        coord[0].toFixed(6),
+                        coord[1].toFixed(6),
+                        speed.toFixed(2)
+                    ];
+                    tableRows.push(row);
+                }
+
+                // Add table to PDF
+                doc.autoTable({
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: 150,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [59, 130, 246] }
                 });
+
+                // Save the PDF
+                doc.save(`transit-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+            } else {
+                // CSV export
+                let csvContent = "Time,Latitude,Longitude,Speed (km/h)\n";
+                
+                for (let i = 0; i < state.timestamps.length; i++) {
+                    const timestamp = state.timestamps[i];
+                    const coord = state.pathCoordinates[i];
+                    
+                    // Calculate speed for this point (simplified)
+                    let speed = 0;
+                    if (i > 0) {
+                        const prevCoord = state.pathCoordinates[i - 1];
+                        const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
+                        const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
+                        if (timeDiff > 0) {
+                            speed = (distance / timeDiff) * 3.6; // km/h
+                        }
+                    }
+                    
+                    csvContent += `${timestamp.toLocaleTimeString()},${coord[0].toFixed(6)},${coord[1].toFixed(6)},${speed.toFixed(2)}\n`;
+                }
+                
+                // Create and download CSV file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `transit-data-${new Date().toISOString().slice(0, 10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            showNotification('Export Data', `${format.toUpperCase()} report generated successfully`, 'success');
         }
 
         // Share location via WhatsApp
@@ -2063,7 +2501,7 @@
             const formattedNumber = phoneNumber.replace(/\D/g, '');
 
             // Create message with location
-            const message = `School bus current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
+            const message = `My current location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
 
             // Create WhatsApp URL
             const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(message)}`;
@@ -2086,6 +2524,15 @@
             // Add new layer
             state.mapLayers[mapType].addTo(state.map);
             state.currentMapType = mapType;
+            
+            showNotification('Map Type', `Map type changed to ${mapType}`, 'info');
+        }
+
+        // Update transit type
+        function updateTransitType() {
+            state.transitType = document.getElementById('transitType').value;
+            updateMarkerIcon();
+            updateTransitInfo();
         }
 
         // Update transit name
@@ -2094,28 +2541,36 @@
             updateTransitInfo();
         }
 
-        // Update bus number
-        function updateBusNumber() {
-            // In a real app, this would update the bus number in the system
-            showNotification('Bus Number', 'Bus number updated', 'success');
-        }
-
-        // Update driver name
-        function updateDriverName() {
-            // In a real app, this would update the driver name in the system
-            showNotification('Driver', 'Driver information updated', 'success');
-        }
-
         // Update transit info display
         function updateTransitInfo() {
-            // Update the marker popup with current transit info
-            if (state.marker) {
-                state.marker.bindPopup(`
-                    <b>${state.transitName}</b><br>
-                    Status: ${state.isTracking ? 'In Transit' : 'Not Tracking'}<br>
-                    Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
-                    Last Update: ${state.lastPosition ? new Date().toLocaleTimeString() : '--'}
-                `);
+            let description = '';
+            let iconName = '';
+
+            switch (state.transitType) {
+                case 'truck':
+                    description = 'Delivery Truck Service';
+                    iconName = 'truck';
+                    break;
+                case 'van':
+                    description = 'Delivery Van Service';
+                    iconName = 'car';
+                    break;
+                case 'car':
+                    description = 'Personal Vehicle';
+                    iconName = 'car';
+                    break;
+                case 'motorcycle':
+                    description = 'Motorcycle Courier';
+                    iconName = 'bike';
+                    break;
+                case 'person':
+                    description = 'Person in Transit';
+                    iconName = 'user';
+                    break;
+                case 'package':
+                    description = 'Package Tracking';
+                    iconName = 'package';
+                    break;
             }
         }
 
@@ -2165,23 +2620,22 @@
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
 
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>End Route';
+            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>Stop Tracking';
             trackBtn.classList.remove('btn-primary');
             trackBtn.classList.add('btn-danger');
 
             // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-active';
             document.getElementById('statusText').textContent = 'Tracking Active';
-            document.getElementById('transitStatus').textContent = 'In Transit';
 
             // Re-initialize Lucide icons
             lucide.createIcons();
 
-            showNotification('Tracking', 'Route started. School bus is now being tracked.', 'success');
+            showNotification('Tracking', 'Tracking started. Your transit is now being monitored.', 'success');
 
             // Voice guidance
             if (document.getElementById('voiceGuidance').checked) {
-                speak("Route started. School bus is now being tracked.", 'high');
+                speak("Tracking started. Your transit is now being monitored.", 'high');
             }
         }
 
@@ -2209,23 +2663,22 @@
 
             state.isTracking = false;
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Route';
+            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Tracking';
             trackBtn.classList.remove('btn-danger');
             trackBtn.classList.add('btn-primary');
 
             // Update status indicator
             document.getElementById('statusIndicator').className = 'status-indicator status-inactive';
             document.getElementById('statusText').textContent = 'Not Tracking';
-            document.getElementById('transitStatus').textContent = 'Route Ended';
 
             // Re-initialize Lucide icons
             lucide.createIcons();
 
-            showNotification('Tracking', 'Route ended.', 'info');
+            showNotification('Tracking', 'Tracking stopped.', 'info');
 
             // Voice guidance
             if (document.getElementById('voiceGuidance').checked) {
-                speak("Route ended.", 'high');
+                speak("Tracking stopped.", 'high');
             }
         }
 
@@ -2236,26 +2689,8 @@
             const accuracy = position.coords.accuracy;
             const speed = position.coords.speed;
             const heading = position.coords.heading;
+            const altitude = position.coords.altitude;
             const timestamp = new Date(position.timestamp);
-
-            // Update location display
-            document.getElementById('latitude').textContent = lat.toFixed(6);
-            document.getElementById('longitude').textContent = lng.toFixed(6);
-            document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)}m`;
-            document.getElementById('speed').textContent = speed ? `${(speed * 3.6).toFixed(2)} km/h` : '--';
-            document.getElementById('heading').textContent = heading ? `${heading.toFixed(0)}°` : '--';
-            document.getElementById('lastUpdate').textContent = timestamp.toLocaleTimeString();
-            document.getElementById('transitUpdate').textContent = timestamp.toLocaleTimeString();
-
-            // Update speed
-            if (speed) {
-                state.currentSpeed = speed * 3.6; // Convert to km/h
-
-                // Update top speed
-                if (state.currentSpeed > state.topSpeed) {
-                    state.topSpeed = state.currentSpeed;
-                }
-            }
 
             // Create new position object
             const newPosition = [lat, lng];
@@ -2292,16 +2727,13 @@
                 // Update metrics
                 updateMetrics();
 
-                // Calculate ETA to school (simplified calculation)
+                // Calculate ETA (simplified calculation)
                 updateETA();
             }
 
             state.pathCoordinates.push(newPosition);
             state.timestamps.push(timestamp);
             state.polyline.setLatLngs(state.pathCoordinates);
-
-            // Add to route history
-            addToRouteHistory(newPosition, timestamp);
 
             // Update routing if destination is set
             if (state.routingControl && state.lastPosition) {
@@ -2322,15 +2754,19 @@
 
         // Update business metrics
         function updateMetrics() {
-            // Update distance traveled
-            document.getElementById('distanceTraveled').textContent = `${(state.totalDistance / 1000).toFixed(2)} km`;
+            // Update speed
+            if (state.currentSpeed) {
+                // Update top speed
+                if (state.currentSpeed > state.topSpeed) {
+                    state.topSpeed = state.currentSpeed;
+                }
+            }
 
             // Update average speed
             if (state.timestamps.length > 1) {
                 const timeDiff = (state.timestamps[state.timestamps.length - 1] - state.timestamps[0]) / 1000; // in seconds
                 if (timeDiff > 0) {
                     state.averageSpeed = (state.totalDistance / timeDiff) * 3.6; // km/h
-                    document.getElementById('averageSpeed').textContent = `${state.averageSpeed.toFixed(2)} km/h`;
                 }
             }
         }
@@ -2339,38 +2775,10 @@
         function updateETA() {
             // Simplified ETA calculation - in a real app, you would use a routing service
             if (state.currentSpeed > 5) { // Only calculate if moving
-                const remainingDistance = 10; // Example: 10km to school
+                const remainingDistance = 10; // Example: 10km to destination
                 const timeHours = remainingDistance / state.currentSpeed;
                 const etaTime = new Date(Date.now() + timeHours * 3600000);
-                document.getElementById('etaToSchool').textContent = etaTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
-        }
-
-        // Add point to route history
-        function addToRouteHistory(position, timestamp) {
-            const routeHistory = document.getElementById('routeHistory');
-
-            // Clear placeholder if it exists
-            if (routeHistory.querySelector('.text-center')) {
-                routeHistory.innerHTML = '';
-            }
-
-            const historyItem = document.createElement('div');
-            historyItem.className = 'py-3 border-b border-gray-200';
-            historyItem.innerHTML = `
-                <div class="flex justify-between">
-                    <div>
-                        <span class="text-sm font-medium text-gray-800">${timestamp.toLocaleTimeString()}</span>
-                        <span class="text-xs text-gray-500 ml-2">${position[0].toFixed(4)}, ${position[1].toFixed(4)}</span>
-                    </div>
-                    <div class="text-xs text-gray-500 font-medium">${state.currentSpeed.toFixed(1)} km/h</div>
-                </div>
-            `;
-
-            routeHistory.appendChild(historyItem);
-
-            // Scroll to bottom
-            routeHistory.scrollTop = routeHistory.scrollHeight;
         }
 
         // Calculate distance between two coordinates in meters
@@ -2398,9 +2806,12 @@
                 const hours = Math.floor(diff / 3600000);
                 const minutes = Math.floor((diff % 3600000) / 60000);
                 const seconds = Math.floor((diff % 60000) / 1000);
-
-                document.getElementById('transitTime').textContent =
-                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Update metrics display
+                state.metrics.time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                state.metrics.distance = (state.totalDistance / 1000).toFixed(2);
+                state.metrics.speed = state.currentSpeed.toFixed(2);
+                state.metrics.topSpeed = state.topSpeed.toFixed(2);
             }
         }
 
@@ -2435,27 +2846,20 @@
             state.totalDistance = 0;
             state.currentSpeed = 0;
             state.topSpeed = 0;
-            refreshRouteHistory();
             updateMetrics();
             showNotification('Route', 'Route cleared.', 'info');
         }
 
-        // Refresh route history display
-        function refreshRouteHistory() {
-            const routeHistory = document.getElementById('routeHistory');
-            routeHistory.innerHTML = '';
-
-            if (state.pathCoordinates.length === 0) {
-                routeHistory.innerHTML = `
-                    <div class="text-gray-400 text-center py-8 flex flex-col items-center">
-                        <i data-lucide="map" class="w-8 h-8 mb-3 opacity-50"></i>
-                        <p class="font-medium">No route history yet</p>
-                        <p class="text-sm">Start tracking to record your journey</p>
-                    </div>
-                `;
-                lucide.createIcons();
+        // Add CSS animation for emergency button
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
             }
-        }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 
