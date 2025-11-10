@@ -122,10 +122,52 @@
             opacity: 0.8;
         }
 
-        /* Professional header styling */
-        .header-gradient {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: white;
+        /* Main layout */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 400px;
+            height: 100%;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Map */
+        #map {
+            height: 100%;
+            width: 100%;
+            border-radius: 0;
+            overflow: hidden;
         }
 
         /* Card styling */
@@ -135,20 +177,42 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
+            margin-bottom: 16px;
         }
 
         .card:hover {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
+        .card-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
         /* Button styling */
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            border: none;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
             border-radius: 6px;
             font-weight: 500;
             transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
         }
 
         .btn-primary:hover {
@@ -161,9 +225,6 @@
             background: white;
             color: #475569;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.2s ease;
         }
 
         .btn-secondary:hover {
@@ -174,16 +235,53 @@
         .btn-danger {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.2s ease;
         }
 
         .btn-danger:hover {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-lg {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+
+        /* Form controls */
+        .form-input {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 12px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            width: 100%;
+            font-size: 14px;
         }
 
         /* Status indicators */
@@ -203,41 +301,6 @@
             background-color: #ef4444;
         }
 
-        /* Map styling */
-        #map {
-            height: 100vh;
-            width: 100%;
-            border-radius: 0;
-            overflow: hidden;
-        }
-
-        /* Form controls */
-        .form-input {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px 12px;
-            transition: all 0.2s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-select {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 8px 12px;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 16px;
-        }
-
         /* Metric cards */
         .metric-card {
             background: white;
@@ -245,6 +308,7 @@
             padding: 16px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
         }
 
         .metric-value {
@@ -261,78 +325,30 @@
             font-weight: 500;
         }
 
-        /* Table styling */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th {
-            text-align: left;
-            padding: 12px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .table tr:hover {
-            background-color: #f8fafc;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
         /* Map controls */
         .map-controls {
             position: absolute;
-            bottom: 16px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 20px;
+            right: 20px;
             z-index: 1000;
             display: flex;
+            flex-direction: column;
             gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: auto;
-            max-width: 90%;
         }
 
         .map-control {
             background: white;
             color: #334155;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 6px;
             display: flex;
             align-items: center;
             gap: 6px;
             border: 1px solid #cbd5e1;
             transition: all 0.2s ease;
-            font-size: 12px;
+            font-size: 14px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
         }
 
         .map-control:hover {
@@ -347,7 +363,7 @@
             border: none;
             outline: none;
             max-width: 120px;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .map-control select option {
@@ -355,26 +371,11 @@
             color: #334155;
         }
 
-        .map-control button {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 11px;
-        }
-
-        .map-control button:hover {
-            background: #2563eb;
-        }
-
         /* Full screen button */
         .fullscreen-btn {
             position: absolute;
-            bottom: 16px;
-            right: 16px;
+            bottom: 20px;
+            right: 20px;
             z-index: 1000;
             background: white;
             color: #334155;
@@ -385,8 +386,9 @@
             gap: 6px;
             border: 1px solid #cbd5e1;
             transition: all 0.2s ease;
-            font-size: 12px;
+            font-size: 14px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
         }
 
         .fullscreen-btn:hover {
@@ -397,8 +399,8 @@
         /* Zoom buttons */
         .zoom-controls {
             position: absolute;
-            bottom: 60px;
-            right: 16px;
+            bottom: 70px;
+            right: 20px;
             z-index: 1000;
             display: flex;
             flex-direction: column;
@@ -442,9 +444,9 @@
             z-index: 1001;
             border-radius: 6px;
             padding: 12px;
-            bottom: 100%;
-            left: 0;
-            margin-bottom: 8px;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
             border: 1px solid #e2e8f0;
         }
 
@@ -487,6 +489,10 @@
 
         /* Voice guidance indicator */
         .voice-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -504,6 +510,10 @@
         .voice-indicator:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .voice-indicator.muted {
+            background: #6b7280;
         }
 
         /* Notification system */
@@ -577,34 +587,62 @@
             border-left: 3px solid #3b82f6;
         }
 
-        /* Sidebar layout */
-        .sidebar {
-            width: 400px;
-            height: 100vh;
-            overflow-y: auto;
-            background: white;
-            border-right: 1px solid #e2e8f0;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            z-index: 100;
+        /* Emergency button */
+        .emergency-btn {
+            position: absolute;
+            bottom: 130px;
+            right: 20px;
+            z-index: 1000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s ease;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .main-content {
-            flex: 1;
-            height: 100vh;
-            position: relative;
+        .emergency-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 10px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Geofence controls */
+        .geofence-controls {
+            position: absolute;
+            bottom: 200px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            width: 200px;
         }
 
         /* Mobile optimizations */
         @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
             .sidebar {
                 width: 100%;
-                height: auto;
-                max-height: 50vh;
+                height: 40vh;
+                max-height: 40vh;
                 overflow-y: auto;
             }
 
             .main-content {
-                height: 50vh;
+                height: 60vh;
             }
 
             .mobile-hidden {
@@ -616,32 +654,25 @@
             }
 
             .map-controls {
-                flex-direction: row;
-                align-items: center;
+                top: 10px;
+                right: 10px;
                 gap: 6px;
-                max-width: 95%;
-                bottom: 10px;
-            }
-
-            .card {
-                margin: 0 -8px;
-                border-radius: 0;
             }
 
             .map-control {
-                padding: 5px 8px;
-                font-size: 11px;
+                padding: 6px 10px;
+                font-size: 12px;
             }
 
             .fullscreen-btn {
                 bottom: 10px;
                 right: 10px;
                 padding: 6px 10px;
-                font-size: 11px;
+                font-size: 12px;
             }
 
             .zoom-controls {
-                bottom: 50px;
+                bottom: 60px;
                 right: 10px;
             }
 
@@ -651,35 +682,22 @@
                 font-size: 14px;
             }
 
-            .control-panel, .route-planning {
-                width: 90%;
-                max-width: 320px;
-                left: 5%;
-                right: 5%;
-            }
-
-            .dropdown-toggle {
-                left: 10px;
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-
             .emergency-btn {
-                bottom: 70px;
+                bottom: 120px;
                 right: 10px;
                 width: 50px;
                 height: 50px;
             }
 
             .geofence-controls {
-                bottom: 130px;
+                bottom: 180px;
                 right: 10px;
                 width: 180px;
             }
 
             .voice-indicator {
                 bottom: 10px;
-                right: 70px;
+                left: 10px;
                 width: 40px;
                 height: 40px;
             }
@@ -745,172 +763,65 @@
             background: #2563eb;
         }
 
-        /* NEW STYLES FOR ADD DEVICE CARD */
-        .add-device-card {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            width: 320px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            padding: 16px;
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-content {
             display: none;
         }
 
-        .add-device-card.show {
+        .tab-content.active {
             display: block;
-            animation: fadeInUp 0.3s ease;
         }
 
-        .device-search-results {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+        /* Grid layout for metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
-        .device-search-item {
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .device-search-item:hover {
-            background-color: #f8fafc;
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
         }
 
-        .device-search-item:last-child {
-            border-bottom: none;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
         }
 
-        .searching-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            color: #64748b;
-        }
-
-        /* NEW: Control panel styles */
-        .control-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            width: 320px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            padding: 16px;
-            display: none; /* Initially hidden */
-        }
-
-        .control-panel.show {
-            display: block;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        /* NEW: Route planning styles */
-        .route-planning {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            width: 320px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            padding: 16px;
-            display: none; /* Initially hidden */
-        }
-
-        .route-planning.show {
-            display: block;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        /* NEW: Dropdown toggle button */
-        .dropdown-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: white;
-            color: #334155;
-            padding: 10px 16px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #cbd5e1;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            cursor: pointer;
-        }
-
-        .dropdown-toggle:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-        }
-
-        .dropdown-toggle.active {
-            background: #eff6ff;
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
-
-        /* NEW: Emergency button styles */
-        .emergency-btn {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            z-index: 1000;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
-            transition: all 0.2s ease;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .emergency-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 10px rgba(239, 68, 68, 0.4);
-        }
-
-        /* NEW: Geofence styles */
-        .geofence-controls {
-            position: absolute;
-            bottom: 150px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            width: 200px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
 
-<body class="min-h-screen bg-gray-50 flex">
+<body>
     <!-- Loading Screen -->
     <div id="loadingScreen">
         <div class="loading-logo">
@@ -937,244 +848,326 @@
         </div>
     </div>
 
-    <!-- Dropdown Toggle Button -->
-    <div class="dropdown-toggle" id="controlsToggle">
-        <i data-lucide="map-pin" class="w-4 h-4"></i>
-        <span>Transit Controls</span>
-        <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" id="toggleIcon"></i>
-    </div>
-
-    <!-- Control Panel (NEW) -->
-    <div class="control-panel" id="controlPanel">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Transit Controls</h2>
-            <div class="flex items-center">
-                <span class="status-indicator status-inactive" id="statusIndicator"></span>
-                <span id="statusText" class="text-sm font-medium text-gray-600">Not Tracking</span>
-            </div>
-        </div>
-        
-        <div class="space-y-4">
-            <!-- Transit Info -->
-            <div>
-                <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit Name</label>
-                <input type="text" id="transitNameInput" class="w-full form-input p-2 text-sm mt-1"
-                    value="Delivery Truck #1245">
-            </div>
-            <div>
-                <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Transit Type</label>
-                <select id="transitType" class="w-full form-select p-2 text-sm mt-1">
-                    <option value="truck">Delivery Truck</option>
-                    <option value="van">Delivery Van</option>
-                    <option value="car">Car</option>
-                    <option value="motorcycle">Motorcycle</option>
-                    <option value="person">Person</option>
-                    <option value="package">Package</option>
-                </select>
-            </div>
-            
-            <!-- Tracking Controls -->
-            <div class="grid grid-cols-2 gap-3">
-                <button id="trackBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
-                    <i data-lucide="play" class="w-4 h-4 mr-2"></i>
-                    Start Tracking
-                </button>
-                <button id="addDeviceBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
-                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                    Add Device
-                </button>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <button id="clearRouteBtn"
-                    class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
-                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
-                    Clear Route
-                </button>
-                <button id="saveRouteBtn"
-                    class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
-                    <i data-lucide="save" class="w-4 h-4 mr-2"></i>
-                    Save Route
-                </button>
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i data-lucide="map-pin" class="w-6 h-6 text-blue-600 mr-2"></i>
+                        <h1 class="text-xl font-bold text-gray-800">Transit Tracker Pro</h1>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="status-indicator status-inactive" id="statusIndicator"></span>
+                        <span id="statusText" class="text-sm font-medium text-gray-600">Not Tracking</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Tracking Settings -->
-            <div class="pt-2 border-t border-gray-200">
-                <h3 class="font-medium text-gray-700 mb-3">Tracking Settings</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                            checked>
-                        <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
+            <div class="sidebar-content">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <div class="tab active" data-tab="tracking">Tracking</div>
+                    <div class="tab" data-tab="devices">Devices</div>
+                    <div class="tab" data-tab="routes">Routes</div>
+                </div>
+
+                <!-- Tracking Tab -->
+                <div class="tab-content active" id="tracking-tab">
+                    <!-- Transit Info -->
+                    <div class="card">
+                        <div class="card-header">Transit Information</div>
+                        <div class="card-body">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm text-gray-700 font-medium mb-2 block">Transit Name</label>
+                                    <input type="text" id="transitNameInput" class="form-input"
+                                        value="Delivery Truck #1245">
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-700 font-medium mb-2 block">Transit Type</label>
+                                    <select id="transitType" class="form-select">
+                                        <option value="truck">Delivery Truck</option>
+                                        <option value="van">Delivery Van</option>
+                                        <option value="car">Car</option>
+                                        <option value="motorcycle">Motorcycle</option>
+                                        <option value="person">Person</option>
+                                        <option value="package">Package</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                            checked>
-                        <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
+
+                    <!-- Tracking Controls -->
+                    <div class="card">
+                        <div class="card-header">Tracking Controls</div>
+                        <div class="card-body">
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <button id="trackBtn" class="btn btn-primary">
+                                    <i data-lucide="play" class="w-4 h-4"></i>
+                                    Start
+                                </button>
+                                <button id="addDeviceBtn" class="btn btn-secondary">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Add Device
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="clearRouteBtn" class="btn btn-secondary">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    Clear Route
+                                </button>
+                                <button id="saveRouteBtn" class="btn btn-secondary">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    Save Route
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-blue-600 rounded">
-                        <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
+
+                    <!-- Metrics -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-value" id="distanceValue">0.00 km</div>
+                            <div class="metric-label">Distance</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="timeValue">00:00:00</div>
+                            <div class="metric-label">Time</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="speedValue">0.00 km/h</div>
+                            <div class="metric-label">Speed</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="topSpeedValue">0.00 km/h</div>
+                            <div class="metric-label">Top Speed</div>
+                        </div>
                     </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                            checked>
-                        <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
+
+                    <!-- Route Planning -->
+                    <div class="card">
+                        <div class="card-header">Route Planning</div>
+                        <div class="card-body">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm text-gray-700 font-medium mb-2 block">Destination</label>
+                                    <input type="text" id="destinationInput" class="form-input"
+                                        placeholder="Enter destination">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button id="planRouteBtn" class="btn btn-primary">
+                                        <i data-lucide="navigation" class="w-4 h-4"></i>
+                                        Plan Route
+                                    </button>
+                                    <button id="clearRoutePlanBtn" class="btn btn-secondary">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                        Clear Route
+                                    </button>
+                                </div>
+                                <div id="routeInfo" class="hidden">
+                                    <div class="text-sm text-gray-700">
+                                        <div class="flex justify-between">
+                                            <span>Distance:</span>
+                                            <span id="routeDistance">--</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Estimated Time:</span>
+                                            <span id="routeTime">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tracking Settings -->
+                    <div class="card">
+                        <div class="card-header">Tracking Settings</div>
+                        <div class="card-body">
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                                        checked>
+                                    <label for="highAccuracy" class="text-sm text-gray-700">High Accuracy</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                                        checked>
+                                    <label for="autoCenter" class="text-sm text-gray-700">Auto Center Map</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-blue-600 rounded">
+                                    <label for="shareLive" class="text-sm text-gray-700">Share Live Location</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded"
+                                        checked>
+                                    <label for="voiceGuidance" class="text-sm text-gray-700">Voice Guidance</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devices Tab -->
+                <div class="tab-content" id="devices-tab">
+                    <div class="card">
+                        <div class="card-header">GPS Devices</div>
+                        <div class="card-body">
+                            <div class="device-list" id="deviceList">
+                                <!-- Devices will be dynamically added here -->
+                            </div>
+                            <div class="mt-4">
+                                <button id="searchDevicesBtn" class="btn btn-primary w-full">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                    Search for Devices
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Add Device Manually</div>
+                        <div class="card-body">
+                            <div class="space-y-3">
+                                <div>
+                                    <input type="text" id="manualDeviceName" placeholder="Device Name"
+                                        class="form-input">
+                                </div>
+                                <div>
+                                    <input type="text" id="manualDeviceId" placeholder="Device ID" class="form-input">
+                                </div>
+                                <button id="addManualDeviceBtn" class="btn btn-primary w-full">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Add Device
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Routes Tab -->
+                <div class="tab-content" id="routes-tab">
+                    <div class="card">
+                        <div class="card-header">Saved Routes</div>
+                        <div class="card-body">
+                            <div id="savedRoutesList">
+                                <!-- Saved routes will be dynamically added here -->
+                                <div class="text-center text-gray-500 py-4">
+                                    No saved routes yet
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Export Data</div>
+                        <div class="card-body">
+                            <div class="flex flex-col gap-2">
+                                <button class="btn btn-secondary export-option" data-format="pdf">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                    Export as PDF
+                                </button>
+                                <button class="btn btn-secondary export-option" data-format="csv">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                    Export as CSV
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Route Planning Panel (NEW) -->
-    <div class="route-planning" id="routePlanningPanel">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Route Planning</h2>
-        </div>
-        
-        <div class="space-y-4">
-            <div>
-                <label class="text-xs text-gray-500 font-medium uppercase tracking-wide">Destination</label>
-                <input type="text" id="destinationInput" class="w-full form-input p-2 text-sm mt-1"
-                    placeholder="Enter destination">
-            </div>
-            
-            <div class="grid grid-cols-2 gap-3">
-                <button id="planRouteBtn" class="btn-primary py-2 px-4 text-sm flex items-center justify-center">
-                    <i data-lucide="navigation" class="w-4 h-4 mr-2"></i>
-                    Plan Route
-                </button>
-                <button id="clearRoutePlanBtn" class="btn-secondary py-2 px-4 text-sm flex items-center justify-center">
-                    <i data-lucide="x" class="w-4 h-4 mr-2"></i>
-                    Clear Route
-                </button>
-            </div>
-            
-            <div id="routeInfo" class="hidden">
-                <div class="text-sm text-gray-700">
-                    <div class="flex justify-between">
-                        <span>Distance:</span>
-                        <span id="routeDistance">--</span>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Map Container -->
+            <div id="map"></div>
+
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <!-- Map Type Selector -->
+                <div class="map-control">
+                    <i data-lucide="map" class="w-4 h-4"></i>
+                    <select id="mapType">
+                        <option value="standard">Standard</option>
+                        <option value="satellite">Satellite</option>
+                    </select>
+                </div>
+
+                <!-- Share Location -->
+                <div class="dropdown">
+                    <div class="map-control cursor-pointer">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                        <span>Share</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Estimated Time:</span>
-                        <span id="routeTime">--</span>
+                    <div class="dropdown-content">
+                        <button class="dropdown-close">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                        <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
+                        <div class="flex mb-3">
+                            <input type="text" id="whatsappNumber" placeholder="Phone number"
+                                class="flex-grow form-input rounded-l p-2 text-sm">
+                            <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
+                                <i data-lucide="send" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                data-number="+255123456789">Manager</button>
+                            <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
+                                data-number="+255987654321">Dispatch</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <!-- Map Container -->
-        <div id="map"></div>
-
-        <!-- Full Screen Button -->
-        <button id="fullScreenBtn" class="fullscreen-btn">
-            <i data-lucide="maximize" class="w-4 h-4"></i>
-            <span>Full Screen</span>
-        </button>
-
-        <!-- Zoom Controls -->
-        <div class="zoom-controls">
-            <button id="zoomInBtn" class="zoom-btn">
-                <i data-lucide="plus" class="w-4 h-4"></i>
+            <!-- Full Screen Button -->
+            <button id="fullScreenBtn" class="fullscreen-btn">
+                <i data-lucide="maximize" class="w-4 h-4"></i>
+                <span>Full Screen</span>
             </button>
-            <button id="zoomOutBtn" class="zoom-btn">
-                <i data-lucide="minus" class="w-4 h-4"></i>
+
+            <!-- Zoom Controls -->
+            <div class="zoom-controls">
+                <button id="zoomInBtn" class="zoom-btn">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+                <button id="zoomOutBtn" class="zoom-btn">
+                    <i data-lucide="minus" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Emergency Button -->
+            <button id="emergencyBtn" class="emergency-btn">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
             </button>
-        </div>
 
-        <!-- Map Controls -->
-        <div class="map-controls">
-            <!-- Map Type Selector -->
-            <div class="map-control">
-                <i data-lucide="map" class="w-3 h-3"></i>
-                <select id="mapType">
-                    <option value="standard">Standard</option>
-                    <option value="satellite">Satellite</option>
-                </select>
-            </div>
-
-            <!-- Share Location -->
-            <div class="dropdown">
-                <div class="map-control cursor-pointer">
-                    <i data-lucide="share-2" class="w-3 h-3"></i>
-                    <span>Share</span>
-                    <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                </div>
-                <div class="dropdown-content">
-                    <button class="dropdown-close">
-                        <i data-lucide="x" class="w-3 h-3"></i>
+            <!-- Geofence Controls -->
+            <div class="geofence-controls">
+                <div class="text-sm font-medium text-gray-800 mb-2">Geofence</div>
+                <div class="flex space-x-2">
+                    <button id="addGeofenceBtn" class="btn btn-primary btn-sm">
+                        <i data-lucide="circle" class="w-3 h-3"></i>
+                        Add
                     </button>
-                    <div class="text-sm mb-3 font-medium text-gray-800">Share Location</div>
-                    <div class="flex mb-3">
-                        <input type="text" id="whatsappNumber" placeholder="Phone number"
-                            class="flex-grow form-input rounded-l p-2 text-sm">
-                        <button id="shareWhatsAppBtn" class="btn-primary px-3 rounded-r text-sm">
-                            <i data-lucide="send" class="w-3 h-3"></i>
-                        </button>
-                    </div>
-                    <div class="text-xs text-gray-500 mb-2">Quick contacts:</div>
-                    <div class="flex flex-wrap gap-2">
-                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
-                            data-number="+255123456789">Manager</button>
-                        <button class="contact-option btn-secondary py-1 px-2 rounded text-xs"
-                            data-number="+255987654321">Dispatch</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Export Data -->
-            <div class="dropdown">
-                <div class="map-control cursor-pointer">
-                    <i data-lucide="download" class="w-3 h-3"></i>
-                    <span>Export</span>
-                    <i data-lucide="chevron-down" class="w-2 h-2"></i>
-                </div>
-                <div class="dropdown-content">
-                    <button class="dropdown-close">
-                        <i data-lucide="x" class="w-3 h-3"></i>
+                    <button id="clearGeofenceBtn" class="btn btn-secondary btn-sm">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        Clear
                     </button>
-                    <div class="text-sm mb-3 font-medium text-gray-800">Export Data</div>
-                    <div class="flex flex-col gap-2">
-                        <button class="export-option btn-secondary py-2 px-4 text-sm flex items-center justify-center" data-format="pdf">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>
-                            Export as PDF
-                        </button>
-                        <button class="export-option btn-secondary py-2 px-4 text-sm flex items-center justify-center" data-format="csv">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i>
-                            Export as CSV
-                        </button>
-                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Emergency Button (NEW) -->
-        <button id="emergencyBtn" class="emergency-btn">
-            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-        </button>
-        
-        <!-- Geofence Controls (NEW) -->
-        <div class="geofence-controls">
-            <div class="text-sm font-medium text-gray-800 mb-2">Geofence</div>
-            <div class="flex space-x-2">
-                <button id="addGeofenceBtn" class="btn-primary py-1 px-2 text-xs flex items-center">
-                    <i data-lucide="circle" class="w-3 h-3 mr-1"></i>
-                    Add
-                </button>
-                <button id="clearGeofenceBtn" class="btn-secondary py-1 px-2 text-xs flex items-center">
-                    <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i>
-                    Clear
-                </button>
+
+            <!-- Voice Guidance Indicator -->
+            <div class="voice-indicator" id="voiceIndicator">
+                <i data-lucide="volume-2" class="w-5 h-5"></i>
             </div>
         </div>
-    </div>
-
-    <!-- Voice Guidance Indicator -->
-    <div class="voice-indicator fixed bottom-6 right-6 z-50" id="voiceIndicator">
-        <i data-lucide="volume-2" class="w-5 h-5"></i>
     </div>
 
     <!-- Notification -->
@@ -1184,72 +1177,6 @@
             <div>
                 <div id="notificationTitle" class="font-semibold">Notification</div>
                 <div id="notificationMessage" class="text-sm text-gray-600 mt-1">This is a notification message.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Device Card -->
-    <div id="addDeviceCard" class="add-device-card">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">Add GPS Device</h3>
-            <button id="closeAddDeviceCard" class="text-gray-500 hover:text-gray-700">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-        <div class="space-y-4">
-            <div>
-                <label class="text-sm text-gray-700 font-medium mb-2 block">Search for Available Devices</label>
-                <div class="flex space-x-2">
-                    <button id="searchDevicesBtn" class="w-full btn-primary py-2 px-4 text-sm flex items-center justify-center">
-                        <i data-lucide="search" class="w-4 h-4 mr-2"></i>
-                        Search for Devices
-                    </button>
-                </div>
-            </div>
-            <div id="deviceSearchResults" class="device-search-results hidden">
-                <div class="searching-indicator">
-                    <div class="loading mr-2"></div>
-                    <span>Searching for devices...</span>
-                </div>
-            </div>
-            <div class="border-t pt-4">
-                <label class="text-sm text-gray-700 font-medium mb-2 block">Add Device Manually</label>
-                <div class="flex space-x-2">
-                    <input type="text" id="manualDeviceName" placeholder="Device Name" class="flex-grow form-input p-2 text-sm">
-                    <input type="text" id="manualDeviceId" placeholder="Device ID" class="flex-grow form-input p-2 text-sm">
-                    <button id="addManualDeviceBtn" class="btn-primary px-3 text-sm">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Device Management Modal -->
-    <div id="deviceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Manage GPS Devices</h3>
-                <button id="closeDeviceModal" class="text-gray-500 hover:text-gray-700">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-sm text-gray-700 font-medium mb-2 block">Add New Device</label>
-                    <div class="flex space-x-2">
-                        <input type="text" id="newDeviceName" placeholder="Device Name" class="flex-grow form-input p-2 text-sm">
-                        <input type="text" id="newDeviceId" placeholder="Device ID" class="flex-grow form-input p-2 text-sm">
-                        <button id="addNewDeviceBtn" class="btn-primary px-3 text-sm">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="max-h-64 overflow-y-auto">
-                    <div id="deviceManagementList" class="space-y-2">
-                        <!-- Devices will be dynamically added here -->
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1301,20 +1228,13 @@
             deviceMarkers: {},
             devicePolylines: {},
             deviceData: {},
-            // NEW: Device search state
             deviceSearchInProgress: false,
             availableDevices: [],
             isFullScreen: false,
-            // NEW: Geofence state
             geofences: [],
             currentGeofence: null,
-            // NEW: Emergency state
             emergencyContacts: ['+255123456789', '+255987654321'],
-            // NEW: Route planning state
             routePlan: null,
-            // NEW: Controls visibility state
-            controlsVisible: false,
-            // NEW: Metrics state
             metrics: {
                 distance: 0,
                 time: '00:00:00',
@@ -1363,6 +1283,7 @@
             initVoiceGuidance();
             loadDevices();
             renderDeviceList();
+            loadSavedRoutes();
         }
 
         // Initialize Leaflet Map with OpenStreetMap tiles
@@ -1408,6 +1329,101 @@
             }).addTo(state.map);
         }
 
+        // Set up event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Tracking controls
+            document.getElementById('trackBtn').addEventListener('click', toggleTracking);
+            document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
+            document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
+            document.getElementById('transitType').addEventListener('change', updateTransitType);
+            document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
+            document.getElementById('mapType').addEventListener('change', changeMapType);
+            document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
+            document.getElementById('addDeviceBtn').addEventListener('click', showAddDeviceCard);
+            document.getElementById('searchDevicesBtn').addEventListener('click', searchForDevices);
+            document.getElementById('addManualDeviceBtn').addEventListener('click', addManualDevice);
+            document.getElementById('fullScreenBtn').addEventListener('click', toggleFullScreen);
+            
+            // Zoom controls
+            document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+            document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+            
+            // Route planning events
+            document.getElementById('planRouteBtn').addEventListener('click', planRoute);
+            document.getElementById('clearRoutePlanBtn').addEventListener('click', clearRoutePlan);
+            
+            // Emergency button event
+            document.getElementById('emergencyBtn').addEventListener('click', triggerEmergency);
+            
+            // Geofence events
+            document.getElementById('addGeofenceBtn').addEventListener('click', addGeofence);
+            document.getElementById('clearGeofenceBtn').addEventListener('click', clearGeofences);
+
+            // Voice indicator event
+            document.getElementById('voiceIndicator').addEventListener('click', toggleVoiceGuidance);
+
+            // Export options
+            document.querySelectorAll('.export-option').forEach(button => {
+                button.addEventListener('click', function() {
+                    const exportType = this.getAttribute('data-format');
+                    exportData(exportType);
+                });
+            });
+
+            // Add event listeners for contact options
+            document.querySelectorAll('.contact-option').forEach(button => {
+                button.addEventListener('click', function () {
+                    const number = this.getAttribute('data-number');
+                    document.getElementById('whatsappNumber').value = number;
+                });
+            });
+
+            // Settings checkboxes
+            document.getElementById('highAccuracy').addEventListener('change', updateTrackingSettings);
+            document.getElementById('autoCenter').addEventListener('change', updateTrackingSettings);
+            document.getElementById('shareLive').addEventListener('change', updateTrackingSettings);
+            document.getElementById('voiceGuidance').addEventListener('change', updateTrackingSettings);
+
+            // Close dropdown buttons
+            document.querySelectorAll('.dropdown-close').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.dropdown-content').style.display = 'none';
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                        dropdown.style.display = 'none';
+                    });
+                }
+            });
+        }
+
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Update tab UI
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        }
+
         // Initialize voice guidance
         function initVoiceGuidance() {
             if (!state.speechSynthesis) {
@@ -1432,47 +1448,6 @@
                 utterance.rate = 0.9;
                 utterance.pitch = 1.0;
                 state.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Provide real-time voice guidance for navigation
-        function provideVoiceGuidance() {
-            if (!state.routingControl || !state.lastPosition) return;
-
-            // Get route instructions
-            const route = state.routingControl.getRoute();
-            if (!route || !route.instructions) return;
-
-            // Find the next instruction
-            let nextInstruction = null;
-            let distanceToNext = 0;
-
-            for (let i = 0; i < route.instructions.length; i++) {
-                const instruction = route.instructions[i];
-                if (instruction.distance > 0) {
-                    nextInstruction = instruction;
-                    distanceToNext = instruction.distance;
-                    break;
-                }
-            }
-
-            if (!nextInstruction) return;
-
-            // Convert distance to appropriate unit
-            let distanceText;
-            if (distanceToNext < 100) {
-                distanceText = `${Math.round(distanceToNext)} meters`;
-            } else {
-                distanceText = `${(distanceToNext / 1000).toFixed(1)} kilometers`;
-            }
-
-            // Create guidance message
-            const guidanceMessage = `In ${distanceText}, ${nextInstruction.text}`;
-
-            // Only speak if it's a new instruction or distance has changed significantly
-            if (state.lastVoiceGuidance !== guidanceMessage) {
-                state.lastVoiceGuidance = guidanceMessage;
-                speak(guidanceMessage, 'normal');
             }
         }
 
@@ -1560,140 +1535,17 @@
             setTimeout(() => lucide.createIcons(), 100);
         }
 
-        // Set up event listeners
-        function setupEventListeners() {
-            document.getElementById('trackBtn').addEventListener('click', toggleTracking);
-            document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
-            document.getElementById('saveRouteBtn').addEventListener('click', saveRoute);
-            document.getElementById('transitType').addEventListener('change', updateTransitType);
-            document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
-            document.getElementById('mapType').addEventListener('change', changeMapType);
-            document.getElementById('shareWhatsAppBtn').addEventListener('click', shareLocationViaWhatsApp);
-            document.getElementById('addDeviceBtn').addEventListener('click', showAddDeviceCard);
-            document.getElementById('closeAddDeviceCard').addEventListener('click', hideAddDeviceCard);
-            document.getElementById('searchDevicesBtn').addEventListener('click', searchForDevices);
-            document.getElementById('addManualDeviceBtn').addEventListener('click', addManualDevice);
-            document.getElementById('fullScreenBtn').addEventListener('click', toggleFullScreen);
-            
-            // NEW: Zoom controls
-            document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
-            document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
-            
-            // NEW: Route planning events
-            document.getElementById('planRouteBtn').addEventListener('click', planRoute);
-            document.getElementById('clearRoutePlanBtn').addEventListener('click', clearRoutePlan);
-            
-            // NEW: Emergency button event
-            document.getElementById('emergencyBtn').addEventListener('click', triggerEmergency);
-            
-            // NEW: Geofence events
-            document.getElementById('addGeofenceBtn').addEventListener('click', addGeofence);
-            document.getElementById('clearGeofenceBtn').addEventListener('click', clearGeofences);
-
-            // NEW: Controls toggle event
-            document.getElementById('controlsToggle').addEventListener('click', toggleControls);
-
-            // NEW: Voice indicator event
-            document.getElementById('voiceIndicator').addEventListener('click', toggleVoiceGuidance);
-
-            // NEW: Export options
-            document.querySelectorAll('.export-option').forEach(button => {
-                button.addEventListener('click', function() {
-                    const exportType = this.getAttribute('data-format');
-                    exportData(exportType);
-                });
-            });
-
-            // Add event listeners for contact options
-            document.querySelectorAll('.contact-option').forEach(button => {
-                button.addEventListener('click', function () {
-                    const number = this.getAttribute('data-number');
-                    document.getElementById('whatsappNumber').value = number;
-                });
-            });
-
-            // NEW: Settings checkboxes
-            document.getElementById('highAccuracy').addEventListener('change', updateTrackingSettings);
-            document.getElementById('autoCenter').addEventListener('change', updateTrackingSettings);
-            document.getElementById('shareLive').addEventListener('change', updateTrackingSettings);
-            document.getElementById('voiceGuidance').addEventListener('change', updateTrackingSettings);
-
-            // NEW: Close dropdown buttons
-            document.querySelectorAll('.dropdown-close').forEach(button => {
-                button.addEventListener('click', function() {
-                    this.closest('.dropdown-content').style.display = 'none';
-                });
-            });
-
-            // NEW: Close dropdowns when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!event.target.closest('.dropdown')) {
-                    document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                        dropdown.style.display = 'none';
-                    });
-                }
-            });
-
-            // NEW: Mobile-specific event listeners
-            setupMobileEvents();
-        }
-
-        // NEW: Setup mobile-specific events
-        function setupMobileEvents() {
-            // Handle touch events for better mobile interaction
-            document.addEventListener('touchstart', function() {
-                // Add any mobile-specific touch handling here
-            }, { passive: true });
-
-            // Prevent zoom on double tap for map controls
-            document.querySelectorAll('.map-control, .fullscreen-btn, .zoom-btn').forEach(element => {
-                element.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    this.click();
-                });
-            });
-        }
-
-        // NEW: Zoom in function
+        // Zoom in function
         function zoomIn() {
             state.map.zoomIn();
         }
 
-        // NEW: Zoom out function
+        // Zoom out function
         function zoomOut() {
             state.map.zoomOut();
         }
 
-        // NEW: Toggle controls visibility
-        function toggleControls() {
-            const controlPanel = document.getElementById('controlPanel');
-            const routePlanningPanel = document.getElementById('routePlanningPanel');
-            const toggleButton = document.getElementById('controlsToggle');
-            const toggleIcon = document.getElementById('toggleIcon');
-            
-            if (state.controlsVisible) {
-                // Hide controls
-                controlPanel.classList.remove('show');
-                routePlanningPanel.classList.remove('show');
-                toggleButton.classList.remove('active');
-                toggleIcon.style.transform = 'rotate(0deg)';
-                state.controlsVisible = false;
-            } else {
-                // Show controls
-                controlPanel.classList.add('show');
-                routePlanningPanel.classList.add('show');
-                toggleButton.classList.add('active');
-                toggleIcon.style.transform = 'rotate(180deg)';
-                state.controlsVisible = true;
-            }
-            
-            // Trigger map resize to adjust for panel visibility
-            setTimeout(() => {
-                state.map.invalidateSize();
-            }, 300);
-        }
-
-        // NEW: Toggle voice guidance
+        // Toggle voice guidance
         function toggleVoiceGuidance() {
             const voiceGuidanceCheckbox = document.getElementById('voiceGuidance');
             voiceGuidanceCheckbox.checked = !voiceGuidanceCheckbox.checked;
@@ -1707,7 +1559,7 @@
             }
         }
 
-        // NEW: Update tracking settings
+        // Update tracking settings
         function updateTrackingSettings() {
             const highAccuracy = document.getElementById('highAccuracy').checked;
             const autoCenter = document.getElementById('autoCenter').checked;
@@ -1717,9 +1569,9 @@
             // Update voice indicator appearance
             const voiceIndicator = document.getElementById('voiceIndicator');
             if (voiceGuidance) {
-                voiceIndicator.style.background = '#10b981';
+                voiceIndicator.classList.remove('muted');
             } else {
-                voiceIndicator.style.background = '#6b7280';
+                voiceIndicator.classList.add('muted');
             }
             
             // Restart tracking with new accuracy setting if currently tracking
@@ -1729,7 +1581,7 @@
             }
         }
 
-        // NEW: Plan route to destination
+        // Plan route to destination
         function planRoute() {
             const destination = document.getElementById('destinationInput').value.trim();
             
@@ -1785,7 +1637,7 @@
             }
         }
 
-        // NEW: Clear route plan
+        // Clear route plan
         function clearRoutePlan() {
             if (state.routingControl) {
                 state.map.removeControl(state.routingControl);
@@ -1798,7 +1650,7 @@
             showNotification('Route Planning', 'Route cleared', 'info');
         }
 
-        // NEW: Trigger emergency alert
+        // Trigger emergency alert
         function triggerEmergency() {
             if (!state.lastPosition) {
                 showNotification('Emergency', 'Location not available', 'error');
@@ -1829,7 +1681,7 @@
             }
         }
 
-        // NEW: Add geofence
+        // Add geofence
         function addGeofence() {
             if (!state.lastPosition) {
                 showNotification('Geofence', 'Location not available', 'error');
@@ -1854,7 +1706,7 @@
             showNotification('Geofence', 'Geofence added at current location', 'success');
         }
 
-        // NEW: Remove specific geofence
+        // Remove specific geofence
         function removeGeofence(index) {
             if (state.geofences[index]) {
                 state.map.removeLayer(state.geofences[index]);
@@ -1863,7 +1715,7 @@
             }
         }
 
-        // NEW: Clear all geofences
+        // Clear all geofences
         function clearGeofences() {
             if (state.geofences.length === 0) {
                 showNotification('Geofence', 'No geofences to clear', 'info');
@@ -1917,12 +1769,7 @@
 
         // Show Add Device Card
         function showAddDeviceCard() {
-            document.getElementById('addDeviceCard').classList.add('show');
-        }
-
-        // Hide Add Device Card
-        function hideAddDeviceCard() {
-            document.getElementById('addDeviceCard').classList.remove('show');
+            switchTab('devices');
         }
 
         // Search for available GPS devices
@@ -1930,11 +1777,10 @@
             if (state.deviceSearchInProgress) return;
             
             state.deviceSearchInProgress = true;
-            const resultsContainer = document.getElementById('deviceSearchResults');
-            resultsContainer.classList.remove('hidden');
             
             // Show searching indicator
-            resultsContainer.innerHTML = `
+            const deviceList = document.getElementById('deviceList');
+            deviceList.innerHTML = `
                 <div class="searching-indicator">
                     <div class="loading mr-2"></div>
                     <span>Searching for devices...</span>
@@ -1960,10 +1806,10 @@
 
         // Display available devices in search results
         function displayAvailableDevices() {
-            const resultsContainer = document.getElementById('deviceSearchResults');
+            const deviceList = document.getElementById('deviceList');
             
             if (state.availableDevices.length === 0) {
-                resultsContainer.innerHTML = `
+                deviceList.innerHTML = `
                     <div class="searching-indicator">
                         <span>No devices found nearby</span>
                     </div>
@@ -1971,7 +1817,7 @@
                 return;
             }
             
-            resultsContainer.innerHTML = '';
+            deviceList.innerHTML = '';
             
             state.availableDevices.forEach(device => {
                 const deviceItem = document.createElement('div');
@@ -1995,7 +1841,7 @@
                     addDeviceFromSearch(device);
                 });
                 
-                resultsContainer.appendChild(deviceItem);
+                deviceList.appendChild(deviceItem);
             });
         }
 
@@ -2017,7 +1863,6 @@
             
             saveDevices();
             renderDeviceList();
-            hideAddDeviceCard();
             
             showNotification('Add Device', `Device ${device.name} added successfully`, 'success');
         }
@@ -2052,7 +1897,6 @@
             // Clear input fields
             document.getElementById('manualDeviceName').value = '';
             document.getElementById('manualDeviceId').value = '';
-            hideAddDeviceCard();
 
             showNotification('Add Device', `Device ${name} added successfully`, 'success');
         }
@@ -2108,57 +1952,6 @@
                 deviceItem.addEventListener('click', () => switchActiveDevice(device.id));
                 deviceList.appendChild(deviceItem);
             });
-
-            // Also update the device management list
-            renderDeviceManagementList();
-        }
-
-        function renderDeviceManagementList() {
-            const deviceManagementList = document.getElementById('deviceManagementList');
-            if (!deviceManagementList) return;
-            
-            deviceManagementList.innerHTML = '';
-
-            state.devices.forEach(device => {
-                const deviceItem = document.createElement('div');
-                deviceItem.className = 'flex justify-between items-center p-2 border border-gray-200 rounded';
-                deviceItem.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="status-indicator ${device.active ? 'status-active' : 'status-inactive'} mr-2"></span>
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">${device.name}</div>
-                            <div class="text-xs text-gray-500">${device.id}</div>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="text-blue-600 hover:text-blue-800 edit-device" data-id="${device.id}">
-                            <i data-lucide="edit" class="w-4 h-4"></i>
-                        </button>
-                        <button class="text-red-600 hover:text-red-800 delete-device" data-id="${device.id}">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `;
-                deviceManagementList.appendChild(deviceItem);
-            });
-
-            // Add event listeners for edit and delete buttons
-            document.querySelectorAll('.edit-device').forEach(button => {
-                button.addEventListener('click', function() {
-                    const deviceId = this.getAttribute('data-id');
-                    editDevice(deviceId);
-                });
-            });
-
-            document.querySelectorAll('.delete-device').forEach(button => {
-                button.addEventListener('click', function() {
-                    const deviceId = this.getAttribute('data-id');
-                    deleteDevice(deviceId);
-                });
-            });
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
         }
 
         function switchActiveDevice(deviceId) {
@@ -2298,55 +2091,6 @@
             }
         }
 
-        function editDevice(deviceId) {
-            const device = state.devices.find(d => d.id === deviceId);
-            if (!device) return;
-
-            const newName = prompt('Enter new name for device:', device.name);
-            if (newName && newName.trim() !== '') {
-                device.name = newName.trim();
-                saveDevices();
-                renderDeviceList();
-                showNotification('Edit Device', `Device renamed to ${newName}`, 'success');
-            }
-        }
-
-        function deleteDevice(deviceId) {
-            if (state.devices.length <= 1) {
-                showNotification('Delete Device', 'Cannot delete the only device', 'error');
-                return;
-            }
-
-            if (confirm('Are you sure you want to delete this device?')) {
-                // Remove device from state
-                state.devices = state.devices.filter(d => d.id !== deviceId);
-                
-                // If the active device was deleted, switch to another device
-                if (state.activeDeviceId === deviceId) {
-                    state.activeDeviceId = state.devices[0].id;
-                    switchActiveDevice(state.activeDeviceId);
-                }
-                
-                // Remove device data
-                delete state.deviceData[deviceId];
-                
-                // Remove device marker and polyline from map
-                if (state.deviceMarkers[deviceId]) {
-                    state.map.removeLayer(state.deviceMarkers[deviceId]);
-                    delete state.deviceMarkers[deviceId];
-                }
-                
-                if (state.devicePolylines[deviceId]) {
-                    state.map.removeLayer(state.devicePolylines[deviceId]);
-                    delete state.devicePolylines[deviceId];
-                }
-                
-                saveDevices();
-                renderDeviceList();
-                showNotification('Delete Device', 'Device deleted successfully', 'success');
-            }
-        }
-
         // Save route
         function saveRoute() {
             if (state.pathCoordinates.length === 0) {
@@ -2372,9 +2116,101 @@
             localStorage.setItem('transitTrackerRoutes', JSON.stringify(state.savedRoutes));
             
             showNotification('Save Route', `Route "${routeName}" saved successfully`, 'success');
+            loadSavedRoutes();
         }
 
-        // Export data as PDF
+        // Load saved routes
+        function loadSavedRoutes() {
+            const savedRoutesList = document.getElementById('savedRoutesList');
+            if (!savedRoutesList) return;
+            
+            // Load from localStorage
+            const savedRoutes = localStorage.getItem('transitTrackerRoutes');
+            if (savedRoutes) {
+                state.savedRoutes = JSON.parse(savedRoutes);
+            }
+            
+            if (state.savedRoutes.length === 0) {
+                savedRoutesList.innerHTML = '<div class="text-center text-gray-500 py-4">No saved routes yet</div>';
+                return;
+            }
+            
+            savedRoutesList.innerHTML = '';
+            
+            state.savedRoutes.forEach((route, index) => {
+                const routeItem = document.createElement('div');
+                routeItem.className = 'device-item';
+                routeItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">${route.name}</div>
+                            <div class="text-xs text-gray-500">${new Date(route.date).toLocaleDateString()} | ${(route.distance / 1000).toFixed(2)} km</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800 load-route" data-index="${index}">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800 delete-route" data-index="${index}">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                savedRoutesList.appendChild(routeItem);
+            });
+            
+            // Add event listeners for route actions
+            document.querySelectorAll('.load-route').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = this.getAttribute('data-index');
+                    loadRoute(index);
+                });
+            });
+            
+            document.querySelectorAll('.delete-route').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = this.getAttribute('data-index');
+                    deleteRoute(index);
+                });
+            });
+            
+            // Re-initialize Lucide icons
+            lucide.createIcons();
+        }
+
+        // Load a saved route
+        function loadRoute(index) {
+            const route = state.savedRoutes[index];
+            if (!route) return;
+            
+            // Clear current route
+            clearRoute();
+            
+            // Set the route coordinates
+            state.pathCoordinates = route.coordinates;
+            state.timestamps = route.timestamps;
+            state.totalDistance = route.distance;
+            
+            // Update the polyline
+            state.polyline.setLatLngs(state.pathCoordinates);
+            
+            // Update metrics
+            updateMetricsDisplay();
+            
+            showNotification('Route Loaded', `Route "${route.name}" loaded successfully`, 'success');
+        }
+
+        // Delete a saved route
+        function deleteRoute(index) {
+            if (confirm('Are you sure you want to delete this route?')) {
+                state.savedRoutes.splice(index, 1);
+                localStorage.setItem('transitTrackerRoutes', JSON.stringify(state.savedRoutes));
+                loadSavedRoutes();
+                showNotification('Route Deleted', 'Route deleted successfully', 'success');
+            }
+        }
+
+        // Export data as PDF or CSV
         function exportData(format = 'pdf') {
             if (state.pathCoordinates.length === 0) {
                 showNotification('Export Data', 'No data to export', 'error');
@@ -2543,34 +2379,13 @@
 
         // Update transit info display
         function updateTransitInfo() {
-            let description = '';
-            let iconName = '';
-
-            switch (state.transitType) {
-                case 'truck':
-                    description = 'Delivery Truck Service';
-                    iconName = 'truck';
-                    break;
-                case 'van':
-                    description = 'Delivery Van Service';
-                    iconName = 'car';
-                    break;
-                case 'car':
-                    description = 'Personal Vehicle';
-                    iconName = 'car';
-                    break;
-                case 'motorcycle':
-                    description = 'Motorcycle Courier';
-                    iconName = 'bike';
-                    break;
-                case 'person':
-                    description = 'Person in Transit';
-                    iconName = 'user';
-                    break;
-                case 'package':
-                    description = 'Package Tracking';
-                    iconName = 'package';
-                    break;
+            // Update the marker popup if it exists
+            if (state.marker) {
+                state.marker.bindPopup(`
+                    <b>${state.transitName}</b><br>
+                    Status: ${state.isTracking ? 'In Transit' : 'Not Tracking'}<br>
+                    Type: ${state.transitType}
+                `);
             }
         }
 
@@ -2620,7 +2435,7 @@
             state.trackingInterval = setInterval(updateTrackingTime, 1000);
 
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4 mr-2"></i>Stop Tracking';
+            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i>Stop Tracking';
             trackBtn.classList.remove('btn-primary');
             trackBtn.classList.add('btn-danger');
 
@@ -2663,7 +2478,7 @@
 
             state.isTracking = false;
             const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 mr-2"></i>Start Tracking';
+            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i>Start Tracking';
             trackBtn.classList.remove('btn-danger');
             trackBtn.classList.add('btn-primary');
 
@@ -2750,6 +2565,9 @@
 
             // Store last position
             state.lastPosition = newPosition;
+            
+            // Update metrics display
+            updateMetricsDisplay();
         }
 
         // Update business metrics
@@ -2769,6 +2587,14 @@
                     state.averageSpeed = (state.totalDistance / timeDiff) * 3.6; // km/h
                 }
             }
+        }
+
+        // Update metrics display
+        function updateMetricsDisplay() {
+            document.getElementById('distanceValue').textContent = `${(state.totalDistance / 1000).toFixed(2)} km`;
+            document.getElementById('timeValue').textContent = state.metrics.time;
+            document.getElementById('speedValue').textContent = `${state.currentSpeed.toFixed(2)} km/h`;
+            document.getElementById('topSpeedValue').textContent = `${state.topSpeed.toFixed(2)} km/h`;
         }
 
         // Update ETA calculation
@@ -2812,6 +2638,8 @@
                 state.metrics.distance = (state.totalDistance / 1000).toFixed(2);
                 state.metrics.speed = state.currentSpeed.toFixed(2);
                 state.metrics.topSpeed = state.topSpeed.toFixed(2);
+                
+                updateMetricsDisplay();
             }
         }
 
@@ -2847,7 +2675,49 @@
             state.currentSpeed = 0;
             state.topSpeed = 0;
             updateMetrics();
+            updateMetricsDisplay();
             showNotification('Route', 'Route cleared.', 'info');
+        }
+
+        // Provide real-time voice guidance for navigation
+        function provideVoiceGuidance() {
+            if (!state.routingControl || !state.lastPosition) return;
+
+            // Get route instructions
+            const route = state.routingControl.getRoute();
+            if (!route || !route.instructions) return;
+
+            // Find the next instruction
+            let nextInstruction = null;
+            let distanceToNext = 0;
+
+            for (let i = 0; i < route.instructions.length; i++) {
+                const instruction = route.instructions[i];
+                if (instruction.distance > 0) {
+                    nextInstruction = instruction;
+                    distanceToNext = instruction.distance;
+                    break;
+                }
+            }
+
+            if (!nextInstruction) return;
+
+            // Convert distance to appropriate unit
+            let distanceText;
+            if (distanceToNext < 100) {
+                distanceText = `${Math.round(distanceToNext)} meters`;
+            } else {
+                distanceText = `${(distanceToNext / 1000).toFixed(1)} kilometers`;
+            }
+
+            // Create guidance message
+            const guidanceMessage = `In ${distanceText}, ${nextInstruction.text}`;
+
+            // Only speak if it's a new instruction or distance has changed significantly
+            if (state.lastVoiceGuidance !== guidanceMessage) {
+                state.lastVoiceGuidance = guidanceMessage;
+                speak(guidanceMessage, 'normal');
+            }
         }
 
         // Add CSS animation for emergency button
