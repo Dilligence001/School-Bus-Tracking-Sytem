@@ -452,6 +452,16 @@
         .status-pulse {
             animation: pulse 2s infinite;
         }
+        
+        /* Pre-configured badge */
+        .preconfigured-badge {
+            background-color: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -513,17 +523,17 @@
             
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Connection Settings</div>
+                    <div class="card-title">Connection Settings <span class="preconfigured-badge">EMQX Pre-configured</span></div>
                 </div>
                 
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="mqtt-broker">MQTT Broker</label>
-                        <input type="text" id="mqtt-broker" placeholder="wss://broker.example.com">
+                        <input type="text" id="mqtt-broker" placeholder="wss://broker.emqx.io:8084/mqtt" value="wss://broker.emqx.io:8084/mqtt">
                     </div>
                     <div class="form-group">
                         <label for="driver-id">Driver ID</label>
-                        <input type="text" id="driver-id" placeholder="DRV-001">
+                        <input type="text" id="driver-id" placeholder="DRV-001" value="BUS-DRIVER-001">
                     </div>
                 </div>
                 
@@ -541,17 +551,17 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="publish-topic">Publish Topic</label>
-                        <input type="text" id="publish-topic" placeholder="schoolbus/location">
+                        <input type="text" id="publish-topic" placeholder="schoolbus/driver/location" value="schoolbus/driver/location">
                     </div>
                     <div class="form-group">
                         <label for="subscribe-topic">Subscribe Topic</label>
-                        <input type="text" id="subscribe-topic" placeholder="schoolbus/location">
+                        <input type="text" id="subscribe-topic" placeholder="schoolbus/dispatch/commands" value="schoolbus/dispatch/commands">
                     </div>
                 </div>
                 
                 <div class="btn-group">
                     <button id="connect-btn" class="btn-primary">
-                        <i class="fas fa-plug"></i> Connect
+                        <i class="fas fa-plug"></i> Connect to EMQX
                     </button>
                 </div>
             </div>
@@ -564,17 +574,17 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="bus-number">Bus Number</label>
-                        <input type="text" id="bus-number" placeholder="BUS-12">
+                        <input type="text" id="bus-number" placeholder="BUS-12" value="BUS-12">
                     </div>
                     <div class="form-group">
                         <label for="route-name">Route Name</label>
-                        <input type="text" id="route-name" placeholder="Route A">
+                        <input type="text" id="route-name" placeholder="Route A" value="Route A">
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="driver-name">Driver Name</label>
-                    <input type="text" id="driver-name" placeholder="Your Name">
+                    <input type="text" id="driver-name" placeholder="Your Name" value="John Driver">
                 </div>
             </div>
             
@@ -619,7 +629,7 @@
                     <option value="streets">Streets</option>
                     <option value="satellite">Satellite</option>
                     <option value="light">Light</option>
-                    <option value="dark">Dark</option>
+                    <option value="dark" selected>Dark</option>
                 </select>
             </div>
             
@@ -650,6 +660,19 @@
                 routeName: '',
                 driverName: ''
             }
+        };
+
+        // Default configuration for EMQX broker
+        const defaultConfig = {
+            broker: "wss://broker.emqx.io:8084/mqtt",
+            username: "",
+            password: "",
+            publishTopic: "schoolbus/driver/location",
+            subscribeTopic: "schoolbus/dispatch/commands",
+            busNumber: "BUS-12",
+            routeName: "Route A",
+            driverName: "John Driver",
+            driverId: "BUS-DRIVER-001"
         };
 
         // DOM elements
@@ -693,11 +716,28 @@
 
         // Initialize the application
         function initApp() {
+            setDefaultConfig();
             loadSettings();
             initMap();
             setupEventListeners();
             updateUI();
             updateBusInfo();
+            addLogEntry('App started with EMQX broker pre-configured');
+        }
+
+        // Set default EMQX configuration
+        function setDefaultConfig() {
+            inputs.mqttBroker.value = defaultConfig.broker;
+            inputs.driverId.value = defaultConfig.driverId;
+            inputs.publishTopic.value = defaultConfig.publishTopic;
+            inputs.subscribeTopic.value = defaultConfig.subscribeTopic;
+            inputs.busNumber.value = defaultConfig.busNumber;
+            inputs.routeName.value = defaultConfig.routeName;
+            inputs.driverName.value = defaultConfig.driverName;
+            
+            // Clear username and password for public broker
+            inputs.mqttUsername.value = defaultConfig.username;
+            inputs.mqttPassword.value = defaultConfig.password;
         }
 
         // Load settings from localStorage
@@ -707,7 +747,7 @@
                 appState.settings = { ...appState.settings, ...JSON.parse(savedSettings) };
             }
             
-            // Load form values from localStorage
+            // Load form values from localStorage (only if they exist)
             for (const key in inputs) {
                 const savedValue = localStorage.getItem(`busTracker_${key}`);
                 if (savedValue && inputs[key]) {
@@ -813,7 +853,7 @@
             } else {
                 elements.connectionStatus.textContent = 'Disconnected';
                 elements.connectionIndicator.className = 'status-indicator status-disconnected';
-                elements.connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect';
+                elements.connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect to EMQX';
                 elements.connectBtn.classList.remove('btn-secondary');
                 elements.connectBtn.classList.add('btn-primary');
                 elements.startTrackingBtn.disabled = true;
@@ -883,32 +923,37 @@
                     onFailure: onConnectFailure,
                     userName: username || undefined,
                     password: password || undefined,
-                    useSSL: brokerUrl.startsWith('wss://')
+                    useSSL: brokerUrl.startsWith('wss://'),
+                    timeout: 10, // Connection timeout in seconds
+                    keepAliveInterval: 60, // Keep alive interval in seconds
+                    cleanSession: true
                 };
                 
                 appState.mqttClient.connect(connectOptions);
                 
                 // Update UI to show connecting state
-                elements.connectionStatus.textContent = 'Connecting...';
+                elements.connectionStatus.textContent = 'Connecting to EMQX...';
                 elements.connectBtn.disabled = true;
+                addLogEntry(`Connecting to EMQX broker: ${brokerUrl}`);
                 
             } catch (error) {
                 console.error('MQTT connection error:', error);
-                addLogEntry('Error connecting to MQTT: ' + error.message);
-                alert('Failed to connect to MQTT broker: ' + error.message);
+                addLogEntry('Error connecting to EMQX: ' + error.message);
+                alert('Failed to connect to EMQX broker: ' + error.message);
+                elements.connectBtn.disabled = false;
             }
         }
 
         // MQTT connection success callback
         function onConnect() {
             appState.mqttConnected = true;
-            addLogEntry('Successfully connected to MQTT broker');
+            addLogEntry('✅ Successfully connected to EMQX broker');
             
             // Subscribe to topic
             const subscribeTopic = inputs.subscribeTopic.value;
             if (subscribeTopic) {
                 appState.mqttClient.subscribe(subscribeTopic);
-                addLogEntry(`Subscribed to topic: ${subscribeTopic}`);
+                addLogEntry(`📡 Subscribed to topic: ${subscribeTopic}`);
             }
             
             updateUI();
@@ -918,16 +963,17 @@
         // MQTT connection failure callback
         function onConnectFailure(error) {
             console.error('MQTT connection failed:', error);
-            addLogEntry('Failed to connect to MQTT broker: ' + error.errorMessage);
-            alert('Failed to connect to MQTT broker: ' + error.errorMessage);
+            addLogEntry('❌ Failed to connect to EMQX: ' + error.errorMessage);
+            alert('Failed to connect to EMQX broker. Please check:\n\n1. Your internet connection\n2. The broker URL\n3. Firewall settings\n\nError: ' + error.errorMessage);
             elements.connectBtn.disabled = false;
+            elements.connectionStatus.textContent = 'Connection Failed';
         }
 
         // MQTT connection lost callback
         function onConnectionLost(response) {
             if (response.errorCode !== 0) {
                 console.error('MQTT connection lost:', response.errorMessage);
-                addLogEntry('MQTT connection lost: ' + response.errorMessage);
+                addLogEntry('🔌 Connection lost: ' + response.errorMessage);
             }
             
             appState.mqttConnected = false;
@@ -943,9 +989,14 @@
         function onMessageArrived(message) {
             try {
                 const payload = JSON.parse(message.payloadString);
-                addLogEntry(`Received: ${payload.driver_id} at ${payload.lat}, ${payload.lng}`);
+                addLogEntry(`📨 Received from ${message.destinationName}: ${payload.driver_id} at ${payload.lat}, ${payload.lng}`);
+                
+                // You could update other bus locations on the map here
+                // For example, if you want to show multiple buses
+                
             } catch (error) {
                 console.error('Error parsing MQTT message:', error);
+                addLogEntry(`📨 Received message: ${message.payloadString}`);
             }
         }
 
@@ -964,7 +1015,7 @@
             }
             
             updateUI();
-            addLogEntry('Disconnected from MQTT broker');
+            addLogEntry('🔌 Disconnected from EMQX broker');
         }
 
         // Start GPS tracking
@@ -995,10 +1046,16 @@
                     
                     appState.trackingActive = true;
                     updateUI();
-                    addLogEntry('Started GPS tracking');
+                    addLogEntry('📍 Started GPS tracking');
+                    
+                    // Publish initial location
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    onLocationUpdate(position);
                 },
                 (error) => {
                     alert('Error getting location: ' + error.message);
+                    addLogEntry('❌ GPS error: ' + error.message);
                 }
             );
         }
@@ -1031,7 +1088,7 @@
         // Location error handler
         function onLocationError(error) {
             console.error('Geolocation error:', error);
-            addLogEntry('GPS error: ' + error.message);
+            addLogEntry('❌ GPS error: ' + error.message);
         }
 
         // Publish location to MQTT
@@ -1042,7 +1099,7 @@
             
             const publishTopic = inputs.publishTopic.value;
             if (!publishTopic) {
-                addLogEntry('Error: No publish topic specified');
+                addLogEntry('❌ Error: No publish topic specified');
                 return;
             }
             
@@ -1053,7 +1110,9 @@
                 driver_name: inputs.driverName.value || 'unknown',
                 lat: lat,
                 lng: lng,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                speed: 0, // You could calculate this from previous positions
+                heading: 0 // You could calculate this from previous positions
             };
             
             const mqttMessage = new Paho.MQTT.Message(JSON.stringify(message));
@@ -1061,7 +1120,7 @@
             
             appState.mqttClient.send(mqttMessage);
             
-            addLogEntry(`Published: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+            addLogEntry(`📤 Published location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         }
 
         // Stop GPS tracking
@@ -1073,7 +1132,7 @@
             
             appState.trackingActive = false;
             updateUI();
-            addLogEntry('Stopped GPS tracking');
+            addLogEntry('🛑 Stopped GPS tracking');
         }
 
         // Add entry to tracking log
@@ -1129,7 +1188,7 @@
 
         // Show help information
         function showHelp() {
-            alert('School Bus Tracker Help:\n\n1. Enter your bus details and MQTT connection information\n2. Click "Connect" to establish MQTT connection\n3. Click "Start Tracking" to begin publishing location data\n4. Your location will be shown on the map and sent via MQTT');
+            alert('🚌 School Bus Tracker Help:\n\n📡 CONNECTION:\n- EMQX broker is pre-configured\n- Click "Connect to EMQX" to establish connection\n- No username/password required for public broker\n\n📍 TRACKING:\n- Click "Start Tracking" to begin GPS tracking\n- Location updates every 3 seconds (configurable)\n- Data is published to MQTT topic\n\n📊 TOPICS:\n- Publish: schoolbus/driver/location\n- Subscribe: schoolbus/dispatch/commands\n\n⚙️ SETTINGS:\n- Adjust GPS update interval\n- Change map style\n- Clear stored data if needed');
         }
 
         // Save app settings
@@ -1139,7 +1198,7 @@
             
             saveSettings();
             hideSettingsModal();
-            addLogEntry('Settings saved');
+            addLogEntry('⚙️ Settings saved');
             
             // Reinitialize map with new style if needed
             if (appState.map) {
@@ -1150,26 +1209,16 @@
 
         // Clear all data
         function clearAllData() {
-            if (confirm('Are you sure you want to clear all saved data?')) {
+            if (confirm('Are you sure you want to clear all saved data?\n\nThis will reset all settings to default but keep the EMQX broker configuration.')) {
                 localStorage.clear();
                 appState.logEntries = [];
                 updateLogDisplay();
-                addLogEntry('All data cleared');
+                
+                // Reset to default EMQX config but keep user modifications
+                setDefaultConfig();
+                
+                addLogEntry('🗑️ All data cleared, EMQX configuration restored');
                 hideSettingsModal();
-                
-                // Reset form inputs
-                for (const key in inputs) {
-                    if (inputs[key]) {
-                        inputs[key].value = '';
-                    }
-                }
-                
-                // Reset settings
-                appState.settings = {
-                    gpsInterval: 3000,
-                    mapStyle: 'dark'
-                };
-                
                 updateBusInfo();
             }
         }
