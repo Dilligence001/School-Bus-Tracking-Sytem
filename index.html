@@ -3,2350 +3,1179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transit Tracker Pro - Multi-Device GPS Tracking</title>
-    <!-- Leaflet CSS -->
+    <title>School Bus Tracker - Driver</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Leaflet Routing Machine CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <!-- jsPDF for PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        :root {
+            --primary: #21D375; /* Bolt green */
+            --primary-dark: #1BB863;
+            --secondary: #FFC632; /* School bus yellow */
+            --dark: #1A1D29;
+            --darker: #12141C;
+            --light: #F8F9FA;
+            --gray: #8E8E93;
+            --gray-dark: #636366;
+            --card-bg: #252836;
+            --danger: #FF3B30;
+            --warning: #FF9500;
+            --border-radius: 16px;
+            --border-radius-sm: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
         }
-
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
+        
+        * {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            height: 100vh;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
-
-        /* Loading screen styles */
-        #loadingScreen {
+        
+        body {
+            background-color: var(--darker);
+            color: var(--light);
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+        
+        /* Header Styles - Bolt inspired */
+        header {
+            background-color: var(--dark);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            background-color: var(--primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .header-icon {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        /* Main Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 66px);
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background-color: var(--dark);
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-connected {
+            background-color: var(--primary);
+        }
+        
+        .status-disconnected {
+            background-color: var(--danger);
+        }
+        
+        .status-tracking {
+            background-color: var(--warning);
+        }
+        
+        .status-idle {
+            background-color: var(--gray);
+        }
+        
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        /* Bottom Panel - Bolt style */
+        .bottom-panel {
+            background-color: var(--dark);
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 500;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .panel-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .panel-toggle {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--light);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* Button Styles - Bolt inspired */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:active {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--light);
+        }
+        
+        .btn-secondary:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Tracking Controls */
+        .tracking-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tracking-btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        /* Log Panel */
+        .log-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .log-panel.expanded {
+            max-height: 200px;
+        }
+        
+        .log-header {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .log-entries {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+        }
+        
+        .log-time {
+            color: var(--primary);
+            font-size: 0.7rem;
+            margin-right: 8px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            display: flex;
-            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            color: white;
         }
-
-        .loading-logo {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        
+        .modal-content {
+            background-color: var(--dark);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
         }
-
-        .loading-logo i {
-            width: 60px;
-            height: 60px;
-            color: white;
-        }
-
-        .loading-text {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .loading-subtext {
-            font-size: 16px;
-            opacity: 0.8;
-            margin-bottom: 40px;
-            text-align: center;
-            max-width: 400px;
-        }
-
-        .loading-bar {
-            width: 300px;
-            height: 6px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .loading-progress {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .loading-features {
-            display: flex;
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .loading-feature {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            max-width: 120px;
-        }
-
-        .loading-feature i {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 8px;
-            color: #60a5fa;
-        }
-
-        .loading-feature span {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        /* Main app layout */
-        .app-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
-
-        /* Map container */
-        .map-container {
-            flex: 1;
-            height: 100%;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        #map {
-            height: 100%;
-            width: 100%;
-            border-radius: 0;
-            overflow: hidden;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 380px;
-            height: 100%;
-            background: #1e293b;
-            border-left: 1px solid #334155;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(100%);
-            width: 0;
-        }
-
-        .sidebar-header {
-            padding: 16px;
-            border-bottom: 1px solid #334155;
-            background: #1e293b;
+        
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
-
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
         }
-
-        /* Floating action button */
-        .fab {
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Bus Info Panel */
+        .bus-info {
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 1000;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #3b82f6;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            background-color: var(--dark);
+            border-radius: var(--border-radius-sm);
+            padding: 15px;
+            z-index: 400;
+            box-shadow: var(--shadow);
+            max-width: 200px;
         }
-
-        .fab:hover {
-            background: #2563eb;
-            transform: scale(1.05);
-        }
-
-        /* Bottom controls */
-        .bottom-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
+        
+        .bus-info-item {
             display: flex;
-            gap: 12px;
-            background: rgba(30, 41, 59, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid #334155;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
         }
-
-        .control-btn {
-            background: #334155;
-            color: #f8fafc;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
+        
+        .bus-info-label {
+            color: var(--gray);
+        }
+        
+        .bus-info-value {
             font-weight: 500;
         }
-
-        .control-btn:hover {
-            background: #475569;
-        }
-
-        .control-btn.primary {
-            background: #3b82f6;
-        }
-
-        .control-btn.primary:hover {
-            background: #2563eb;
-        }
-
-        .control-btn.danger {
-            background: #ef4444;
-        }
-
-        .control-btn.danger:hover {
-            background: #dc2626;
-        }
-
-        /* Card styling */
-        .card {
-            background: #334155;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            border: 1px solid #475569;
-            transition: all 0.2s ease;
-            margin-bottom: 16px;
-        }
-
-        .card-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #475569;
-            font-weight: 600;
-            color: #f8fafc;
-        }
-
-        .card-body {
-            padding: 16px;
-        }
-
-        /* Form controls */
-        .form-input {
-            background: #1e293b;
-            border: 1px solid #475569;
-            border-radius: 6px;
-            padding: 10px 12px;
-            transition: all 0.2s ease;
-            width: 100%;
-            font-size: 14px;
-            color: #f8fafc;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-select {
-            background: #1e293b;
-            border: 1px solid #475569;
-            border-radius: 6px;
-            padding: 10px 12px;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 16px;
-            width: 100%;
-            font-size: 14px;
-            color: #f8fafc;
-        }
-
-        /* Status indicators */
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .status-active {
-            background-color: #10b981;
-        }
-
-        .status-inactive {
-            background-color: #ef4444;
-        }
-
-        /* Metrics grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .metric-card {
-            background: #1e293b;
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #475569;
-        }
-
-        .metric-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #f8fafc;
-        }
-
-        .metric-label {
-            font-size: 12px;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #475569;
-            margin-bottom: 16px;
-        }
-
-        .tab {
-            padding: 12px 16px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            font-weight: 500;
-            color: #94a3b8;
-            transition: all 0.2s ease;
-        }
-
-        .tab.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Device list */
-        .device-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .device-item {
-            padding: 12px;
-            border-bottom: 1px solid #475569;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .device-item:hover {
-            background-color: #475569;
-        }
-
-        .device-item.active {
-            background-color: #1e40af;
-            border-left: 3px solid #3b82f6;
-        }
-
-        /* Map controls */
-        .map-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .map-control {
-            background: rgba(30, 41, 59, 0.9);
-            backdrop-filter: blur(10px);
-            color: #f8fafc;
-            padding: 8px 12px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #475569;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-        }
-
-        .map-control:hover {
-            background: #475569;
-        }
-
-        .map-control select,
-        .map-control input {
-            background: transparent;
-            color: #f8fafc;
-            border: none;
-            outline: none;
-            max-width: 120px;
-            font-size: 14px;
-        }
-
-        .map-control select option {
-            background: #1e293b;
-            color: #f8fafc;
-        }
-
-        /* Zoom controls */
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .zoom-btn {
-            background: rgba(30, 41, 59, 0.9);
-            backdrop-filter: blur(10px);
-            color: #f8fafc;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #475569;
-            transition: all 0.2s ease;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-        }
-
-        .zoom-btn:hover {
-            background: #475569;
-        }
-
-        /* Notification system */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #1e293b;
-            border-radius: 8px;
-            padding: 16px 20px;
-            border-left: 4px solid #3b82f6;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-            z-index: 2001;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-            max-width: 350px;
-            color: #f8fafc;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left-color: #10b981;
-        }
-
-        .notification.error {
-            border-left-color: #ef4444;
-        }
-
-        .notification.warning {
-            border-left-color: #f59e0b;
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Mobile optimizations */
+        
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: absolute;
-                right: 0;
-                z-index: 1000;
-                height: 100%;
+            .form-grid {
+                grid-template-columns: 1fr;
             }
             
-            .bottom-controls {
-                width: 90%;
-                flex-wrap: wrap;
-                justify-content: center;
+            .btn-group {
+                flex-direction: column;
             }
             
-            .control-btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            
-            .fab {
-                top: 16px;
-                left: 16px;
-                width: 48px;
-                height: 48px;
-            }
-            
-            .map-controls {
-                top: 16px;
-                right: 16px;
-            }
-            
-            .zoom-controls {
-                bottom: 16px;
-                right: 16px;
-            }
-            
-            .notification {
-                right: 10px;
-                left: 10px;
-                max-width: none;
+            .tracking-controls {
+                flex-direction: column;
             }
         }
-
-        /* Leaflet Routing Machine customization */
-        .leaflet-routing-container {
-            background: #1e293b;
-            color: #f8fafc;
-            width: 280px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-        }
-
-        .leaflet-routing-alt {
-            max-height: 180px;
-        }
-
-        .leaflet-routing-alt h2,
-        .leaflet-routing-alt h3 {
-            color: #f8fafc;
-        }
-
-        .leaflet-routing-alt table {
-            color: #f8fafc;
-        }
-
-        .leaflet-routing-alt table tr:hover {
-            background-color: #475569;
-        }
-
-        .leaflet-routing-collapse-btn {
-            color: #f8fafc;
-        }
-
-        .leaflet-routing-geocoders input {
-            background: #1e293b;
-            color: #f8fafc;
-            border: 1px solid #475569;
-            border-radius: 4px;
-        }
-
-        .leaflet-routing-geocoders input:focus {
-            background: #1e293b;
-            color: #f8fafc;
-            border-color: #3b82f6;
-        }
-
-        .leaflet-routing-geocoders button {
-            background: #3b82f6;
-            color: white;
-            border-radius: 4px;
-        }
-
-        .leaflet-routing-geocoders button:hover {
-            background: #2563eb;
-        }
-
-        /* Custom scrollbar */
+        
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
-
+        
         ::-webkit-scrollbar-track {
-            background: #1e293b;
-            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
         }
-
+        
         ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
+            background: var(--primary);
+            border-radius: 10px;
         }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+        
+        /* Animation for connection status */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .status-pulse {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen">
-        <div class="loading-logo">
-            <i data-lucide="map-pin"></i>
-        </div>
-        <div class="loading-text">Transit Tracker Pro</div>
-        <div class="loading-subtext">Multi-Device GPS Tracking System</div>
-        <div class="loading-bar">
-            <div class="loading-progress" id="loadingProgress"></div>
-        </div>
-        <div class="loading-features">
-            <div class="loading-feature">
-                <i data-lucide="navigation"></i>
-                <span>Real-time Tracking</span>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-bus"></i>
             </div>
-            <div class="loading-feature">
-                <i data-lucide="route"></i>
-                <span>Route Planning</span>
+            <div class="logo-text">School Bus Tracker</div>
+        </div>
+        <div class="header-actions">
+            <button class="header-icon" id="settings-btn">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="header-icon" id="help-btn">
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator status-disconnected" id="connection-indicator"></div>
+                <span id="connection-status">Disconnected</span>
             </div>
-            <div class="loading-feature">
-                <i data-lucide="users"></i>
-                <span>Multi-Device</span>
+            <div class="status-item">
+                <div class="status-indicator status-idle" id="tracking-indicator"></div>
+                <span id="tracking-status">Not Tracking</span>
             </div>
         </div>
-    </div>
-
-    <!-- Main App Container -->
-    <div class="app-container">
-        <!-- Map Container -->
+        
         <div class="map-container">
             <div id="map"></div>
-
-            <!-- Floating Action Button -->
-            <button class="fab" id="menuToggle">
-                <i data-lucide="menu" id="menuIcon"></i>
-            </button>
-
-            <!-- Bottom Controls -->
-            <div class="bottom-controls">
-                <button id="trackBtn" class="control-btn primary">
-                    <i data-lucide="play" class="w-4 h-4"></i>
-                    Start Tracking
-                </button>
-                <button id="planRouteBtn" class="control-btn">
-                    <i data-lucide="navigation" class="w-4 h-4"></i>
-                    Plan Route
-                </button>
-                <button id="addDeviceBtn" class="control-btn">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Add Device
-                </button>
-                <button id="emergencyBtn" class="control-btn danger">
-                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                    Emergency
-                </button>
-            </div>
-
-            <!-- Map Controls -->
-            <div class="map-controls">
-                <div class="map-control">
-                    <i data-lucide="map" class="w-4 h-4"></i>
-                    <select id="mapType">
-                        <option value="standard">Standard</option>
-                        <option value="satellite">Satellite</option>
-                    </select>
+            
+            <div class="bus-info">
+                <div class="bus-info-item">
+                    <span class="bus-info-label">Bus:</span>
+                    <span class="bus-info-value" id="info-bus-number">-</span>
                 </div>
-                <div class="map-control">
-                    <i data-lucide="share-2" class="w-4 h-4"></i>
-                    <span>Share Location</span>
+                <div class="bus-info-item">
+                    <span class="bus-info-label">Route:</span>
+                    <span class="bus-info-value" id="info-route-name">-</span>
                 </div>
-            </div>
-
-            <!-- Zoom Controls -->
-            <div class="zoom-controls">
-                <button id="zoomInBtn" class="zoom-btn">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                </button>
-                <button id="zoomOutBtn" class="zoom-btn">
-                    <i data-lucide="minus" class="w-4 h-4"></i>
-                </button>
+                <div class="bus-info-item">
+                    <span class="bus-info-label">Driver:</span>
+                    <span class="bus-info-value" id="info-driver-name">-</span>
+                </div>
             </div>
         </div>
-
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="flex items-center">
-                    <i data-lucide="map-pin" class="w-6 h-6 text-blue-400 mr-2"></i>
-                    <h1 class="text-xl font-bold text-white">Transit Tracker Pro</h1>
-                </div>
-                <button id="closeSidebar" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+        
+        <div class="bottom-panel">
+            <div class="panel-header">
+                <div class="panel-title">Tracking Controls</div>
+                <button class="panel-toggle" id="log-toggle">
+                    <i class="fas fa-chevron-down"></i> Logs
                 </button>
             </div>
-
-            <div class="sidebar-content">
-                <!-- Status Indicator -->
-                <div class="flex items-center mb-6 p-3 bg-slate-800 rounded-lg">
-                    <span class="status-indicator status-inactive" id="statusIndicator"></span>
-                    <span id="statusText" class="text-sm font-medium text-slate-300">Not Tracking</span>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Connection Settings</div>
                 </div>
-
-                <!-- Tabs -->
-                <div class="tabs">
-                    <div class="tab active" data-tab="tracking">Tracking</div>
-                    <div class="tab" data-tab="devices">Devices</div>
-                    <div class="tab" data-tab="routes">Routes</div>
-                </div>
-
-                <!-- Tracking Tab -->
-                <div class="tab-content active" id="tracking-tab">
-                    <!-- Transit Info -->
-                    <div class="card">
-                        <div class="card-header">Transit Information</div>
-                        <div class="card-body">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="text-sm text-slate-300 font-medium mb-2 block">Transit Name</label>
-                                    <input type="text" id="transitNameInput" class="form-input"
-                                        value="Delivery Truck #1245">
-                                </div>
-                                <div>
-                                    <label class="text-sm text-slate-300 font-medium mb-2 block">Transit Type</label>
-                                    <select id="transitType" class="form-select">
-                                        <option value="truck">Delivery Truck</option>
-                                        <option value="van">Delivery Van</option>
-                                        <option value="car">Car</option>
-                                        <option value="motorcycle">Motorcycle</option>
-                                        <option value="person">Person</option>
-                                        <option value="package">Package</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="mqtt-broker">MQTT Broker</label>
+                        <input type="text" id="mqtt-broker" placeholder="wss://broker.example.com">
                     </div>
-
-                    <!-- Metrics -->
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-value" id="distanceValue">0.00 km</div>
-                            <div class="metric-label">Distance</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value" id="timeValue">00:00:00</div>
-                            <div class="metric-label">Time</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value" id="speedValue">0.00 km/h</div>
-                            <div class="metric-label">Speed</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value" id="topSpeedValue">0.00 km/h</div>
-                            <div class="metric-label">Top Speed</div>
-                        </div>
-                    </div>
-
-                    <!-- Route Planning -->
-                    <div class="card">
-                        <div class="card-header">Route Planning</div>
-                        <div class="card-body">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="text-sm text-slate-300 font-medium mb-2 block">Destination</label>
-                                    <input type="text" id="destinationInput" class="form-input"
-                                        placeholder="Enter destination">
-                                </div>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <button id="planRouteSidebarBtn" class="control-btn primary">
-                                        <i data-lucide="navigation" class="w-4 h-4"></i>
-                                        Plan Route
-                                    </button>
-                                    <button id="clearRoutePlanBtn" class="control-btn">
-                                        <i data-lucide="x" class="w-4 h-4"></i>
-                                        Clear
-                                    </button>
-                                </div>
-                                <div id="routeInfo" class="hidden">
-                                    <div class="text-sm text-slate-300">
-                                        <div class="flex justify-between">
-                                            <span>Distance:</span>
-                                            <span id="routeDistance">--</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Estimated Time:</span>
-                                            <span id="routeTime">--</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tracking Settings -->
-                    <div class="card">
-                        <div class="card-header">Tracking Settings</div>
-                        <div class="card-body">
-                            <div class="space-y-3">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="highAccuracy" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                                        checked>
-                                    <label for="highAccuracy" class="text-sm text-slate-300">High Accuracy</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="autoCenter" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                                        checked>
-                                    <label for="autoCenter" class="text-sm text-slate-300">Auto Center Map</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="shareLive" class="mr-3 w-4 h-4 text-blue-600 rounded">
-                                    <label for="shareLive" class="text-sm text-slate-300">Share Live Location</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="voiceGuidance" class="mr-3 w-4 h-4 text-blue-600 rounded"
-                                        checked>
-                                    <label for="voiceGuidance" class="text-sm text-slate-300">Voice Guidance</label>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="driver-id">Driver ID</label>
+                        <input type="text" id="driver-id" placeholder="DRV-001">
                     </div>
                 </div>
-
-                <!-- Devices Tab -->
-                <div class="tab-content" id="devices-tab">
-                    <div class="card">
-                        <div class="card-header">GPS Devices</div>
-                        <div class="card-body">
-                            <div class="device-list" id="deviceList">
-                                <!-- Devices will be dynamically added here -->
-                            </div>
-                            <div class="mt-4">
-                                <button id="searchDevicesBtn" class="control-btn primary w-full">
-                                    <i data-lucide="search" class="w-4 h-4"></i>
-                                    Search for Devices
-                                </button>
-                            </div>
-                        </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="mqtt-username">Username</label>
+                        <input type="text" id="mqtt-username" placeholder="Username">
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">Add Device Manually</div>
-                        <div class="card-body">
-                            <div class="space-y-3">
-                                <div>
-                                    <input type="text" id="manualDeviceName" placeholder="Device Name"
-                                        class="form-input">
-                                </div>
-                                <div>
-                                    <input type="text" id="manualDeviceId" placeholder="Device ID" class="form-input">
-                                </div>
-                                <button id="addManualDeviceBtn" class="control-btn primary w-full">
-                                    <i data-lucide="plus" class="w-4 h-4"></i>
-                                    Add Device
-                                </button>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="mqtt-password">Password</label>
+                        <input type="password" id="mqtt-password" placeholder="Password">
                     </div>
                 </div>
-
-                <!-- Routes Tab -->
-                <div class="tab-content" id="routes-tab">
-                    <div class="card">
-                        <div class="card-header">Saved Routes</div>
-                        <div class="card-body">
-                            <div id="savedRoutesList">
-                                <!-- Saved routes will be dynamically added here -->
-                                <div class="text-center text-slate-400 py-4">
-                                    No saved routes yet
-                                </div>
-                            </div>
-                        </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="publish-topic">Publish Topic</label>
+                        <input type="text" id="publish-topic" placeholder="schoolbus/location">
                     </div>
-
-                    <div class="card">
-                        <div class="card-header">Export Data</div>
-                        <div class="card-body">
-                            <div class="flex flex-col gap-2">
-                                <button class="control-btn export-option" data-format="pdf">
-                                    <i data-lucide="file-text" class="w-4 h-4"></i>
-                                    Export as PDF
-                                </button>
-                                <button class="control-btn export-option" data-format="csv">
-                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                                    Export as CSV
-                                </button>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="subscribe-topic">Subscribe Topic</label>
+                        <input type="text" id="subscribe-topic" placeholder="schoolbus/location">
                     </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="connect-btn" class="btn-primary">
+                        <i class="fas fa-plug"></i> Connect
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Bus Information</div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="bus-number">Bus Number</label>
+                        <input type="text" id="bus-number" placeholder="BUS-12">
+                    </div>
+                    <div class="form-group">
+                        <label for="route-name">Route Name</label>
+                        <input type="text" id="route-name" placeholder="Route A">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="driver-name">Driver Name</label>
+                    <input type="text" id="driver-name" placeholder="Your Name">
+                </div>
+            </div>
+            
+            <div class="tracking-controls">
+                <button id="start-tracking-btn" class="btn-primary tracking-btn" disabled>
+                    <i class="fas fa-play"></i> Start Tracking
+                </button>
+                <button id="stop-tracking-btn" class="btn-danger tracking-btn" disabled>
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+            </div>
+            
+            <div class="log-panel" id="log-panel">
+                <div class="log-header">Recent Activity</div>
+                <div class="log-entries" id="log-entries">
+                    <!-- Log entries will be added here -->
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Notification -->
-    <div id="notification" class="notification">
-        <div class="flex items-start">
-            <i data-lucide="info" class="w-5 h-5 mr-3 mt-0.5"></i>
-            <div>
-                <div id="notificationTitle" class="font-semibold">Notification</div>
-                <div id="notificationMessage" class="text-sm text-slate-300 mt-1">This is a notification message.</div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Settings</div>
+                <button class="close-btn">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="gps-interval">GPS Update Interval</label>
+                <select id="gps-interval">
+                    <option value="2000">2 seconds</option>
+                    <option value="3000" selected>3 seconds</option>
+                    <option value="5000">5 seconds</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="map-style">Map Style</label>
+                <select id="map-style">
+                    <option value="streets">Streets</option>
+                    <option value="satellite">Satellite</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="save-settings" class="btn-primary">Save Settings</button>
+                <button id="clear-data" class="btn-secondary">Clear Data</button>
             </div>
         </div>
     </div>
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Leaflet Routing Machine JS -->
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // App state
-        const state = {
-            isTracking: false,
-            watchId: null,
+        // Application state
+        const appState = {
+            mqttConnected: false,
+            trackingActive: false,
+            currentLocation: null,
+            locationWatcher: null,
+            mqttClient: null,
             map: null,
-            marker: null,
-            accuracyCircle: null,
-            pathCoordinates: [],
-            timestamps: [],
-            polyline: null,
-            lastPosition: null,
-            totalDistance: 0,
-            currentSpeed: 0,
-            topSpeed: 0,
-            startTime: null,
-            trackingInterval: null,
-            transitType: 'truck',
-            transitName: 'Delivery Truck #1245',
-            destination: null,
-            eta: null,
-            routingControl: null,
-            currentMapType: 'standard',
-            mapLayers: {},
-            destinationMarker: null,
-            suggestions: [],
-            suggestionTimeout: null,
-            speechSynthesis: window.speechSynthesis,
-            savedRoutes: [],
-            averageSpeed: 0,
-            transitStartTime: null,
-            transitTimer: null,
-            lastVoiceGuidance: null,
-            voiceGuidanceInterval: null,
-            devices: [],
-            activeDeviceId: null,
-            deviceMarkers: {},
-            devicePolylines: {},
-            deviceData: {},
-            deviceSearchInProgress: false,
-            availableDevices: [],
-            isFullScreen: false,
-            geofences: [],
-            currentGeofence: null,
-            emergencyContacts: ['+255123456789', '+255987654321'],
-            routePlan: null,
-            metrics: {
-                distance: 0,
-                time: '00:00:00',
-                speed: 0,
-                topSpeed: 0
+            busMarker: null,
+            logEntries: [],
+            settings: {
+                gpsInterval: 3000,
+                mapStyle: 'dark'
             },
-            sidebarOpen: false
+            busInfo: {
+                busNumber: '',
+                routeName: '',
+                driverName: ''
+            }
         };
 
-        // Show loading screen for 5 seconds
-        function showLoadingScreen() {
-            const loadingScreen = document.getElementById('loadingScreen');
-            const loadingProgress = document.getElementById('loadingProgress');
-            
-            // Animate progress bar
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 1;
-                loadingProgress.style.width = `${progress}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    // Hide loading screen after 5 seconds
-                    setTimeout(() => {
-                        loadingScreen.style.opacity = '0';
-                        setTimeout(() => {
-                            loadingScreen.style.display = 'none';
-                            // Initialize the app after loading screen
-                            initApp();
-                        }, 500);
-                    }, 500);
-                }
-            }, 50);
-        }
+        // DOM elements
+        const elements = {
+            connectionStatus: document.getElementById('connection-status'),
+            trackingStatus: document.getElementById('tracking-status'),
+            connectionIndicator: document.getElementById('connection-indicator'),
+            trackingIndicator: document.getElementById('tracking-indicator'),
+            connectBtn: document.getElementById('connect-btn'),
+            startTrackingBtn: document.getElementById('start-tracking-btn'),
+            stopTrackingBtn: document.getElementById('stop-tracking-btn'),
+            settingsBtn: document.getElementById('settings-btn'),
+            helpBtn: document.getElementById('help-btn'),
+            logToggle: document.getElementById('log-toggle'),
+            map: document.getElementById('map'),
+            logEntries: document.getElementById('log-entries'),
+            logPanel: document.getElementById('log-panel'),
+            settingsModal: document.getElementById('settings-modal'),
+            closeModalBtn: document.querySelector('.close-btn'),
+            saveSettingsBtn: document.getElementById('save-settings'),
+            clearDataBtn: document.getElementById('clear-data'),
+            gpsInterval: document.getElementById('gps-interval'),
+            mapStyle: document.getElementById('map-style'),
+            infoBusNumber: document.getElementById('info-bus-number'),
+            infoRouteName: document.getElementById('info-route-name'),
+            infoDriverName: document.getElementById('info-driver-name')
+        };
 
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function () {
-            showLoadingScreen();
-        });
+        // Input elements
+        const inputs = {
+            busNumber: document.getElementById('bus-number'),
+            routeName: document.getElementById('route-name'),
+            driverName: document.getElementById('driver-name'),
+            driverId: document.getElementById('driver-id'),
+            mqttBroker: document.getElementById('mqtt-broker'),
+            mqttUsername: document.getElementById('mqtt-username'),
+            mqttPassword: document.getElementById('mqtt-password'),
+            publishTopic: document.getElementById('publish-topic'),
+            subscribeTopic: document.getElementById('subscribe-topic')
+        };
 
-        // Initialize the app after loading screen
+        // Initialize the application
         function initApp() {
+            loadSettings();
             initMap();
             setupEventListeners();
-            checkGeolocationSupport();
-            updateTransitInfo();
-            initVoiceGuidance();
-            loadDevices();
-            renderDeviceList();
-            loadSavedRoutes();
+            updateUI();
+            updateBusInfo();
         }
 
-        // Initialize Leaflet Map with OpenStreetMap tiles
+        // Load settings from localStorage
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('busTrackerSettings');
+            if (savedSettings) {
+                appState.settings = { ...appState.settings, ...JSON.parse(savedSettings) };
+            }
+            
+            // Load form values from localStorage
+            for (const key in inputs) {
+                const savedValue = localStorage.getItem(`busTracker_${key}`);
+                if (savedValue && inputs[key]) {
+                    inputs[key].value = savedValue;
+                }
+            }
+            
+            // Apply settings to UI
+            if (elements.gpsInterval) elements.gpsInterval.value = appState.settings.gpsInterval;
+            if (elements.mapStyle) elements.mapStyle.value = appState.settings.mapStyle;
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            localStorage.setItem('busTrackerSettings', JSON.stringify(appState.settings));
+            
+            // Save form values
+            for (const key in inputs) {
+                if (inputs[key].value) {
+                    localStorage.setItem(`busTracker_${key}`, inputs[key].value);
+                }
+            }
+        }
+
+        // Initialize the map
         function initMap() {
-            // Default center (Dar es Salaam, Tanzania)
-            const defaultCenter = [-6.7924, 39.2083];
-
-            // Create map
-            state.map = L.map('map', {
-                attributionControl: false // Remove default attribution
-            }).setView(defaultCenter, 13);
-
-            // Define map layers
-            state.mapLayers = {
-                standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19
-                }),
-                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    maxZoom: 19
-                })
-            };
-
-            // Add default layer
-            state.mapLayers.standard.addTo(state.map);
-
-            // Create initial marker with custom icon based on transit type
-            updateMarkerIcon();
-
-            // Initialize accuracy circle
-            state.accuracyCircle = L.circle(defaultCenter, {
-                color: '#3b82f6',
-                fillColor: '#3b82f6',
-                fillOpacity: 0.1,
-                radius: 0
-            }).addTo(state.map);
-
-            // Initialize polyline for route tracking
-            state.polyline = L.polyline([], {
-                color: '#3b82f6',
-                weight: 4,
-                opacity: 0.7,
-                lineJoin: 'round'
-            }).addTo(state.map);
+            // Default to a central US location if GPS not available yet
+            const defaultLocation = [39.8283, -98.5795];
+            
+            // Determine which map tiles to use based on settings
+            let tileLayerUrl;
+            switch(appState.settings.mapStyle) {
+                case 'satellite':
+                    tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                    break;
+                case 'light':
+                    tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+                    break;
+                case 'dark':
+                    tileLayerUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+                    break;
+                default: // streets
+                    tileLayerUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            }
+            
+            appState.map = L.map('map').setView(defaultLocation, 5);
+            
+            L.tileLayer(tileLayerUrl, {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(appState.map);
+            
+            // Create a custom bus icon
+            const busIcon = L.divIcon({
+                className: 'bus-marker',
+                html: '<div style="background-color: #FFC632; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"><i class="fas fa-bus" style="color: #1A1D29; font-size: 10px;"></i></div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            // Add initial marker
+            appState.busMarker = L.marker(defaultLocation, { icon: busIcon })
+                .addTo(appState.map)
+                .bindPopup('Bus location will appear here');
         }
 
         // Set up event listeners
         function setupEventListeners() {
-            // Menu toggle
-            document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
-            document.getElementById('closeSidebar').addEventListener('click', toggleSidebar);
-
-            // Tab switching
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    switchTab(tabId);
-                });
-            });
-
-            // Tracking controls
-            document.getElementById('trackBtn').addEventListener('click', toggleTracking);
-            document.getElementById('planRouteBtn').addEventListener('click', planRoute);
-            document.getElementById('planRouteSidebarBtn').addEventListener('click', planRoute);
-            document.getElementById('clearRoutePlanBtn').addEventListener('click', clearRoutePlan);
-            document.getElementById('addDeviceBtn').addEventListener('click', showAddDeviceCard);
-            document.getElementById('emergencyBtn').addEventListener('click', triggerEmergency);
+            elements.connectBtn.addEventListener('click', toggleMQTTConnection);
+            elements.startTrackingBtn.addEventListener('click', startTracking);
+            elements.stopTrackingBtn.addEventListener('click', stopTracking);
+            elements.settingsBtn.addEventListener('click', showSettingsModal);
+            elements.helpBtn.addEventListener('click', showHelp);
+            elements.closeModalBtn.addEventListener('click', hideSettingsModal);
+            elements.saveSettingsBtn.addEventListener('click', saveAppSettings);
+            elements.clearDataBtn.addEventListener('click', clearAllData);
+            elements.logToggle.addEventListener('click', toggleLogPanel);
             
-            // Device management
-            document.getElementById('searchDevicesBtn').addEventListener('click', searchForDevices);
-            document.getElementById('addManualDeviceBtn').addEventListener('click', addManualDevice);
-            
-            // Map controls
-            document.getElementById('mapType').addEventListener('change', changeMapType);
-            document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
-            document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
-            
-            // Transit settings
-            document.getElementById('transitType').addEventListener('change', updateTransitType);
-            document.getElementById('transitNameInput').addEventListener('change', updateTransitName);
-
-            // Export options
-            document.querySelectorAll('.export-option').forEach(button => {
-                button.addEventListener('click', function() {
-                    const exportType = this.getAttribute('data-format');
-                    exportData(exportType);
-                });
-            });
-
-            // Settings checkboxes
-            document.getElementById('highAccuracy').addEventListener('change', updateTrackingSettings);
-            document.getElementById('autoCenter').addEventListener('change', updateTrackingSettings);
-            document.getElementById('shareLive').addEventListener('change', updateTrackingSettings);
-            document.getElementById('voiceGuidance').addEventListener('change', updateTrackingSettings);
-        }
-
-        // Toggle sidebar
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const menuIcon = document.getElementById('menuIcon');
-            
-            state.sidebarOpen = !state.sidebarOpen;
-            
-            if (state.sidebarOpen) {
-                sidebar.classList.remove('collapsed');
-                menuIcon.setAttribute('data-lucide', 'x');
-            } else {
-                sidebar.classList.add('collapsed');
-                menuIcon.setAttribute('data-lucide', 'menu');
-            }
-            
-            lucide.createIcons();
-            
-            // Trigger map resize
-            setTimeout(() => {
-                state.map.invalidateSize();
-            }, 300);
-        }
-
-        // Switch between tabs
-        function switchTab(tabId) {
-            // Update tab UI
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-            
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-        }
-
-        // Initialize voice guidance
-        function initVoiceGuidance() {
-            if (!state.speechSynthesis) {
-                console.warn('Speech synthesis not supported');
-                document.getElementById('voiceGuidance').disabled = true;
-            }
-        }
-
-        // Text-to-speech function for voice guidance
-        function speak(text, priority = 'normal') {
-            if (state.speechSynthesis && document.getElementById('voiceGuidance').checked) {
-                // Don't interrupt high priority messages
-                if (priority === 'normal' && state.speechSynthesis.speaking) {
-                    return;
+            // Update bus info when inputs change
+            for (const key in inputs) {
+                if (inputs[key] && ['busNumber', 'routeName', 'driverName'].includes(key)) {
+                    inputs[key].addEventListener('input', updateBusInfo);
                 }
-
-                // Cancel any ongoing speech
-                state.speechSynthesis.cancel();
-
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.0;
-                state.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Show notification
-        function showNotification(title, message, type = 'info') {
-            const notification = document.getElementById('notification');
-            const notificationTitle = document.getElementById('notificationTitle');
-            const notificationMessage = document.getElementById('notificationMessage');
-
-            notificationTitle.textContent = title;
-            notificationMessage.textContent = message;
-
-            // Set icon based on type
-            let icon = 'info';
-            if (type === 'success') icon = 'check-circle';
-            if (type === 'error') icon = 'alert-circle';
-            if (type === 'warning') icon = 'alert-triangle';
-
-            notification.innerHTML = `
-                <div class="flex items-start">
-                    <i data-lucide="${icon}" class="w-5 h-5 mr-3 mt-0.5"></i>
-                    <div>
-                        <div class="font-semibold">${title}</div>
-                        <div class="text-sm text-slate-300 mt-1">${message}</div>
-                    </div>
-                </div>
-            `;
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            // Set notification type
-            notification.className = 'notification';
-            notification.classList.add(type);
-            notification.classList.add('show');
-
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 5000);
-        }
-
-        // Update marker icon based on transit type
-        function updateMarkerIcon() {
-            let iconName = '';
-
-            switch (state.transitType) {
-                case 'truck':
-                    iconName = 'truck';
-                    break;
-                case 'van':
-                    iconName = 'car';
-                    break;
-                case 'car':
-                    iconName = 'car';
-                    break;
-                case 'motorcycle':
-                    iconName = 'bike';
-                    break;
-                case 'person':
-                    iconName = 'user';
-                    break;
-                case 'package':
-                    iconName = 'package';
-                    break;
-                default:
-                    iconName = 'map-pin';
-            }
-
-            const customIcon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="${iconName}" style="width: 18px; height: 18px; color: white;"></i></div>`,
-                iconSize: [46, 46],
-                iconAnchor: [23, 23]
-            });
-
-            if (state.marker) {
-                state.marker.setIcon(customIcon);
-            } else {
-                state.marker = L.marker([-6.7924, 39.2083], { icon: customIcon }).addTo(state.map);
-                state.marker.bindPopup("<b>Your Location</b><br>Tracking not started").openPopup();
-            }
-
-            // Re-initialize Lucide icons for the new marker
-            setTimeout(() => lucide.createIcons(), 100);
-        }
-
-        // Zoom in function
-        function zoomIn() {
-            state.map.zoomIn();
-        }
-
-        // Zoom out function
-        function zoomOut() {
-            state.map.zoomOut();
-        }
-
-        // Update tracking settings
-        function updateTrackingSettings() {
-            const highAccuracy = document.getElementById('highAccuracy').checked;
-            const autoCenter = document.getElementById('autoCenter').checked;
-            const shareLive = document.getElementById('shareLive').checked;
-            const voiceGuidance = document.getElementById('voiceGuidance').checked;
-            
-            // Restart tracking with new accuracy setting if currently tracking
-            if (state.isTracking) {
-                stopTracking();
-                startTracking();
-            }
-        }
-
-        // Plan route to destination
-        function planRoute() {
-            const destination = document.getElementById('destinationInput').value.trim();
-            
-            if (!destination) {
-                showNotification('Route Planning', 'Please enter a destination', 'error');
-                return;
             }
             
-            if (!state.lastPosition) {
-                showNotification('Route Planning', 'Current location not available. Start tracking first.', 'error');
-                return;
-            }
-            
-            // Clear any existing routing control
-            if (state.routingControl) {
-                state.map.removeControl(state.routingControl);
-            }
-            
-            // Create routing control
-            state.routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(state.lastPosition[0], state.lastPosition[1]),
-                    L.latLng(state.lastPosition[0] + 0.01, state.lastPosition[1] + 0.01) // Placeholder, would use geocoding in real app
-                ],
-                routeWhileDragging: true,
-                showAlternatives: true,
-                altLineOptions: {
-                    styles: [
-                        {color: 'black', opacity: 0.15, weight: 9},
-                        {color: 'white', opacity: 0.8, weight: 6},
-                        {color: '#3b82f6', opacity: 0.5, weight: 4}
-                    ]
-                },
-                lineOptions: {
-                    styles: [
-                        {color: 'black', opacity: 0.15, weight: 9},
-                        {color: 'white', opacity: 0.8, weight: 6},
-                        {color: '#3b82f6', opacity: 1, weight: 4}
-                    ]
+            // Close modal when clicking outside
+            elements.settingsModal.addEventListener('click', (e) => {
+                if (e.target === elements.settingsModal) {
+                    hideSettingsModal();
                 }
-            }).addTo(state.map);
-            
-            // Show route info
-            document.getElementById('routeInfo').classList.remove('hidden');
-            document.getElementById('routeDistance').textContent = '12.5 km'; // Placeholder
-            document.getElementById('routeTime').textContent = '25 min'; // Placeholder
-            
-            showNotification('Route Planning', 'Route planned successfully', 'success');
-            
-            // Voice guidance for route
-            if (document.getElementById('voiceGuidance').checked) {
-                speak("Route planned. Distance 12.5 kilometers. Estimated travel time 25 minutes.");
-            }
-        }
-
-        // Clear route plan
-        function clearRoutePlan() {
-            if (state.routingControl) {
-                state.map.removeControl(state.routingControl);
-                state.routingControl = null;
-            }
-            
-            document.getElementById('routeInfo').classList.add('hidden');
-            document.getElementById('destinationInput').value = '';
-            
-            showNotification('Route Planning', 'Route cleared', 'info');
-        }
-
-        // Trigger emergency alert
-        function triggerEmergency() {
-            if (!state.lastPosition) {
-                showNotification('Emergency', 'Location not available', 'error');
-                return;
-            }
-            
-            // Show confirmation dialog
-            if (confirm('Are you sure you want to send an emergency alert?')) {
-                // Send emergency alerts to all contacts
-                state.emergencyContacts.forEach(contact => {
-                    const message = `EMERGENCY ALERT! ${state.transitName} needs assistance. Location: https://www.google.com/maps?q=${state.lastPosition[0]},${state.lastPosition[1]}`;
-                    const whatsappUrl = `https://wa.me/${contact}?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappUrl, '_blank');
-                });
-                
-                // Show notification
-                showNotification('Emergency', 'Emergency alert sent to all contacts', 'error');
-                
-                // Voice alert
-                speak("Emergency alert activated. Help has been notified.", 'high');
-            }
-        }
-
-        // Show Add Device Card
-        function showAddDeviceCard() {
-            switchTab('devices');
-            if (!state.sidebarOpen) {
-                toggleSidebar();
-            }
-        }
-
-        // Search for available GPS devices
-        function searchForDevices() {
-            if (state.deviceSearchInProgress) return;
-            
-            state.deviceSearchInProgress = true;
-            
-            // Show searching indicator
-            const deviceList = document.getElementById('deviceList');
-            deviceList.innerHTML = `
-                <div class="searching-indicator">
-                    <div class="loading mr-2"></div>
-                    <span>Searching for devices...</span>
-                </div>
-            `;
-            
-            // Simulate device discovery (in a real app, this would use Bluetooth, WiFi, or other discovery methods)
-            setTimeout(() => {
-                // Simulate finding some devices
-                state.availableDevices = [
-                    { id: 'GPS-001', name: 'GPS Tracker #001', type: 'truck', signalStrength: 'Strong', distance: '15m' },
-                    { id: 'GPS-002', name: 'GPS Tracker #002', type: 'van', signalStrength: 'Medium', distance: '25m' },
-                    { id: 'GPS-003', name: 'GPS Tracker #003', type: 'motorcycle', signalStrength: 'Weak', distance: '45m' }
-                ];
-                
-                // Display found devices
-                displayAvailableDevices();
-                state.deviceSearchInProgress = false;
-                
-                showNotification('Device Search', `Found ${state.availableDevices.length} available devices`, 'success');
-            }, 3000);
-        }
-
-        // Display available devices in search results
-        function displayAvailableDevices() {
-            const deviceList = document.getElementById('deviceList');
-            
-            if (state.availableDevices.length === 0) {
-                deviceList.innerHTML = `
-                    <div class="searching-indicator">
-                        <span>No devices found nearby</span>
-                    </div>
-                `;
-                return;
-            }
-            
-            deviceList.innerHTML = '';
-            
-            state.availableDevices.forEach(device => {
-                const deviceItem = document.createElement('div');
-                deviceItem.className = 'device-search-item';
-                deviceItem.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="text-sm font-medium text-white">${device.name}</div>
-                            <div class="text-xs text-slate-400">ID: ${device.id} | Type: ${device.type}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xs text-slate-400">${device.distance}</div>
-                            <div class="text-xs ${device.signalStrength === 'Strong' ? 'text-green-400' : device.signalStrength === 'Medium' ? 'text-yellow-400' : 'text-red-400'}">
-                                ${device.signalStrength}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                deviceItem.addEventListener('click', () => {
-                    addDeviceFromSearch(device);
-                });
-                
-                deviceList.appendChild(deviceItem);
             });
         }
 
-        // Add device from search results
-        function addDeviceFromSearch(device) {
-            // Check if device already exists
-            if (state.devices.some(d => d.id === device.id)) {
-                showNotification('Add Device', `Device ${device.name} is already added`, 'error');
-                return;
-            }
-            
-            // Add the device
-            state.devices.push({
-                id: device.id,
-                name: device.name,
-                type: device.type,
-                active: false
-            });
-            
-            saveDevices();
-            renderDeviceList();
-            
-            showNotification('Add Device', `Device ${device.name} added successfully`, 'success');
-        }
-
-        // Add device manually
-        function addManualDevice() {
-            const name = document.getElementById('manualDeviceName').value.trim();
-            const id = document.getElementById('manualDeviceId').value.trim();
-
-            if (!name || !id) {
-                showNotification('Add Device', 'Please enter both device name and ID', 'error');
-                return;
-            }
-
-            // Check if device ID already exists
-            if (state.devices.some(device => device.id === id)) {
-                showNotification('Add Device', 'Device ID already exists', 'error');
-                return;
-            }
-
-            // Add new device
-            state.devices.push({
-                id: id,
-                name: name,
-                type: 'truck', // Default type
-                active: false
-            });
-
-            saveDevices();
-            renderDeviceList();
-            
-            // Clear input fields
-            document.getElementById('manualDeviceName').value = '';
-            document.getElementById('manualDeviceId').value = '';
-
-            showNotification('Add Device', `Device ${name} added successfully`, 'success');
-        }
-
-        // Device Management Functions
-        function loadDevices() {
-            // Load devices from localStorage or use default devices
-            const savedDevices = localStorage.getItem('transitTrackerDevices');
-            if (savedDevices) {
-                state.devices = JSON.parse(savedDevices);
+        // Update UI based on app state
+        function updateUI() {
+            // Update connection status
+            if (appState.mqttConnected) {
+                elements.connectionStatus.textContent = 'Connected';
+                elements.connectionIndicator.className = 'status-indicator status-connected status-pulse';
+                elements.connectBtn.innerHTML = '<i class="fas fa-plug"></i> Disconnect';
+                elements.connectBtn.classList.remove('btn-primary');
+                elements.connectBtn.classList.add('btn-secondary');
+                elements.startTrackingBtn.disabled = false;
             } else {
-                // Add some default devices
-                state.devices = [
-                    { id: 'device-001', name: 'Delivery Truck #1245', type: 'truck', active: true },
-                    { id: 'device-002', name: 'Service Van #5678', type: 'van', active: false },
-                    { id: 'device-003', name: 'Motorcycle Courier', type: 'motorcycle', active: false }
-                ];
-                saveDevices();
+                elements.connectionStatus.textContent = 'Disconnected';
+                elements.connectionIndicator.className = 'status-indicator status-disconnected';
+                elements.connectBtn.innerHTML = '<i class="fas fa-plug"></i> Connect';
+                elements.connectBtn.classList.remove('btn-secondary');
+                elements.connectBtn.classList.add('btn-primary');
+                elements.startTrackingBtn.disabled = true;
+                elements.stopTrackingBtn.disabled = true;
             }
-
-            // Set the first device as active by default
-            if (state.devices.length > 0) {
-                state.activeDeviceId = state.devices[0].id;
-                initializeDeviceData(state.activeDeviceId);
-            }
-        }
-
-        function saveDevices() {
-            localStorage.setItem('transitTrackerDevices', JSON.stringify(state.devices));
-        }
-
-        function renderDeviceList() {
-            const deviceList = document.getElementById('deviceList');
-            if (!deviceList) return;
             
-            deviceList.innerHTML = '';
-
-            state.devices.forEach(device => {
-                const deviceItem = document.createElement('div');
-                deviceItem.className = `device-item ${device.id === state.activeDeviceId ? 'active' : ''}`;
-                deviceItem.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <span class="status-indicator ${device.active ? 'status-active' : 'status-inactive'}"></span>
-                            <div>
-                                <div class="text-sm font-medium text-white">${device.name}</div>
-                                <div class="text-xs text-slate-400">${device.id}</div>
-                            </div>
-                        </div>
-                        <div class="text-xs text-slate-400">${device.type}</div>
-                    </div>
-                `;
-                deviceItem.addEventListener('click', () => switchActiveDevice(device.id));
-                deviceList.appendChild(deviceItem);
-            });
+            // Update tracking status
+            if (appState.trackingActive) {
+                elements.trackingStatus.textContent = 'Tracking Active';
+                elements.trackingIndicator.className = 'status-indicator status-tracking status-pulse';
+                elements.startTrackingBtn.disabled = true;
+                elements.stopTrackingBtn.disabled = false;
+            } else {
+                elements.trackingStatus.textContent = 'Not Tracking';
+                elements.trackingIndicator.className = 'status-indicator status-idle';
+                elements.startTrackingBtn.disabled = !appState.mqttConnected;
+                elements.stopTrackingBtn.disabled = true;
+            }
         }
 
-        function switchActiveDevice(deviceId) {
-            state.activeDeviceId = deviceId;
-            renderDeviceList();
+        // Update bus info display
+        function updateBusInfo() {
+            appState.busInfo.busNumber = inputs.busNumber.value || '-';
+            appState.busInfo.routeName = inputs.routeName.value || '-';
+            appState.busInfo.driverName = inputs.driverName.value || '-';
             
-            // Update the transit info based on the active device
-            const device = state.devices.find(d => d.id === deviceId);
-            if (device) {
-                document.getElementById('transitNameInput').value = device.name;
-                document.getElementById('transitType').value = device.type;
-                updateTransitType();
-                updateTransitName();
-            }
-
-            // Initialize device data if not already done
-            if (!state.deviceData[deviceId]) {
-                initializeDeviceData(deviceId);
-            }
-
-            // Update the map with the active device's data
-            updateMapForActiveDevice();
-
-            showNotification('Device Switched', `Now tracking ${device.name}`, 'info');
+            elements.infoBusNumber.textContent = appState.busInfo.busNumber;
+            elements.infoRouteName.textContent = appState.busInfo.routeName;
+            elements.infoDriverName.textContent = appState.busInfo.driverName;
         }
 
-        function initializeDeviceData(deviceId) {
-            if (!state.deviceData[deviceId]) {
-                state.deviceData[deviceId] = {
-                    pathCoordinates: [],
-                    timestamps: [],
-                    totalDistance: 0,
-                    currentSpeed: 0,
-                    topSpeed: 0,
-                    averageSpeed: 0,
-                    startTime: null,
-                    polyline: null,
-                    marker: null
+        // Toggle MQTT connection
+        function toggleMQTTConnection() {
+            if (appState.mqttConnected) {
+                disconnectMQTT();
+            } else {
+                connectMQTT();
+            }
+        }
+
+        // Connect to MQTT broker
+        function connectMQTT() {
+            const brokerUrl = inputs.mqttBroker.value;
+            const username = inputs.mqttUsername.value;
+            const password = inputs.mqttPassword.value;
+            const subscribeTopic = inputs.subscribeTopic.value;
+            
+            if (!brokerUrl) {
+                alert('Please enter MQTT broker URL');
+                return;
+            }
+            
+            try {
+                // Create MQTT client
+                appState.mqttClient = new Paho.MQTT.Client(
+                    brokerUrl,
+                    `bus_tracker_${Date.now()}`
+                );
+                
+                // Set callback handlers
+                appState.mqttClient.onConnectionLost = onConnectionLost;
+                appState.mqttClient.onMessageArrived = onMessageArrived;
+                
+                // Connect the client
+                const connectOptions = {
+                    onSuccess: onConnect,
+                    onFailure: onConnectFailure,
+                    userName: username || undefined,
+                    password: password || undefined,
+                    useSSL: brokerUrl.startsWith('wss://')
                 };
-            }
-
-            // Create marker for this device if it doesn't exist
-            if (!state.deviceMarkers[deviceId]) {
-                const device = state.devices.find(d => d.id === deviceId);
-                const customIcon = createDeviceIcon(device.type, deviceId);
                 
-                state.deviceMarkers[deviceId] = L.marker([-6.7924, 39.2083], { 
-                    icon: customIcon 
-                }).addTo(state.map);
+                appState.mqttClient.connect(connectOptions);
                 
-                state.deviceMarkers[deviceId].bindPopup(`<b>${device.name}</b><br>Status: Inactive`).openPopup();
-            }
-
-            // Create polyline for this device if it doesn't exist
-            if (!state.devicePolylines[deviceId]) {
-                const color = getDeviceColor(deviceId);
-                state.devicePolylines[deviceId] = L.polyline([], {
-                    color: color,
-                    weight: 4,
-                    opacity: 0.7,
-                    lineJoin: 'round'
-                }).addTo(state.map);
-            }
-        }
-
-        function createDeviceIcon(deviceType, deviceId) {
-            let iconName = '';
-
-            switch (deviceType) {
-                case 'truck':
-                    iconName = 'truck';
-                    break;
-                case 'van':
-                    iconName = 'car';
-                    break;
-                case 'car':
-                    iconName = 'car';
-                    break;
-                case 'motorcycle':
-                    iconName = 'bike';
-                    break;
-                case 'person':
-                    iconName = 'user';
-                    break;
-                case 'package':
-                    iconName = 'package';
-                    break;
-                default:
-                    iconName = 'map-pin';
-            }
-
-            const color = getDeviceColor(deviceId);
-            
-            return L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background: ${color}; width: 40px; height: 40px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"><i data-lucide="${iconName}" style="width: 18px; height: 18px; color: white;"></i></div>`,
-                iconSize: [46, 46],
-                iconAnchor: [23, 23]
-            });
-        }
-
-        function getDeviceColor(deviceId) {
-            // Generate a consistent color for each device
-            const colors = [
-                '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', 
-                '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
-            ];
-            
-            const index = state.devices.findIndex(d => d.id === deviceId);
-            return colors[index % colors.length];
-        }
-
-        function updateMapForActiveDevice() {
-            // Hide all device markers and polylines
-            Object.values(state.deviceMarkers).forEach(marker => {
-                state.map.removeLayer(marker);
-            });
-            
-            Object.values(state.devicePolylines).forEach(polyline => {
-                state.map.removeLayer(polyline);
-            });
-            
-            // Show only the active device's marker and polyline
-            if (state.deviceMarkers[state.activeDeviceId]) {
-                state.map.addLayer(state.deviceMarkers[state.activeDeviceId]);
-            }
-            
-            if (state.devicePolylines[state.activeDeviceId]) {
-                state.map.addLayer(state.devicePolylines[state.activeDeviceId]);
-            }
-            
-            // If we have position data for the active device, center the map on it
-            const deviceData = state.deviceData[state.activeDeviceId];
-            if (deviceData && deviceData.pathCoordinates.length > 0) {
-                const lastPosition = deviceData.pathCoordinates[deviceData.pathCoordinates.length - 1];
-                state.map.setView(lastPosition, state.map.getZoom());
-            }
-        }
-
-        // Save route
-        function saveRoute() {
-            if (state.pathCoordinates.length === 0) {
-                showNotification('Save Route', 'No route data to save', 'error');
-                return;
-            }
-
-            const routeName = prompt('Enter a name for this route:');
-            if (!routeName) return;
-
-            const routeData = {
-                name: routeName,
-                coordinates: state.pathCoordinates,
-                timestamps: state.timestamps,
-                distance: state.totalDistance,
-                duration: state.transitStartTime ? new Date() - state.transitStartTime : 0,
-                date: new Date().toISOString()
-            };
-
-            state.savedRoutes.push(routeData);
-            
-            // Save to localStorage
-            localStorage.setItem('transitTrackerRoutes', JSON.stringify(state.savedRoutes));
-            
-            showNotification('Save Route', `Route "${routeName}" saved successfully`, 'success');
-            loadSavedRoutes();
-        }
-
-        // Load saved routes
-        function loadSavedRoutes() {
-            const savedRoutesList = document.getElementById('savedRoutesList');
-            if (!savedRoutesList) return;
-            
-            // Load from localStorage
-            const savedRoutes = localStorage.getItem('transitTrackerRoutes');
-            if (savedRoutes) {
-                state.savedRoutes = JSON.parse(savedRoutes);
-            }
-            
-            if (state.savedRoutes.length === 0) {
-                savedRoutesList.innerHTML = '<div class="text-center text-slate-400 py-4">No saved routes yet</div>';
-                return;
-            }
-            
-            savedRoutesList.innerHTML = '';
-            
-            state.savedRoutes.forEach((route, index) => {
-                const routeItem = document.createElement('div');
-                routeItem.className = 'device-item';
-                routeItem.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="text-sm font-medium text-white">${route.name}</div>
-                            <div class="text-xs text-slate-400">${new Date(route.date).toLocaleDateString()} | ${(route.distance / 1000).toFixed(2)} km</div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="text-blue-400 hover:text-blue-300 load-route" data-index="${index}">
-                                <i data-lucide="map-pin" class="w-4 h-4"></i>
-                            </button>
-                            <button class="text-red-400 hover:text-red-300 delete-route" data-index="${index}">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                savedRoutesList.appendChild(routeItem);
-            });
-            
-            // Add event listeners for route actions
-            document.querySelectorAll('.load-route').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    loadRoute(index);
-                });
-            });
-            
-            document.querySelectorAll('.delete-route').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    deleteRoute(index);
-                });
-            });
-            
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-        }
-
-        // Load a saved route
-        function loadRoute(index) {
-            const route = state.savedRoutes[index];
-            if (!route) return;
-            
-            // Clear current route
-            clearRoute();
-            
-            // Set the route coordinates
-            state.pathCoordinates = route.coordinates;
-            state.timestamps = route.timestamps;
-            state.totalDistance = route.distance;
-            
-            // Update the polyline
-            state.polyline.setLatLngs(state.pathCoordinates);
-            
-            // Update metrics
-            updateMetricsDisplay();
-            
-            showNotification('Route Loaded', `Route "${route.name}" loaded successfully`, 'success');
-        }
-
-        // Delete a saved route
-        function deleteRoute(index) {
-            if (confirm('Are you sure you want to delete this route?')) {
-                state.savedRoutes.splice(index, 1);
-                localStorage.setItem('transitTrackerRoutes', JSON.stringify(state.savedRoutes));
-                loadSavedRoutes();
-                showNotification('Route Deleted', 'Route deleted successfully', 'success');
-            }
-        }
-
-        // Export data as PDF or CSV
-        function exportData(format = 'pdf') {
-            if (state.pathCoordinates.length === 0) {
-                showNotification('Export Data', 'No data to export', 'error');
-                return;
-            }
-
-            if (format === 'pdf') {
-                // Create PDF document
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                // Add title
-                doc.setFontSize(20);
-                doc.setTextColor(40, 40, 40);
-                doc.text('Transit Tracker Pro - Route Report', 20, 30);
-
-                // Add transit information
-                doc.setFontSize(12);
-                doc.setTextColor(100, 100, 100);
-                doc.text(`Transit Name: ${state.transitName}`, 20, 50);
-                doc.text(`Transit Type: ${state.transitType}`, 20, 60);
-                doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
-
-                // Add metrics
-                doc.setTextColor(40, 40, 40);
-                doc.text('Route Metrics:', 20, 90);
-                doc.setTextColor(100, 100, 100);
-                doc.text(`Total Distance: ${(state.totalDistance / 1000).toFixed(2)} km`, 20, 100);
-                doc.text(`Average Speed: ${state.averageSpeed.toFixed(2)} km/h`, 20, 110);
-                doc.text(`Top Speed: ${state.topSpeed.toFixed(2)} km/h`, 20, 120);
-
-                // Add route coordinates table
-                const tableColumn = ["Time", "Latitude", "Longitude", "Speed (km/h)"];
-                const tableRows = [];
-
-                for (let i = 0; i < state.timestamps.length; i++) {
-                    const timestamp = state.timestamps[i];
-                    const coord = state.pathCoordinates[i];
-
-                    // Calculate speed for this point (simplified)
-                    let speed = 0;
-                    if (i > 0) {
-                        const prevCoord = state.pathCoordinates[i - 1];
-                        const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
-                        const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
-                        if (timeDiff > 0) {
-                            speed = (distance / timeDiff) * 3.6; // km/h
-                        }
-                    }
-
-                    const row = [
-                        timestamp.toLocaleTimeString(),
-                        coord[0].toFixed(6),
-                        coord[1].toFixed(6),
-                        speed.toFixed(2)
-                    ];
-                    tableRows.push(row);
-                }
-
-                // Add table to PDF
-                doc.autoTable({
-                    head: [tableColumn],
-                    body: tableRows,
-                    startY: 150,
-                    theme: 'grid',
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [59, 130, 246] }
-                });
-
-                // Save the PDF
-                doc.save(`transit-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-            } else {
-                // CSV export
-                let csvContent = "Time,Latitude,Longitude,Speed (km/h)\n";
+                // Update UI to show connecting state
+                elements.connectionStatus.textContent = 'Connecting...';
+                elements.connectBtn.disabled = true;
                 
-                for (let i = 0; i < state.timestamps.length; i++) {
-                    const timestamp = state.timestamps[i];
-                    const coord = state.pathCoordinates[i];
-                    
-                    // Calculate speed for this point (simplified)
-                    let speed = 0;
-                    if (i > 0) {
-                        const prevCoord = state.pathCoordinates[i - 1];
-                        const distance = calculateDistance(prevCoord[0], prevCoord[1], coord[0], coord[1]);
-                        const timeDiff = (timestamp - state.timestamps[i - 1]) / 1000; // in seconds
-                        if (timeDiff > 0) {
-                            speed = (distance / timeDiff) * 3.6; // km/h
-                        }
-                    }
-                    
-                    csvContent += `${timestamp.toLocaleTimeString()},${coord[0].toFixed(6)},${coord[1].toFixed(6)},${speed.toFixed(2)}\n`;
-                }
-                
-                // Create and download CSV file
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", `transit-data-${new Date().toISOString().slice(0, 10)}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            } catch (error) {
+                console.error('MQTT connection error:', error);
+                addLogEntry('Error connecting to MQTT: ' + error.message);
+                alert('Failed to connect to MQTT broker: ' + error.message);
             }
-
-            showNotification('Export Data', `${format.toUpperCase()} report generated successfully`, 'success');
         }
 
-        // Change map type
-        function changeMapType() {
-            const mapType = document.getElementById('mapType').value;
-
-            // Remove current layer
-            if (state.currentMapType && state.mapLayers[state.currentMapType]) {
-                state.map.removeLayer(state.mapLayers[state.currentMapType]);
-            }
-
-            // Add new layer
-            state.mapLayers[mapType].addTo(state.map);
-            state.currentMapType = mapType;
+        // MQTT connection success callback
+        function onConnect() {
+            appState.mqttConnected = true;
+            addLogEntry('Successfully connected to MQTT broker');
             
-            showNotification('Map Type', `Map type changed to ${mapType}`, 'info');
-        }
-
-        // Update transit type
-        function updateTransitType() {
-            state.transitType = document.getElementById('transitType').value;
-            updateMarkerIcon();
-            updateTransitInfo();
-        }
-
-        // Update transit name
-        function updateTransitName() {
-            state.transitName = document.getElementById('transitNameInput').value;
-            updateTransitInfo();
-        }
-
-        // Update transit info display
-        function updateTransitInfo() {
-            // Update the marker popup if it exists
-            if (state.marker) {
-                state.marker.bindPopup(`
-                    <b>${state.transitName}</b><br>
-                    Status: ${state.isTracking ? 'In Transit' : 'Not Tracking'}<br>
-                    Type: ${state.transitType}
-                `);
+            // Subscribe to topic
+            const subscribeTopic = inputs.subscribeTopic.value;
+            if (subscribeTopic) {
+                appState.mqttClient.subscribe(subscribeTopic);
+                addLogEntry(`Subscribed to topic: ${subscribeTopic}`);
             }
+            
+            updateUI();
+            saveSettings(); // Save connection details
         }
 
-        // Check if geolocation is supported
-        function checkGeolocationSupport() {
-            if (!navigator.geolocation) {
-                showNotification('Geolocation', 'Geolocation is not supported by this browser.', 'error');
-                document.getElementById('trackBtn').disabled = true;
+        // MQTT connection failure callback
+        function onConnectFailure(error) {
+            console.error('MQTT connection failed:', error);
+            addLogEntry('Failed to connect to MQTT broker: ' + error.errorMessage);
+            alert('Failed to connect to MQTT broker: ' + error.errorMessage);
+            elements.connectBtn.disabled = false;
+        }
+
+        // MQTT connection lost callback
+        function onConnectionLost(response) {
+            if (response.errorCode !== 0) {
+                console.error('MQTT connection lost:', response.errorMessage);
+                addLogEntry('MQTT connection lost: ' + response.errorMessage);
             }
-        }
-
-        // Toggle tracking on/off
-        function toggleTracking() {
-            if (state.isTracking) {
+            
+            appState.mqttConnected = false;
+            updateUI();
+            
+            // Stop tracking if active
+            if (appState.trackingActive) {
                 stopTracking();
-            } else {
-                startTracking();
             }
         }
 
-        // Start location tracking
+        // MQTT message received callback
+        function onMessageArrived(message) {
+            try {
+                const payload = JSON.parse(message.payloadString);
+                addLogEntry(`Received: ${payload.driver_id} at ${payload.lat}, ${payload.lng}`);
+            } catch (error) {
+                console.error('Error parsing MQTT message:', error);
+            }
+        }
+
+        // Disconnect from MQTT
+        function disconnectMQTT() {
+            if (appState.mqttClient) {
+                appState.mqttClient.disconnect();
+                appState.mqttClient = null;
+            }
+            
+            appState.mqttConnected = false;
+            
+            // Stop tracking if active
+            if (appState.trackingActive) {
+                stopTracking();
+            }
+            
+            updateUI();
+            addLogEntry('Disconnected from MQTT broker');
+        }
+
+        // Start GPS tracking
         function startTracking() {
-            if (!navigator.geolocation) {
-                showNotification('Tracking', 'Geolocation is not supported by this browser.', 'error');
+            if (!appState.mqttConnected) {
+                alert('Please connect to MQTT first');
                 return;
             }
-
-            const highAccuracy = document.getElementById('highAccuracy').checked;
-
-            const options = {
-                enableHighAccuracy: highAccuracy,
-                timeout: 10000,
-                maximumAge: 0
-            };
-
-            state.watchId = navigator.geolocation.watchPosition(
-                updatePosition,
-                handleGeolocationError,
-                options
+            
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by this browser');
+                return;
+            }
+            
+            // Request location permission and start tracking
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Success - start watching position
+                    appState.locationWatcher = navigator.geolocation.watchPosition(
+                        onLocationUpdate,
+                        onLocationError,
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                    
+                    appState.trackingActive = true;
+                    updateUI();
+                    addLogEntry('Started GPS tracking');
+                },
+                (error) => {
+                    alert('Error getting location: ' + error.message);
+                }
             );
-
-            state.isTracking = true;
-            state.startTime = new Date();
-            state.transitStartTime = new Date();
-
-            // Start tracking timer
-            state.trackingInterval = setInterval(updateTrackingTime, 1000);
-
-            const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i>Stop Tracking';
-            trackBtn.classList.remove('primary');
-            trackBtn.classList.add('danger');
-
-            // Update status indicator
-            document.getElementById('statusIndicator').className = 'status-indicator status-active';
-            document.getElementById('statusText').textContent = 'Tracking Active';
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            showNotification('Tracking', 'Tracking started. Your transit is now being monitored.', 'success');
-
-            // Voice guidance
-            if (document.getElementById('voiceGuidance').checked) {
-                speak("Tracking started. Your transit is now being monitored.", 'high');
-            }
         }
 
-        // Stop location tracking
-        function stopTracking() {
-            if (state.watchId) {
-                navigator.geolocation.clearWatch(state.watchId);
-                state.watchId = null;
-            }
-
-            if (state.trackingInterval) {
-                clearInterval(state.trackingInterval);
-                state.trackingInterval = null;
-            }
-
-            if (state.transitTimer) {
-                clearInterval(state.transitTimer);
-                state.transitTimer = null;
-            }
-
-            if (state.voiceGuidanceInterval) {
-                clearInterval(state.voiceGuidanceInterval);
-                state.voiceGuidanceInterval = null;
-            }
-
-            state.isTracking = false;
-            const trackBtn = document.getElementById('trackBtn');
-            trackBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i>Start Tracking';
-            trackBtn.classList.remove('danger');
-            trackBtn.classList.add('primary');
-
-            // Update status indicator
-            document.getElementById('statusIndicator').className = 'status-indicator status-inactive';
-            document.getElementById('statusText').textContent = 'Not Tracking';
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            showNotification('Tracking', 'Tracking stopped.', 'info');
-
-            // Voice guidance
-            if (document.getElementById('voiceGuidance').checked) {
-                speak("Tracking stopped.", 'high');
-            }
-        }
-
-        // Update position on the map
-        function updatePosition(position) {
+        // Location update handler
+        function onLocationUpdate(position) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
-            const accuracy = position.coords.accuracy;
-            const speed = position.coords.speed;
-            const heading = position.coords.heading;
-            const altitude = position.coords.altitude;
-            const timestamp = new Date(position.timestamp);
-
-            // Create new position object
-            const newPosition = [lat, lng];
-
-            // Update marker position
-            state.marker.setLatLng(newPosition);
-
-            // Update accuracy circle
-            state.accuracyCircle.setLatLng(newPosition);
-            state.accuracyCircle.setRadius(accuracy);
-
-            // Update marker popup
-            state.marker.bindPopup(`
-                <b>${state.transitName}</b><br>
-                Status: In Transit<br>
-                Speed: ${state.currentSpeed.toFixed(2)} km/h<br>
-                Last Update: ${timestamp.toLocaleTimeString()}
-            `);
-
-            // Center map on new position if auto-center is enabled
-            if (state.isTracking && document.getElementById('autoCenter').checked) {
-                state.map.setView(newPosition, state.map.getZoom());
-            }
-
-            // Add to path and update polyline
-            if (state.lastPosition) {
-                // Calculate distance between points
-                const distance = calculateDistance(
-                    state.lastPosition[0], state.lastPosition[1],
-                    lat, lng
-                );
-                state.totalDistance += distance;
-
-                // Update metrics
-                updateMetrics();
-
-                // Calculate ETA (simplified calculation)
-                updateETA();
-            }
-
-            state.pathCoordinates.push(newPosition);
-            state.timestamps.push(timestamp);
-            state.polyline.setLatLngs(state.pathCoordinates);
-
-            // Update routing if destination is set
-            if (state.routingControl && state.lastPosition) {
-                state.routingControl.setWaypoints([
-                    L.latLng(newPosition[0], newPosition[1]),
-                    state.routingControl.getWaypoints()[1]
-                ]);
-
-                // Provide voice guidance if enabled
-                if (document.getElementById('voiceGuidance').checked) {
-                    provideVoiceGuidance();
-                }
-            }
-
-            // Store last position
-            state.lastPosition = newPosition;
             
-            // Update metrics display
-            updateMetricsDisplay();
-        }
-
-        // Update business metrics
-        function updateMetrics() {
-            // Update speed
-            if (state.currentSpeed) {
-                // Update top speed
-                if (state.currentSpeed > state.topSpeed) {
-                    state.topSpeed = state.currentSpeed;
-                }
-            }
-
-            // Update average speed
-            if (state.timestamps.length > 1) {
-                const timeDiff = (state.timestamps[state.timestamps.length - 1] - state.timestamps[0]) / 1000; // in seconds
-                if (timeDiff > 0) {
-                    state.averageSpeed = (state.totalDistance / timeDiff) * 3.6; // km/h
-                }
-            }
-        }
-
-        // Update metrics display
-        function updateMetricsDisplay() {
-            document.getElementById('distanceValue').textContent = `${(state.totalDistance / 1000).toFixed(2)} km`;
-            document.getElementById('timeValue').textContent = state.metrics.time;
-            document.getElementById('speedValue').textContent = `${state.currentSpeed.toFixed(2)} km/h`;
-            document.getElementById('topSpeedValue').textContent = `${state.topSpeed.toFixed(2)} km/h`;
-        }
-
-        // Update ETA calculation
-        function updateETA() {
-            // Simplified ETA calculation - in a real app, you would use a routing service
-            if (state.currentSpeed > 5) { // Only calculate if moving
-                const remainingDistance = 10; // Example: 10km to destination
-                const timeHours = remainingDistance / state.currentSpeed;
-                const etaTime = new Date(Date.now() + timeHours * 3600000);
-            }
-        }
-
-        // Calculate distance between two coordinates in meters
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // Earth radius in meters
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c;
-        }
-
-        // Update tracking time
-        function updateTrackingTime() {
-            if (state.startTime) {
-                const now = new Date();
-                const diff = now - state.startTime;
-
-                const hours = Math.floor(diff / 3600000);
-                const minutes = Math.floor((diff % 3600000) / 60000);
-                const seconds = Math.floor((diff % 60000) / 1000);
+            appState.currentLocation = { lat, lng };
+            
+            // Update map marker
+            if (appState.busMarker) {
+                appState.busMarker.setLatLng([lat, lng]);
+                appState.busMarker.bindPopup(`Bus Location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
                 
-                // Update metrics display
-                state.metrics.time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                state.metrics.distance = (state.totalDistance / 1000).toFixed(2);
-                state.metrics.speed = state.currentSpeed.toFixed(2);
-                state.metrics.topSpeed = state.topSpeed.toFixed(2);
-                
-                updateMetricsDisplay();
-            }
-        }
-
-        // Handle geolocation errors
-        function handleGeolocationError(error) {
-            let message = '';
-
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    message = 'Location access denied. Please enable location permissions in your browser settings.';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    message = 'Location information is unavailable.';
-                    break;
-                case error.TIMEOUT:
-                    message = 'The request to get your location timed out.';
-                    break;
-                case error.UNKNOWN_ERROR:
-                    message = 'An unknown error occurred while retrieving your location.';
-                    break;
-            }
-
-            showNotification('Geolocation Error', message, 'error');
-            stopTracking();
-        }
-
-        // Clear the route/path
-        function clearRoute() {
-            state.pathCoordinates = [];
-            state.timestamps = [];
-            state.polyline.setLatLngs(state.pathCoordinates);
-            state.totalDistance = 0;
-            state.currentSpeed = 0;
-            state.topSpeed = 0;
-            updateMetrics();
-            updateMetricsDisplay();
-            showNotification('Route', 'Route cleared.', 'info');
-        }
-
-        // Provide real-time voice guidance for navigation
-        function provideVoiceGuidance() {
-            if (!state.routingControl || !state.lastPosition) return;
-
-            // Get route instructions
-            const route = state.routingControl.getRoute();
-            if (!route || !route.instructions) return;
-
-            // Find the next instruction
-            let nextInstruction = null;
-            let distanceToNext = 0;
-
-            for (let i = 0; i < route.instructions.length; i++) {
-                const instruction = route.instructions[i];
-                if (instruction.distance > 0) {
-                    nextInstruction = instruction;
-                    distanceToNext = instruction.distance;
-                    break;
+                // Center map on current location (only first time)
+                if (!appState.mapCentered) {
+                    appState.map.setView([lat, lng], 15);
+                    appState.mapCentered = true;
                 }
             }
+            
+            // Publish location via MQTT
+            if (appState.mqttConnected) {
+                publishLocation(lat, lng);
+            }
+        }
 
-            if (!nextInstruction) return;
+        // Location error handler
+        function onLocationError(error) {
+            console.error('Geolocation error:', error);
+            addLogEntry('GPS error: ' + error.message);
+        }
 
-            // Convert distance to appropriate unit
-            let distanceText;
-            if (distanceToNext < 100) {
-                distanceText = `${Math.round(distanceToNext)} meters`;
+        // Publish location to MQTT
+        function publishLocation(lat, lng) {
+            if (!appState.mqttConnected || !appState.mqttClient) {
+                return;
+            }
+            
+            const publishTopic = inputs.publishTopic.value;
+            if (!publishTopic) {
+                addLogEntry('Error: No publish topic specified');
+                return;
+            }
+            
+            const message = {
+                driver_id: inputs.driverId.value || 'unknown',
+                bus_number: inputs.busNumber.value || 'unknown',
+                route_name: inputs.routeName.value || 'unknown',
+                driver_name: inputs.driverName.value || 'unknown',
+                lat: lat,
+                lng: lng,
+                timestamp: new Date().toISOString()
+            };
+            
+            const mqttMessage = new Paho.MQTT.Message(JSON.stringify(message));
+            mqttMessage.destinationName = publishTopic;
+            
+            appState.mqttClient.send(mqttMessage);
+            
+            addLogEntry(`Published: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        }
+
+        // Stop GPS tracking
+        function stopTracking() {
+            if (appState.locationWatcher) {
+                navigator.geolocation.clearWatch(appState.locationWatcher);
+                appState.locationWatcher = null;
+            }
+            
+            appState.trackingActive = false;
+            updateUI();
+            addLogEntry('Stopped GPS tracking');
+        }
+
+        // Add entry to tracking log
+        function addLogEntry(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = { timestamp, message };
+            
+            appState.logEntries.unshift(entry);
+            
+            // Keep only last 10 entries
+            if (appState.logEntries.length > 10) {
+                appState.logEntries.pop();
+            }
+            
+            // Update log display
+            updateLogDisplay();
+        }
+
+        // Update log display
+        function updateLogDisplay() {
+            elements.logEntries.innerHTML = '';
+            
+            appState.logEntries.forEach(entry => {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-time">[${entry.timestamp}]</span> ${entry.message}
+                `;
+                elements.logEntries.appendChild(logEntry);
+            });
+        }
+
+        // Toggle log panel visibility
+        function toggleLogPanel() {
+            elements.logPanel.classList.toggle('expanded');
+            const icon = elements.logToggle.querySelector('i');
+            if (elements.logPanel.classList.contains('expanded')) {
+                icon.className = 'fas fa-chevron-up';
             } else {
-                distanceText = `${(distanceToNext / 1000).toFixed(1)} kilometers`;
-            }
-
-            // Create guidance message
-            const guidanceMessage = `In ${distanceText}, ${nextInstruction.text}`;
-
-            // Only speak if it's a new instruction or distance has changed significantly
-            if (state.lastVoiceGuidance !== guidanceMessage) {
-                state.lastVoiceGuidance = guidanceMessage;
-                speak(guidanceMessage, 'normal');
+                icon.className = 'fas fa-chevron-down';
             }
         }
+
+        // Show settings modal
+        function showSettingsModal() {
+            elements.settingsModal.style.display = 'flex';
+        }
+
+        // Hide settings modal
+        function hideSettingsModal() {
+            elements.settingsModal.style.display = 'none';
+        }
+
+        // Show help information
+        function showHelp() {
+            alert('School Bus Tracker Help:\n\n1. Enter your bus details and MQTT connection information\n2. Click "Connect" to establish MQTT connection\n3. Click "Start Tracking" to begin publishing location data\n4. Your location will be shown on the map and sent via MQTT');
+        }
+
+        // Save app settings
+        function saveAppSettings() {
+            appState.settings.gpsInterval = parseInt(elements.gpsInterval.value);
+            appState.settings.mapStyle = elements.mapStyle.value;
+            
+            saveSettings();
+            hideSettingsModal();
+            addLogEntry('Settings saved');
+            
+            // Reinitialize map with new style if needed
+            if (appState.map) {
+                appState.map.remove();
+                initMap();
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all saved data?')) {
+                localStorage.clear();
+                appState.logEntries = [];
+                updateLogDisplay();
+                addLogEntry('All data cleared');
+                hideSettingsModal();
+                
+                // Reset form inputs
+                for (const key in inputs) {
+                    if (inputs[key]) {
+                        inputs[key].value = '';
+                    }
+                }
+                
+                // Reset settings
+                appState.settings = {
+                    gpsInterval: 3000,
+                    mapStyle: 'dark'
+                };
+                
+                updateBusInfo();
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
