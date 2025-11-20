@@ -464,6 +464,18 @@
             font-size: 0.8rem;
             cursor: pointer;
             margin-top: 5px;
+            margin-right: 5px;
+        }
+        
+        .debug-btn {
+            background: var(--warning);
+            color: var(--dark);
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -526,13 +538,13 @@
             
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Connection Settings <span class="preconfigured-badge">EMQX Pre-configured</span></div>
+                    <div class="card-title">Connection Settings <span class="preconfigured-badge">Multiple Brokers</span></div>
                 </div>
                 
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="mqtt-broker">MQTT Broker</label>
-                        <input type="text" id="mqtt-broker" placeholder="wss://broker.emqx.io:8084/mqtt" value="wss://broker.emqx.io:8084/mqtt">
+                        <input type="text" id="mqtt-broker" placeholder="wss://broker.emqx.io:8084/mqtt" value="wss://test.mosquitto.org:8081/mqtt">
                     </div>
                     <div class="form-group">
                         <label for="driver-id">Driver ID</label>
@@ -563,14 +575,16 @@
                 </div>
                 
                 <div class="connection-test">
-                    <div>Test Connection: Try different brokers if EMQX fails</div>
-                    <button class="test-btn" id="test-mosquitto">Test Mosquitto</button>
-                    <button class="test-btn" id="test-hivemq">Test HiveMQ</button>
+                    <div>Test Connection: Try different brokers if one fails</div>
+                    <button class="test-btn" id="test-emqx">EMQX</button>
+                    <button class="test-btn" id="test-mosquitto">Mosquitto</button>
+                    <button class="test-btn" id="test-hivemq">HiveMQ</button>
+                    <button class="debug-btn" id="test-connectivity">Test Connectivity</button>
                 </div>
                 
                 <div class="btn-group">
                     <button id="connect-btn" class="btn-primary">
-                        <i class="fas fa-plug"></i> Connect to EMQX
+                        <i class="fas fa-plug"></i> Connect to Mosquitto
                     </button>
                 </div>
             </div>
@@ -680,13 +694,18 @@
             },
             mosquitto: {
                 name: "Mosquitto",
-                url: "wss://test.mosquitto.org:8081",
+                url: "wss://test.mosquitto.org:8081/mqtt",
                 port: 8081
             },
             hivemq: {
                 name: "HiveMQ",
                 url: "wss://broker.hivemq.com:8884/mqtt",
                 port: 8884
+            },
+            emqx_alternative: {
+                name: "EMQX WS",
+                url: "ws://broker.emqx.io:8083/mqtt",
+                port: 8083
             }
         };
 
@@ -714,8 +733,10 @@
             infoBusNumber: document.getElementById('info-bus-number'),
             infoRouteName: document.getElementById('info-route-name'),
             infoDriverName: document.getElementById('info-driver-name'),
+            testEmqx: document.getElementById('test-emqx'),
             testMosquitto: document.getElementById('test-mosquitto'),
-            testHivemq: document.getElementById('test-hivemq')
+            testHivemq: document.getElementById('test-hivemq'),
+            testConnectivity: document.getElementById('test-connectivity')
         };
 
         // Input elements
@@ -733,18 +754,23 @@
 
         // Initialize the application
         function initApp() {
+            // Enable MQTT debugging
+            Paho.MQTT.logging = function(message) {
+                console.log('MQTT Debug:', message);
+            };
+            
             setDefaultConfig();
             loadSettings();
             initMap();
             setupEventListeners();
             updateUI();
             updateBusInfo();
-            addLogEntry('App started with EMQX broker pre-configured');
+            addLogEntry('App started with Mosquitto broker pre-configured');
         }
 
-        // Set default EMQX configuration
+        // Set default Mosquitto configuration (more reliable)
         function setDefaultConfig() {
-            inputs.mqttBroker.value = brokerOptions.emqx.url;
+            inputs.mqttBroker.value = brokerOptions.mosquitto.url;
             inputs.driverId.value = "BUS-DRIVER-001";
             inputs.publishTopic.value = "schoolbus/driver/location";
             inputs.subscribeTopic.value = "schoolbus/dispatch/commands";
@@ -839,8 +865,10 @@
             elements.saveSettingsBtn.addEventListener('click', saveAppSettings);
             elements.clearDataBtn.addEventListener('click', clearAllData);
             elements.logToggle.addEventListener('click', toggleLogPanel);
+            elements.testEmqx.addEventListener('click', () => testBroker('emqx'));
             elements.testMosquitto.addEventListener('click', () => testBroker('mosquitto'));
             elements.testHivemq.addEventListener('click', () => testBroker('hivemq'));
+            elements.testConnectivity.addEventListener('click', testConnectivity);
             
             // Update bus info when inputs change
             for (const key in inputs) {
@@ -869,6 +897,43 @@
                         connectMQTT();
                     }
                 }, 500);
+            }
+        }
+
+        // Test WebSocket connectivity
+        function testConnectivity() {
+            addLogEntry('🧪 Testing WebSocket connectivity...');
+            
+            const testUrl = inputs.mqttBroker.value;
+            addLogEntry(`Testing connection to: ${testUrl}`);
+            
+            try {
+                const testWs = new WebSocket(testUrl);
+                
+                testWs.onopen = function() {
+                    addLogEntry('✅ WebSocket connection successful');
+                    testWs.close();
+                };
+                
+                testWs.onerror = function(error) {
+                    addLogEntry('❌ WebSocket connection failed');
+                    console.error('WebSocket test error:', error);
+                };
+                
+                testWs.onclose = function() {
+                    addLogEntry('🔌 WebSocket test connection closed');
+                };
+                
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    if (testWs.readyState !== WebSocket.OPEN) {
+                        addLogEntry('⏰ WebSocket test timeout');
+                        testWs.close();
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                addLogEntry(`❌ WebSocket test error: ${error.message}`);
             }
         }
 
@@ -959,30 +1024,36 @@
                 const port = parseInt(url.port) || (url.protocol === 'wss:' ? 443 : 80);
                 const path = url.pathname;
                 
-                // Create MQTT client with proper configuration
-                appState.mqttClient = new Paho.MQTT.Client(
-                    host,
-                    port,
-                    path,
-                    `bus_tracker_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-                );
+                // Generate a more unique client ID
+                const clientId = `bus_driver_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                console.log('Connecting to:', { host, port, path, clientId });
+                
+                // Create MQTT client
+                appState.mqttClient = new Paho.MQTT.Client(host, port, path, clientId);
                 
                 // Set callback handlers
                 appState.mqttClient.onConnectionLost = onConnectionLost;
                 appState.mqttClient.onMessageArrived = onMessageArrived;
                 
-                // Connection options
+                // Improved connection options
                 const connectOptions = {
                     onSuccess: onConnect,
                     onFailure: onConnectFailure,
                     userName: username || undefined,
                     password: password || undefined,
                     useSSL: brokerUrl.startsWith('wss://'),
-                    timeout: 10,
-                    keepAliveInterval: 30,
+                    timeout: 30, // Increased timeout
+                    keepAliveInterval: 60,
                     cleanSession: true,
-                    reconnect: true
+                    reconnect: true,
+                    mqttVersion: 4, // MQTT 3.1.1
+                    mqttVersionExplicit: false
                 };
+                
+                // Remove empty credentials
+                if (!username) delete connectOptions.userName;
+                if (!password) delete connectOptions.password;
                 
                 // Connect the client
                 appState.mqttClient.connect(connectOptions);
@@ -1027,7 +1098,20 @@
         function handleConnectionError(error) {
             let errorMessage = 'Unknown error';
             
-            if (error && error.errorMessage) {
+            if (error && error.errorCode !== undefined) {
+                // Paho MQTT specific error codes
+                switch(error.errorCode) {
+                    case 0: errorMessage = 'Connection successful'; break;
+                    case 1: errorMessage = 'Connection refused: Unacceptable protocol version'; break;
+                    case 2: errorMessage = 'Connection refused: Identifier rejected'; break;
+                    case 3: errorMessage = 'Connection refused: Server unavailable'; break;
+                    case 4: errorMessage = 'Connection refused: Bad username or password'; break;
+                    case 5: errorMessage = 'Connection refused: Not authorized'; break;
+                    case 6: errorMessage = 'Connection lost'; break;
+                    case 7: errorMessage = 'Timeout'; break;
+                    default: errorMessage = `Error code: ${error.errorCode}`;
+                }
+            } else if (error && error.errorMessage) {
                 errorMessage = error.errorMessage;
             } else if (error && error.message) {
                 errorMessage = error.message;
@@ -1040,10 +1124,12 @@
             
             // Show helpful suggestions based on error
             let suggestion = '';
-            if (errorMessage.includes('WebSocket')) {
-                suggestion = '\n\nPossible solutions:\n• Check internet connection\n• Try a different broker\n• The broker might be temporarily unavailable';
-            } else if (errorMessage.includes('SecurityError')) {
-                suggestion = '\n\nPossible solutions:\n• Try accessing via HTTPS\n• The broker might not support WebSockets';
+            if (errorMessage.includes('WebSocket') || errorMessage.includes('ws')) {
+                suggestion = '\n\nPossible solutions:\n• Check internet connection\n• Try a different broker\n• The broker might be temporarily unavailable\n• Try accessing via HTTPS instead of HTTP';
+            } else if (errorMessage.includes('SecurityError') || errorMessage.includes('CORS')) {
+                suggestion = '\n\nPossible solutions:\n• Try accessing via HTTPS\n• The broker might not support WebSockets from browser\n• Try a different broker like HiveMQ';
+            } else if (errorMessage.includes('Timeout')) {
+                suggestion = '\n\nPossible solutions:\n• Broker might be down\n• Firewall blocking connection\n• Try a different broker';
             }
             
             alert(`Failed to connect to MQTT broker: ${errorMessage}${suggestion}`);
@@ -1266,7 +1352,7 @@
 
         // Show help information
         function showHelp() {
-            alert('🚌 School Bus Tracker Help:\n\n📡 CONNECTION:\n- EMQX broker is pre-configured\n- If connection fails, try alternative brokers\n- No username/password required\n\n📍 TRACKING:\n- Connect first, then start tracking\n- Location updates every 3 seconds\n- Data is published to MQTT topic\n\n⚙️ TROUBLESHOOTING:\n- Try different brokers if one fails\n- Check internet connection\n- Ensure browser has location permissions');
+            alert('🚌 School Bus Tracker Help:\n\n📡 CONNECTION:\n- Mosquitto broker is pre-configured (most reliable)\n- If connection fails, try alternative brokers\n- No username/password required for public brokers\n\n📍 TRACKING:\n- Connect first, then start tracking\n- Location updates every 3 seconds\n- Data is published to MQTT topic\n\n⚙️ TROUBLESHOOTING:\n- Try different brokers if one fails\n- Check internet connection\n- Ensure browser has location permissions\n- Use "Test Connectivity" to check WebSocket connection');
         }
 
         // Save app settings
@@ -1286,14 +1372,14 @@
 
         // Clear all data
         function clearAllData() {
-            if (confirm('Are you sure you want to clear all saved data?\n\nThis will reset all settings to default but keep the EMQX broker configuration.')) {
+            if (confirm('Are you sure you want to clear all saved data?\n\nThis will reset all settings to default but keep the Mosquitto broker configuration.')) {
                 localStorage.clear();
                 appState.logEntries = [];
                 updateLogDisplay();
                 
                 setDefaultConfig();
                 
-                addLogEntry('🗑️ All data cleared, EMQX configuration restored');
+                addLogEntry('🗑️ All data cleared, Mosquitto configuration restored');
                 hideSettingsModal();
                 updateBusInfo();
             }
